@@ -27,7 +27,11 @@ src = ["sheldon", "tests"]
 extend-exclude = ["spikes"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = ["E", "F", "I", "PLW1514"]
+# PLW1514 (unspecified encoding) is still preview. Enable preview for lint
+# only, and require the full code so other preview rules stay off.
+preview = true
+explicit-preview-rules = true
 
 [tool.ruff.lint.isort]
 known-first-party = ["sheldon"]

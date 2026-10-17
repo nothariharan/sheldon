@@ -62,6 +62,8 @@ Each of those folders has its own `AGENTS.md`. Read that one before editing.
 .venv/bin/ruff check sheldon tests
 ```
 
+On Windows, run `powershell -File scripts/setup.ps1` (the venv interpreter is `.venv\Scripts\python.exe`).
+
 FalkorDB listens on `localhost:6379`. The bundled browser is on `localhost:3000`. `FALKORDB_HOST` and `FALKORDB_PORT` override the client.
 
 Smoke test: module version is `42201`, and `GRAPH.COPY` of a one-node graph round-trips. CI runs lint, the suite, and that smoke test against the same pinned image.

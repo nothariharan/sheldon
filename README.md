@@ -12,6 +12,8 @@ Docker is required.
 ./scripts/setup.sh
 ```
 
+On Windows, run `powershell -File scripts/setup.ps1` (the venv interpreter is `.venv\Scripts\python.exe`).
+
 That starts FalkorDB `v4.22.1`, installs the package into `.venv`, and runs the smoke test. The smoke test checks the engine module version (`42201`) and a `GRAPH.COPY` round trip.
 
 ```bash
