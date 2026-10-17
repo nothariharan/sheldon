@@ -127,7 +127,8 @@ def test_call_tool_resume_dispatches(seed_graph: str) -> None:
             "agent_id": "agent-mcp-1",
         },
     )
-    assert "agent_id" in res
+    assert set(res) == {"tried", "failed", "believed", "next"}
+    assert "C-5" in [f["id"] for f in res["failed"]]
 
 
 def test_call_tool_unknown_raises() -> None:
