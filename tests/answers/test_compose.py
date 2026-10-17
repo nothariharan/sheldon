@@ -136,3 +136,35 @@ def test_compose_no_invented_ids_in_synthetic_bundle() -> None:
     assert "INC-88" in result["answer"]
     assert "C-101" in result["answer"]
     assert "E-909" in result["answer"]
+
+
+def test_compose_deduplicates_repeated_findings() -> None:
+    repeated = [
+        {
+            "file": "checkout/cache.py",
+            "via": "checkout/session.py",
+            "incident": "INC-12",
+            "title": "Checkout timeout",
+            "claim": "C-5",
+            "kind": "fix",
+            "status": "refuted",
+            "relation": "REFUTED_BY",
+            "evidence": "E-41",
+        },
+        {
+            "file": "checkout/cache.py",
+            "via": "checkout/cache.py",
+            "incident": "INC-12",
+            "title": "Checkout timeout",
+            "claim": "C-5",
+            "kind": "fix",
+            "status": "refuted",
+            "relation": "REFUTED_BY",
+            "evidence": "E-41",
+        },
+    ]
+    result = compose("graph", "Check repeated", repeated)
+    assert result["abstained"] is False
+    assert result["citations"] == ["INC-12", "C-5", "E-41"]
+    assert result["answer"].count("fix C-5 was refuted by evidence E-41") == 1
+

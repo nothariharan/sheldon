@@ -66,10 +66,13 @@ def compose(graph: str, question: str, evidence: list[dict[str, Any]]) -> dict[s
 
             status = (row.get("status") or "").lower()
             rel = (row.get("relation") or "").upper()
+            pair = (claim_id, ev_id)
             if status == "refuted" or rel == "REFUTED_BY":
-                incidents[inc_id]["refuted"].append((claim_id, ev_id))
+                if pair not in incidents[inc_id]["refuted"]:
+                    incidents[inc_id]["refuted"].append(pair)
             elif rel == "SUPPORTED_BY" or status in ("supported", "open"):
-                incidents[inc_id]["supported"].append((claim_id, ev_id))
+                if pair not in incidents[inc_id]["supported"]:
+                    incidents[inc_id]["supported"].append(pair)
 
     if not incidents and not citations_ordered:
         return {
