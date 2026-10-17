@@ -1,8 +1,21 @@
 """W1 approval write.
 
-Status: the W1 query ran on v4.22.1. This function is to build.
-It is not a working feature.
+Status: built. `tests/gate/test_approve.py` shows the graph refusing a bad
+citation and writing one FOR plus two CITES. Python does not filter the ids.
 """
+
+from sheldon.cypher import load_query
+from sheldon.db import connect
+from sheldon.schema import ApprovalStatus
+
+
+def _write(graph: str, name: str, params: dict) -> list[dict]:
+    result = connect().select_graph(graph).query(load_query(name), params)
+    rows = result.result_set or []
+    if not rows:
+        return []
+    columns = [column for _, column in result.header]
+    return [dict(zip(columns, row)) for row in rows]
 
 
 def approve(
@@ -16,16 +29,22 @@ def approve(
     model: str,
     session: str,
 ) -> str | None:
-    """To build. Return the approval id, or None when the write returns 0 rows."""
-    del (
+    """Return the approval id, or None when the write returns 0 rows."""
+    rows = _write(
         graph,
-        pr_number,
-        head_sha,
-        approval_id,
-        evidence_ids,
-        by,
-        actor_kind,
-        model,
-        session,
+        "approve_pr",
+        {
+            "pr": pr_number,
+            "sha": head_sha,
+            "ids": evidence_ids,
+            "aid": approval_id,
+            "by": by,
+            "kind": actor_kind,
+            "model": model,
+            "session": session,
+            "status": ApprovalStatus.ACTIVE.value,
+        },
     )
-    raise NotImplementedError("to build: W1 approval")
+    if not rows:
+        return None
+    return str(rows[0]["id"])

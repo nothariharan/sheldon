@@ -53,7 +53,7 @@ The capsule is a short block: do-nots from refuted attempts that touch the curre
 
 ### 2.2 Evidence gate
 
-**W1 ran** on 4.18.3 and v4.22.1. It refuses unexecuted, missing, empty, and duplicate ids, and wrong-sha ids on v4.22.1. Valid ids create 1 `FOR` and 2 `CITES`. The function in `sheldon/gate/approve.py` is to build. It is not a working feature.
+**W1 ran** on 4.18.3 and v4.22.1. It refuses unexecuted, missing, empty, and duplicate ids, and wrong-sha ids on v4.22.1. Valid ids create 1 `FOR` and 2 `CITES`. `tests/gate/test_approve.py` shows `approve` doing that on v4.22.1.
 
 ```cypher
 MATCH (pr:PR {number:$pr, head_sha:$sha})
