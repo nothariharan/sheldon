@@ -8,6 +8,7 @@ QUERIES = ROOT / "queries"
 # Files with a single statement the app can send.
 RUNNABLE: tuple[str, ...] = (
     "record_event",
+    "record_run",
     "claim_task",
     "heartbeat",
     "complete_task",

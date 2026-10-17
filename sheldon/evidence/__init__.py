@@ -1,4 +1,4 @@
-"""Trusted Evidence producer. Status: to build. Not a working feature."""
+"""Trusted Evidence producer. Status: built. The gate does not write Evidence."""
 
 from sheldon.evidence.run import record_run
 
