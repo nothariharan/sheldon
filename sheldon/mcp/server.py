@@ -1,6 +1,6 @@
 """Tool names the host will call.
 
-Status: built, except resume, which is to build.
+Status: built.
 Hosted http is roadmap. Stdio server provides standard JSON-RPC 2.0 MCP protocol.
 """
 
@@ -141,19 +141,9 @@ def call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
 
     if name == "resume":
         agent_id = str(arguments.get("agent_id", ""))
-        try:
-            from sheldon.coordination.resume import resume
+        from sheldon.coordination.resume import resume
 
-            return resume(graph, agent_id)
-        except NotImplementedError:
-            return {
-                "agent_id": agent_id,
-                "status": "to_build",
-                "tried": [],
-                "failed": [],
-                "believed": [],
-                "next": None,
-            }
+        return resume(graph, agent_id)
 
     raise ValueError(f"unhandled tool {name!r}")
 

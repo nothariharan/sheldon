@@ -35,7 +35,6 @@ def resume(graph: str, agent_id: str, now_ms: int | None = None) -> dict[str, An
     rows = read(graph, "resume_state", params)
     if not rows:
         return {
-            "agent_id": agent_id,
             "tried": [],
             "failed": [],
             "believed": [],
@@ -92,7 +91,6 @@ def resume(graph: str, agent_id: str, now_ms: int | None = None) -> dict[str, An
     next_tasks.sort(key=lambda x: (not x["active"], not x["claimable"], x["stale"], x["id"]))
 
     return {
-        "agent_id": agent_id,
         "tried": tried,
         "failed": failed,
         "believed": believed,

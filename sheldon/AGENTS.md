@@ -22,7 +22,7 @@ Product scope is [`docs/plan/README.md`](../docs/plan/README.md). Every function
 | `coordination.resume` | `resume` | built. test_resume.py | Satyansh |
 | `preflight` | `preflight` | built. test_preflight.py | Satyansh |
 | `capsule` | `capsule` | built. test_capsule.py | Satyansh |
-| `mcp.server` | `call_tool` | built. tests/mcp/test_server.py; resume returns a placeholder | Satyansh |
+| `mcp.server` | `call_tool` | built. tests/mcp/test_server.py | Satyansh |
 | `answers.compose` | `compose` | to build | Satyansh |
 | `eval.harness` | `reset_from_seed`, `count_repeated_failed_steps` | to build | Satyansh |
 
