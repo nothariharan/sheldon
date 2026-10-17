@@ -1,11 +1,24 @@
 """W2 refute plus stale cascade.
 
-Status: the W2 query ran on v4.22.1. This function is to build.
-It is not a working feature.
+Status: `refute_claim` is built. `refute_hypothesis` is a sketch: it matches
+`:Event` and does not check `executed`. The race test covers that sketch.
 """
 
-# Flip to False in the PR that runs queries/refute_hypothesis.cypher.
-REFUTE_IS_STUB = True
+from sheldon.cypher import load_query
+from sheldon.db import connect
+from sheldon.schema import ApprovalStatus, HypothesisStatus, TaskStatus
+
+# The race test is a hard check while this is False.
+REFUTE_IS_STUB = False
+
+
+def _write(graph: str, name: str, params: dict) -> list[dict]:
+    result = connect().select_graph(graph).query(load_query(name), params)
+    rows = result.result_set or []
+    if not rows:
+        return []
+    columns = [column for _, column in result.header]
+    return [dict(zip(columns, row)) for row in rows]
 
 
 def refute_hypothesis(
@@ -15,10 +28,59 @@ def refute_hypothesis(
     agent_id: str,
     at_ms: int,
 ) -> bool:
-    """To build. Return True when every cited evidence id matched.
+    """Return True when every cited evidence id matched.
 
     A missing id returns False and changes nothing. Nothing is deleted.
     """
-    del graph, hypothesis_id, evidence_ids, agent_id, at_ms
-    if REFUTE_IS_STUB:
-        raise NotImplementedError("lead (a)(b): queries/refute_hypothesis.cypher")
+    current = _write(
+        graph,
+        "hypothesis_confidence",
+        {"hypothesis_id": hypothesis_id},
+    )
+    confidence = current[0]["confidence"] if current else None
+    rows = _write(
+        graph,
+        "refute_hypothesis",
+        {
+            "hypothesis_id": hypothesis_id,
+            "evidence_ids": evidence_ids,
+            "refuted": HypothesisStatus.REFUTED.value,
+            "confidence": confidence,
+            "agent_id": agent_id,
+            "at_ms": at_ms,
+            "open": TaskStatus.OPEN.value,
+        },
+    )
+    return len(rows) == 1
+
+
+def refute_claim(
+    graph: str,
+    claim_id: str,
+    evidence_ids: list[str],
+    agent_id: str,
+    model: str,
+    session: str,
+    alpha: float = 0.0,
+) -> bool:
+    """Return True when executed evidence refuted the claim and staled dependents."""
+    rows = _write(
+        graph,
+        "refute_claim",
+        {
+            "cid": claim_id,
+            "ids": evidence_ids,
+            "refuted": HypothesisStatus.REFUTED.value,
+            "alpha": alpha,
+            "agent": agent_id,
+            "model": model,
+            "session": session,
+            "stale": ApprovalStatus.STALE.value,
+            "live": [
+                ApprovalStatus.ACTIVE.value,
+                TaskStatus.OPEN.value,
+                TaskStatus.CLAIMED.value,
+            ],
+        },
+    )
+    return len(rows) == 1

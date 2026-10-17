@@ -85,24 +85,32 @@ this edit repeats the cache-TTL fix tried for INC-12; E-41 (CI run) refuted it
 
 ### 2.4 Cascade
 
-**W2 ran** on 4.18.3 and v4.22.1. On valid executed evidence it refutes the claim and stales dependents at 1–2 hops in one statement. It refuses unexecuted evidence. `sheldon/belief/refute.py` is to build. It is not a working feature. The Cypher file already in `queries/` is the older sketch. The statement that ran is this one:
+**W2 ran** on 4.18.3 and v4.22.1. On valid executed evidence it refutes the claim and stales dependents at up to 3 hops in one statement. It refuses unexecuted evidence. `tests/belief/test_refute.py` shows `refute_claim` doing that on v4.22.1. The Cypher file `queries/refute_hypothesis.cypher` is the older sketch and stays, because a contract test locks its text. The statement that ran is `queries/refute_claim.cypher`:
 
 ```cypher
-MATCH (c:Claim {id:$cid})
+MATCH (c:Claim {id: $cid})
 MATCH (e:Evidence) WHERE e.id IN $ids AND e.executed = true
 WITH c, collect(e) AS ev
 WHERE size($ids) > 0 AND size(ev) = size($ids)
-SET c.status = 'refuted', c.confidence = c.confidence - $alpha, c.refuted_at = timestamp()
-FOREACH (x IN ev | CREATE (c)-[:REFUTED_BY {agent:$agent, model:$model, session:$session, at:timestamp()}]->(x))
+SET c.status = $refuted,
+    c.confidence = c.confidence - $alpha,
+    c.refuted_at = timestamp()
+FOREACH (x IN ev |
+  CREATE (c)-[:REFUTED_BY {agent: $agent, model: $model, session: $session, at: timestamp()}]->(x)
+)
 WITH c
 OPTIONAL MATCH (c)<-[:RELIES_ON|DEPENDS_ON*1..3]-(d)
-WHERE d.status IN ['active','open','claimed']
+WHERE d IS NOT NULL AND NOT d:Claim AND d.status IN $live
 WITH c, collect(DISTINCT d) AS deps
-FOREACH (x IN deps | SET x.status = 'stale', x.stale_because = c.id)
-RETURN c.id, size(deps) AS staled
+FOREACH (x IN deps |
+  SET x.stale_because = c.id,
+      x.status = CASE WHEN x:Task THEN x.status ELSE $stale END,
+      x.stale = CASE WHEN x:Task THEN true ELSE x.stale END
+)
+RETURN c.id AS id, size(deps) AS staled
 ```
 
-W2 marks approvals and tasks stale. It does not mark a PR stale by itself. A PR whose approval went stale loses that approval at the check run. Nothing is deleted. Claims are refuted, never stale.
+W2 marks an approval's status stale. A task keeps its status and gets the boolean `stale`. It does not mark a PR stale by itself. A PR whose approval went stale loses that approval at the check run. Nothing is deleted. Claims are refuted, never stale.
 
 ### 2.5 Claim, lease, resume, provenance (to build)
 
