@@ -8,7 +8,9 @@ sha. PR 8 is clean. The check-e2e row reruns this on the real seed.
 import pytest
 
 from sheldon.check import check_run_payload, decide_check
+from sheldon.check.webhook import handle_event
 from sheldon.db import connect
+from sheldon.seed import copy_graph, load_seed
 
 GRAPH = "test_check_run"
 
@@ -145,3 +147,70 @@ def test_clean_payload_is_green() -> None:
     payload = check_run_payload(decision)
     assert payload["conclusion"] == "success"
     assert payload["output"]["title"] == "sheldon: clear"
+
+
+# check-e2e: the demo's step 2 on the seed, through the webhook with the real
+# pr-ingest. Approval A-3 going stale (step 3) needs W2, which is still a stub.
+
+SEED = "test_check_e2e_seed"
+TAKE = "test_check_e2e_take"
+
+
+class _GitHub:
+    def __init__(self) -> None:
+        self.check_runs: list[dict] = []
+
+    def changed_paths(self, repo: str, number: int) -> list[str]:
+        del repo, number
+        return ["checkout/cache.py"]
+
+    def create_check_run(self, repo: str, payload: dict) -> None:
+        del repo
+        self.check_runs.append(payload)
+
+    def create_status(self, repo: str, sha: str, payload: dict) -> None:
+        raise AssertionError("check_run mode only")
+
+
+@pytest.fixture()
+def take() -> str:
+    for key in (SEED, TAKE):
+        try:
+            connect().select_graph(key).delete()
+        except Exception:  # noqa: BLE001 - graph may not exist yet
+            pass
+    copy_graph(load_seed(SEED), TAKE)
+    yield TAKE
+    for key in (SEED, TAKE):
+        connect().select_graph(key).delete()
+
+
+def _pr7(body: str) -> dict:
+    return {
+        "action": "edited",
+        "repository": {"full_name": "demo/checkout"},
+        "pull_request": {"number": 7, "head": {"sha": "b2"}, "body": body},
+    }
+
+
+def test_e2e_done_claim_citing_e52_gets_a_red_check(take: str) -> None:
+    github = _GitHub()
+    handle_event(
+        "pull_request", _pr7("Done, all tests pass.\nEvidence: E-52"), github, lambda _: take
+    )
+    [payload] = github.check_runs
+    assert payload["conclusion"] == "failure"
+    assert payload["head_sha"] == "b2"
+    summary = payload["output"]["summary"].splitlines()
+    assert summary == [
+        "blocked: E-52 not executed",
+        "refuted: C-5 by E-41 (INC-12, via checkout/session.py)",
+    ]
+
+
+def test_e2e_citing_a_real_run_on_the_head_sha_turns_it_green(take: str) -> None:
+    github = _GitHub()
+    handle_event("pull_request", _pr7("Evidence: E-31"), github, lambda _: take)
+    [payload] = github.check_runs
+    assert payload["conclusion"] == "success"
+    assert payload["output"]["summary"] == "refuted: C-5 by E-41 (INC-12, via checkout/session.py)"
