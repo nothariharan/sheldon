@@ -28,6 +28,8 @@ RUNNABLE: tuple[str, ...] = (
     "create_fulltext_claim_text",
     "check_approvals",
     "check_cited_evidence",
+    "seed_demo",
+    "count_nodes",
 )
 
 # Present so the decision is visible, not yet a statement we should run.
