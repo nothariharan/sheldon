@@ -223,3 +223,15 @@ def test_wsgi_app_rejects_a_bad_signature_and_accepts_a_good_one(graph: str) -> 
     status, out = _call(app, b"{}", _sign(b"{}"), event="ping")
     assert status.startswith("200")
     assert json.loads(out) == {"ignored": "ping"}
+
+
+def test_real_pr_ingest_writes_the_changed_files(graph: str) -> None:
+    github = FakeGitHub(["docs/readme.md"])
+    payload = _event("opened", "r1")
+    payload["pull_request"]["number"] = 11
+    decision = handle_event("pull_request", payload, github, graph_for_repo=lambda repo: graph)
+    assert decision["conclusion"] == "success"
+    changed = connect().select_graph(graph).query(
+        "MATCH (:PR {number: 11})-[:CHANGES]->(f:File) RETURN f.path"
+    ).result_set
+    assert changed == [["docs/readme.md"]]

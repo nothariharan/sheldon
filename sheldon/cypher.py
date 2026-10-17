@@ -26,6 +26,7 @@ RUNNABLE: tuple[str, ...] = (
     "s0_keyword",
     "create_fulltext_incident_title",
     "create_fulltext_claim_text",
+    "ingest_pull_request",
     "check_approvals",
     "check_cited_evidence",
     "seed_demo",

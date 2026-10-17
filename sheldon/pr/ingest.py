@@ -1,7 +1,11 @@
 """Webhook and diff ingest for one pull request.
 
-Status: to build. It is not a working feature.
+Status: wired and tested. ``ingest_pull_request`` runs
+``queries/ingest_pull_request.cypher``. The check-run webhook calls it.
 """
+
+from sheldon.cypher import load_query
+from sheldon.db import connect
 
 
 def ingest_pull_request(
@@ -10,6 +14,14 @@ def ingest_pull_request(
     head_sha: str,
     changed_paths: list[str],
 ) -> int:
-    """To build. Return how many CHANGES edges were written."""
-    del graph, number, head_sha, changed_paths
-    raise NotImplementedError("to build: pr-ingest")
+    """Write ``PR -[:CHANGES]-> File`` for ``head_sha``. Return how many CHANGES edges were written.
+
+    One statement. A new push replaces the PR's changed-file set. File nodes
+    are reused by path and never deleted.
+    """
+    paths = list(dict.fromkeys(changed_paths))
+    result = connect().select_graph(graph).query(
+        load_query("ingest_pull_request"),
+        {"number": number, "head_sha": head_sha, "paths": paths},
+    )
+    return result.result_set[0][0]
