@@ -8,7 +8,7 @@ import time
 from typing import Any
 
 from sheldon.db import read
-from sheldon.schema import HypothesisStatus, TaskStatus
+from sheldon.schema import EventType, HypothesisStatus, TaskStatus
 
 
 def resume(graph: str, agent_id: str, now_ms: int | None = None) -> dict[str, Any]:
@@ -24,7 +24,10 @@ def resume(graph: str, agent_id: str, now_ms: int | None = None) -> dict[str, An
         "believed_statuses": [
             HypothesisStatus.SUPPORTED.value,
             HypothesisStatus.OPEN.value,
-            "confirmed",
+        ],
+        "tried_event_types": [
+            EventType.ACTION.value,
+            EventType.DECISION.value,
         ],
         "done": TaskStatus.DONE.value,
     }
@@ -32,6 +35,7 @@ def resume(graph: str, agent_id: str, now_ms: int | None = None) -> dict[str, An
     rows = read(graph, "resume_state", params)
     if not rows:
         return {
+            "agent_id": agent_id,
             "tried": [],
             "failed": [],
             "believed": [],
@@ -88,6 +92,7 @@ def resume(graph: str, agent_id: str, now_ms: int | None = None) -> dict[str, An
     next_tasks.sort(key=lambda x: (not x["active"], not x["claimable"], x["stale"], x["id"]))
 
     return {
+        "agent_id": agent_id,
         "tried": tried,
         "failed": failed,
         "believed": believed,

@@ -41,6 +41,7 @@ def test_resume_on_empty_graph() -> None:
     _drop("test_nonexistent_resume_graph")
     state = resume("test_nonexistent_resume_graph", agent_id="agent-1")
     assert state == {
+        "agent_id": "agent-1",
         "tried": [],
         "failed": [],
         "believed": [],
@@ -52,7 +53,8 @@ def test_resume_on_seed_graph(seed_graph: str) -> None:
     state = resume(seed_graph, agent_id="agent-test", now_ms=1_000)
 
     # Check top-level keys
-    assert set(state.keys()) == {"tried", "failed", "believed", "next"}
+    assert {"tried", "failed", "believed", "next", "agent_id"} <= set(state.keys())
+    assert state["agent_id"] == "agent-test"
 
     # Tried: includes ACT-1
     tried_ids = [t["id"] for t in state["tried"]]

@@ -12,7 +12,7 @@ WITH collect(DISTINCT {
      }) AS raw_actions
 
 OPTIONAL MATCH (ev:Event)
-WHERE ev.type IN ['action', 'attempt', 'decision']
+WHERE ev.type IN $tried_event_types
 WITH raw_actions,
      collect(DISTINCT {
        id: ev.id,
