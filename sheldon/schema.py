@@ -60,6 +60,13 @@ class TaskStatus(StrEnum):
     BLOCKED = "blocked"
 
 
+class ApprovalStatus(StrEnum):
+    """From docs/plan/deep.md section 5. W2 sets ``stale``. Nothing deletes an approval."""
+
+    ACTIVE = "active"
+    STALE = "stale"
+
+
 class EventType(StrEnum):
     OBSERVATION = "observation"
     ACTION = "action"

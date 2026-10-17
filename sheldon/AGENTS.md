@@ -12,7 +12,7 @@ Product scope is [`docs/plan/README.md`](../docs/plan/README.md). Every function
 | `retrieval.s0` | `s0` | keyword half wired on a fixture; vector half waits on `EMBEDDING_DIM` | Akshat |
 | `retrieval.recall` | `recall` | wired on a fixture; waits on pr-ingest and the seed for real data | Akshat |
 | `retrieval.read` | `retrieve`, `q_star` | to build | Akshat |
-| `check.app` | `decide_check` | to build | Akshat |
+| `check.app` | `decide_check`, `check_run_payload` | decision wired on a fixture; webhook to build | Akshat |
 | `gate.approve` | `approve` | W1 query ran; function to build | Hariharan |
 | `gate.done` | `claim_done` | to build | Hariharan |
 | `belief.refute` | `refute_hypothesis` | W2 query ran; function to build | Hariharan |

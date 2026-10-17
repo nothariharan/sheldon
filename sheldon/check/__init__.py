@@ -1,5 +1,5 @@
-"""GitHub check run. Status: to build. Not a working feature."""
+"""GitHub check run. The decision is wired. The webhook is to build."""
 
-from sheldon.check.app import decide_check
+from sheldon.check.app import check_run_payload, decide_check
 
-__all__ = ["decide_check"]
+__all__ = ["check_run_payload", "decide_check"]
