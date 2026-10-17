@@ -14,7 +14,7 @@ Product scope is [`docs/plan/README.md`](../docs/plan/README.md). Every function
 | `retrieval.read` | `retrieve`, `q_star` | to build | Akshat |
 | `check.app`, `check.webhook` | `decide_check`, `check_run_payload`, `handle_event`, `make_app` | wired; not yet run against GitHub | Akshat |
 | `gate.approve` | `approve` | built. test_approve.py | Hariharan |
-| `gate.done` | `claim_done` | to build | Hariharan |
+| `gate.done` | `claim_done` | built. test_done.py | Hariharan |
 | `belief.refute` | `refute_claim`, `refute_hypothesis` | `refute_claim` is built (test_refute.py). `refute_hypothesis` is a sketch: it matches `:Event` and does not check `executed` | Hariharan |
 | `evidence.run` | `record_run` | built. test_run.py writes executed Evidence | Hariharan |
 | `provenance` | `writes_with_provenance` | to build | Hariharan |

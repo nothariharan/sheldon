@@ -10,6 +10,7 @@ RUNNABLE: tuple[str, ...] = (
     "record_event",
     "record_run",
     "claim_task",
+    "claim_done",
     "heartbeat",
     "complete_task",
     "handoff_task",
