@@ -1,8 +1,12 @@
-"""record_run writes an executed Evidence node. The model does not."""
+"""record_run writes an executed Evidence node. Raw writes are not blocked."""
+
+import inspect
 
 import pytest
 
+from sheldon.cypher import load_query
 from sheldon.db import connect
+from sheldon.evidence import run as producer
 from sheldon.evidence.run import record_run
 
 GRAPH = "test_evidence_run"
@@ -42,14 +46,23 @@ def test_record_run_writes_an_executed_evidence_node(graph: str) -> None:
     assert rows == [["test_run", "pytest", "abc", True, 0, "opus", "s1"]]
 
 
-def test_a_model_cannot_mint_executed_evidence_through_the_producer(graph: str) -> None:
-    """The producer records a process exit. It has no flag a model can set false or true."""
-    record_run(graph, "E-1", "pytest", "abc", 1, "opus", "s1")
-    connect().select_graph(graph).query(
-        "CREATE (:Evidence {id: 'E-minted', executed: false, sha: 'abc', "
-        "kind: 'test_run', exit_code: 0, model: 'model', session: 'chat'})"
-    )
+def test_only_record_run_produces_executed_evidence(graph: str) -> None:
+    """The producer API has one writer, and it stores executed true as a literal."""
+    writers = [
+        name
+        for name, obj in vars(producer).items()
+        if inspect.isfunction(obj)
+        and obj.__module__ == producer.__name__
+        and not name.startswith("_")
+    ]
+    assert writers == ["record_run"]
+    assert "executed" not in inspect.signature(record_run).parameters
+    statement = load_query("record_run")
+    assert "executed: true" in statement
+    assert "$executed" not in statement
+
+    assert record_run(graph, "E-1", "pytest", "abc", 0, "opus", "s1") == "E-1"
     rows = connect().select_graph(graph).query(
-        "MATCH (e:Evidence) RETURN e.id, e.executed ORDER BY e.id"
+        "MATCH (e:Evidence) WHERE e.executed = true RETURN e.id"
     ).result_set
-    assert rows == [["E-1", True], ["E-minted", False]]
+    assert rows == [["E-1"]]
