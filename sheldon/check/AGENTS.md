@@ -1,6 +1,6 @@
 # check
 
-Akshat. Status: `decide_check`, `check_run_payload`, and the webhook are wired and tested with fakes in `tests/check/`. The webhook waits on pr-ingest: the real `ingest_pull_request` still raises, so a live event fails loudly. Nothing here has run on the seed or against GitHub (check-e2e row).
+Akshat. Status: `decide_check`, `check_run_payload`, and the webhook are wired and tested with fakes in `tests/check/`. pr-ingest is wired, so a live event now ingests for real. Nothing here has run on the seed or against GitHub (check-e2e row).
 
 ## Contract
 

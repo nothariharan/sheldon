@@ -7,12 +7,12 @@ Product scope is [`docs/plan/README.md`](../docs/plan/README.md). Every function
 | Module | Public function | Status | Owner |
 |---|---|---|---|
 | `memory.ingest` | `record_event` | to build | Amaan |
-| `pr.ingest` | `ingest_pull_request` | to build | Amaan |
+| `pr.ingest` | `ingest_pull_request` | wired and tested | Amaan |
 | `seed.snapshot` | `load_seed` | to build | Amaan |
 | `retrieval.s0` | `s0` | keyword half wired on a fixture; vector half waits on `EMBEDDING_DIM` | Akshat |
 | `retrieval.recall` | `recall` | wired on a fixture; waits on pr-ingest and the seed for real data | Akshat |
 | `retrieval.read` | `retrieve`, `q_star` | to build | Akshat |
-| `check.app`, `check.webhook` | `decide_check`, `check_run_payload`, `handle_event`, `make_app` | wired with fakes; waits on pr-ingest | Akshat |
+| `check.app`, `check.webhook` | `decide_check`, `check_run_payload`, `handle_event`, `make_app` | wired; not yet run against GitHub | Akshat |
 | `gate.approve` | `approve` | W1 query ran; function to build | Hariharan |
 | `gate.done` | `claim_done` | to build | Hariharan |
 | `belief.refute` | `refute_hypothesis` | W2 query ran; function to build | Hariharan |

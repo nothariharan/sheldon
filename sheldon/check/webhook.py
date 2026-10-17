@@ -1,8 +1,7 @@
 """GitHub webhook for the PR check.
 
-Status: wired and tested with a fake GitHub client and a fake pr-ingest. Until
-the pr-ingest row lands, the real ``ingest_pull_request`` raises, so a live
-event fails loudly instead of checking a PR the graph has not seen.
+Status: wired and tested with a fake GitHub client, with both a fake and the
+real pr-ingest. Not yet run against GitHub.
 
 The flow for a pull_request event: pr-ingest writes the PR's changed files,
 ``decide_check`` reads the graph, and the result is posted as a check run
