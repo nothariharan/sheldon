@@ -1,6 +1,6 @@
 """Tool names the host will call.
 
-Status: built.
+Status: built, except resume, which is to build.
 Hosted http is roadmap. Stdio server provides standard JSON-RPC 2.0 MCP protocol.
 """
 

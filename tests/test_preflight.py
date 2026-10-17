@@ -179,14 +179,20 @@ def test_preflight_manual_override_bypasses_block(seed_graph: str) -> None:
 
 
 def test_preflight_fails_open_on_db_outage() -> None:
-    """Fail-open: database outage or non-existent endpoint must not crash the agent."""
+    """Fail-open: database outage or connection error must return warn with explanatory reason."""
+
+    class FailingDB:
+        def select_graph(self, name: str) -> None:
+            raise ConnectionError("Connection refused: FalkorDB is down")
+
     res = preflight(
-        "non_existent_graph_12345",
+        "any_graph",
         command="edit checkout/cache.py",
         paths=["checkout/cache.py"],
+        db=FailingDB(),  # type: ignore[arg-type]
     )
-    assert res["decision"] in ("ok", "warn")
-    assert res["decision"] != "block"
+    assert res["decision"] == "warn"
+    assert "Database unavailable" in res["reason"]
 
 
 # ==============================================================================
