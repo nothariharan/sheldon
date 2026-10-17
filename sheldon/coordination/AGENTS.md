@@ -1,6 +1,6 @@
 # coordination (p4)
 
-Status: to build. Not a working feature. Hariharan owns `board.py` (claim and lease). Satyansh owns `resume.py`. Do not edit each other's file.
+Status: claim and lease are built. `tests/coordination/test_claim.py` and the claim race show one winner, and a non-owner cannot heartbeat or complete. Hariharan owns `board.py`. Satyansh owns `resume.py`, which is still to build. Do not edit each other's file.
 
 Owns the task board. The refute gate is not in this folder.
 
