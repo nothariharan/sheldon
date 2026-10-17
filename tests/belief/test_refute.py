@@ -2,7 +2,7 @@
 
 import pytest
 
-from sheldon.belief.refute import refute_claim
+from sheldon.belief.refute import refute_claim, refute_hypothesis
 from sheldon.db import connect
 from sheldon.schema import ApprovalStatus, HypothesisStatus, TaskStatus
 
@@ -47,10 +47,25 @@ def test_one_call_refutes_c7_and_stales_a3_and_t9(graph: str) -> None:
         ["A-3", ApprovalStatus.STALE.value],
         ["C-7", HypothesisStatus.REFUTED.value],
         ["C-8", HypothesisStatus.OPEN.value],
-        ["T-2", ApprovalStatus.STALE.value],
-        ["T-9", ApprovalStatus.STALE.value],
+        ["T-2", TaskStatus.CLAIMED.value],
+        ["T-9", TaskStatus.OPEN.value],
     ]
-    assert _nodes(graph) >= before
+    stale = connect().select_graph(graph).query(
+        "MATCH (t:Task) WHERE t.id IN ['T-9', 'T-2'] RETURN t.id, t.stale ORDER BY t.id"
+    ).result_set
+    assert stale == [["T-2", True], ["T-9", True]]
+    assert _nodes(graph) == before
+
+
+def test_a_successful_hypothesis_refute_keeps_confidence(graph: str) -> None:
+    connect().select_graph(graph).query(
+        "CREATE (:Hypothesis {id: 'H-1', status: 'open', confidence: 0.5}), (:Event {id: 'E-1'})"
+    )
+    assert refute_hypothesis(graph, "H-1", ["E-1"], agent_id="a", at_ms=1) is True
+    row = connect().select_graph(graph).query(
+        "MATCH (h:Hypothesis {id: 'H-1'}) RETURN h.status, h.confidence"
+    ).result_set[0]
+    assert row == [HypothesisStatus.REFUTED.value, 0.5]
 
 
 def test_missing_or_unexecuted_evidence_changes_nothing(graph: str) -> None:

@@ -1,7 +1,7 @@
 """W2 refute plus stale cascade.
 
-Status: built. `refute_claim` runs the statement in `queries/refute_claim.cypher`.
-`refute_hypothesis` runs the older sketch. The race test covers that sketch.
+Status: `refute_claim` is built. `refute_hypothesis` is a sketch: it matches
+`:Event` and does not check `executed`. The race test covers that sketch.
 """
 
 from sheldon.cypher import load_query
@@ -32,6 +32,12 @@ def refute_hypothesis(
 
     A missing id returns False and changes nothing. Nothing is deleted.
     """
+    current = _write(
+        graph,
+        "hypothesis_confidence",
+        {"hypothesis_id": hypothesis_id},
+    )
+    confidence = current[0]["confidence"] if current else None
     rows = _write(
         graph,
         "refute_hypothesis",
@@ -39,7 +45,7 @@ def refute_hypothesis(
             "hypothesis_id": hypothesis_id,
             "evidence_ids": evidence_ids,
             "refuted": HypothesisStatus.REFUTED.value,
-            "confidence": None,
+            "confidence": confidence,
             "agent_id": agent_id,
             "at_ms": at_ms,
             "open": TaskStatus.OPEN.value,
