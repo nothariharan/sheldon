@@ -18,7 +18,7 @@ Product scope is [`docs/plan/README.md`](../docs/plan/README.md). Every function
 | `belief.refute` | `refute_hypothesis` | W2 query ran; function to build | Hariharan |
 | `evidence.run` | `record_run` | built. test_run.py writes executed Evidence | Hariharan |
 | `provenance` | `writes_with_provenance` | to build | Hariharan |
-| `coordination.board` | `claim_task`, `heartbeat`, `complete_task`, `handoff_task` | built. test_claim.py and the claim race | Hariharan |
+| `coordination.board` | `claim_task`, `heartbeat`, `complete_task`, `handoff_task` | claim, heartbeat, and complete are built (test_claim.py and the claim race). `handoff_task` is partly built: it releases a claimed lease and drops `to_agent` and `note` | Hariharan |
 | `coordination.resume` | `resume` | to build | Satyansh |
 | `preflight` | `preflight` | to build | Satyansh |
 | `capsule` | `capsule` | to build | Satyansh |

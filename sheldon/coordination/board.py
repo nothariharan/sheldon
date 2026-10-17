@@ -1,7 +1,9 @@
 """Claim and lease.
 
-Status: built. `tests/coordination/test_claim.py` and the claim race show
-one winner, and a non-owner cannot heartbeat or complete.
+Status: claim, heartbeat, and complete are built. `handoff_task` is
+partly built: it releases a claimed lease and drops `to_agent` and `note`.
+`tests/coordination/test_claim.py` and the claim race show one winner, and a
+non-owner cannot heartbeat or complete.
 ``resume`` lives in ``resume.py`` so another owner can edit it.
 """
 
@@ -81,6 +83,7 @@ def handoff_task(graph: str, task_id: str, agent_id: str, to_agent: str, note: s
             "task_id": task_id,
             "agent_id": agent_id,
             "open": TaskStatus.OPEN.value,
+            "claimed": TaskStatus.CLAIMED.value,
         },
     )
     return len(rows) == 1

@@ -62,6 +62,16 @@ def test_the_owner_can_extend_and_complete(graph: str) -> None:
     assert _row(graph)[0] == TaskStatus.DONE.value
 
 
+def test_the_owner_of_a_done_task_cannot_reopen_it(graph: str) -> None:
+    _task(graph)
+    assert claim_task(graph, "T-9", "a", now_ms=1_000, ttl_ms=5_000) is True
+    assert complete_task(graph, "T-9", "a") is True
+    assert handoff_task(graph, "T-9", "a", "c", "handing off a finished task") is False
+    status, owner, _lease = _row(graph)
+    assert status == TaskStatus.DONE.value
+    assert owner == "a"
+
+
 def test_an_unfinished_dependency_blocks_the_claim(graph: str) -> None:
     _task(graph, "T-1")
     _task(graph, "T-9")
