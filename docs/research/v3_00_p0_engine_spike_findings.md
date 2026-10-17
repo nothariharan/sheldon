@@ -1,6 +1,6 @@
 > **Spike record, 15 Oct 2026**, against `falkordb/falkordb:latest`. The engine reported module **42201**, which is 4.22.1. The pin is now `falkordb/falkordb:v4.22.1`. Re-run `spikes/` on that tag before trusting a result.
 >
-> This file is what overturned "vector queries can't combine with filters": a filter after `YIELD` runs, and it applies **after the top-k cut** (section D1). Product scope still comes from [`REPORT.md`](../decisions/REPORT.md) and [`check.md`](../decisions/check.md).
+> This file is what overturned "vector queries can't combine with filters": a filter after `YIELD` runs, and it applies **after the top-k cut** (section D1). Product scope still comes from [`facts.md`](../facts.md), [`REPORT.md`](../decisions/REPORT.md), and [`papers.md`](../engine/papers.md).
 
 # v3_00 — P0 Engine Spike Findings (Executed, Not Read)
 

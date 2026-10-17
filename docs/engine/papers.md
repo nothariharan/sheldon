@@ -1,12 +1,13 @@
 > Papers for the three-part lead. The version key at the top says which FalkorDB behavior was spiked on **4.22.1** `[S]` and which is docs-only `[D]`.
 > Paper numbers motivate the design. They are never Sheldon's results.
+> **Precedence:** this file, [`facts.md`](../facts.md), and [`REPORT.md`](../decisions/REPORT.md) override `docs/design/` and `docs/research/`. The errors section is why a personalized-PageRank design row cannot be built.
 
 # paper scout: papers for sheldon (2026-10-17)
 written sat 17 oct 2026, ~11:00–12:00 ist. every number below comes from the paper's abstract or results/ablation section, read on arxiv today (abs page + html full text). anything i couldn't check is marked **unverified**. ranks, "take" lines and verdicts are **opinion**.
 
 team lead (fixed): (1) an evidence-gated refute write, ideally path-checked (the cited evidence sits within n hops), (2) one traversal that flags open tasks resting on refuted hypotheses, (3) a measured count of repeated failed steps vs plain memory.
 
-## falkordb version key (from sponsor-intel/features.md + spike v3_00)
+## falkordb version key (from features.md + spike v3_00)
 - **[S]** = spiked by the team on **4.22.1** (module 42201, C engine): atomic conditional `MATCH…WHERE…SET` write, multi-type var-length paths + `length(p)`, vector index (+ `WHERE` filter on the yielded node), `algo.pageRank(label,rel)`, `algo.betweenness()`, `algo.WCC()`, `algo.labelPropagation()`, `algo.BFS`, `algo.SPpaths`. the 6.0 notes say "same procedures as 4.20.7", so these should exist on 6.0 too, but **not spiked on 6.0**.
 - **[D]** = docs only, not spiked. should exist on both 4.22.x and 6.0.x: full-text index (6.0 uses RediSearch 8.6.1), multigraph keys (`GRAPH.LIST/DELETE`), `GRAPH.COPY`, constraints (**MANDATORY/UNIQUE only**; UNIQUE needs an exact-match index first), JS UDFs (**read-only**; `graph.traverse` API since 4.16; 6.0.2 fixed UDF edge cases), temporal types, `GRAPH.PROFILE`, `GRAPH.RO_QUERY`+timeout.
 - **not available:** personalized pagerank (none, on any version); `algo.AStar`/CCH (4.22.0+ only, **not in 6.0**, and geographic). no mapping below uses them.
@@ -49,7 +50,7 @@ team lead (fixed): (1) an evidence-gated refute write, ideally path-checked (the
 - **mechanism:** the trajectory is a graph over environment states. a *cycle* returns to the same state with no progress, and a *loop* is a consecutive repeat of a cycle. **Loop Ratio = redundant loop actions / total actions** (sec 3, alg 1).
 - **result:** scaling qwen3-4b → qwen3-30b-a3b cuts LR from **15.8% → 1.0%** (blocksworld) and **36.7% → 5.7%** (webshop). high LR correlates with low AUV across four models.
 - **code:** yes, https://github.com/yayayacc/TIDE.
-- **falkor:** the event chain is already a graph, so LR is a path query: `(s1:State)-[:NEXT*]->(s2:State)` with `s1.hash = s2.hash` [S var-length, 4.22.1], or `algo.BFS` from the current state [S]. `GRAPH.PROFILE` [D] can show it's cheap. rivals use neither BFS nor PROFILE (field-scout).
+- **falkor:** the event chain is already a graph, so LR is a path query: `(s1:State)-[:NEXT*]->(s2:State)` with `s1.hash = s2.hash` [S var-length, 4.22.1], or `algo.BFS` from the current state [S]. `GRAPH.PROFILE` [D] can show it's cheap. Do not treat BFS or PROFILE as a differentiator.
 - **take:** report two numbers for lead (3): raw repeated-failed-steps (MAST-style) and Loop Ratio (TIDE-style), S0 plain memory vs S3 sheldon, on a frozen seed via `GRAPH.COPY` [D].
 
 ### 5. ReasoningBank: scaling agent self-evolving with reasoning memory

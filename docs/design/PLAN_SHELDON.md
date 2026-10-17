@@ -1,7 +1,7 @@
-> **Precedence:** [`REPORT.md`](../decisions/REPORT.md) and [`check.md`](../decisions/check.md) override this file. They are the 17 Oct 2026 verdict.
+> **Precedence:** [`facts.md`](../facts.md), [`REPORT.md`](../decisions/REPORT.md), and [`papers.md`](../engine/papers.md) override this file.
 >
 > **Do not quote or implement these. They were disproved:**
-> - "vector queries can't combine with filters" — a `WHERE` after `YIELD` runs, but only on the top-k, so recall drops. Per-investigation graphs are a choice, not a requirement (check.md claim 7).
+> - "vector queries can't combine with filters" — a `WHERE` after `YIELD` runs, but only on the top-k, so recall drops. Per-investigation graphs are a choice, not a requirement (see [`facts.md`](../facts.md)).
 > - "no competitor has GRAPH.COPY" — false. It is an eval-reset method, not a novelty claim.
 > - MIRIX arXiv `2501.02388` — the id is **`2507.07957`** ("MIRIX: Multi-Agent Memory System for LLM-Based Agents").
 > - HippoRAG "+38.6%" — it is **+38.6 points** AR@5 on 2Wiki (37.1 → 75.7), not a relative percent.
@@ -139,7 +139,7 @@ This is where the research is strongest, and it was not in `stuff.md` at all. Al
 | **No native multi-query transactions**; `MULTI`/`EXEC` "serializes all enclosed commands **across all graphs**" | **Never use MULTI/EXEC for coordination** — it stalls every investigation. Multi-step atomicity must be one query |
 | `GRAPH.COPY <src> <dest>`: consistent snapshot, copies **indexes and constraints**, source stays readable, errors if dest exists. **Latency not documented** | Eval reset only. Not a novelty claim. Do not quote a copy-time number. Branch-and-merge sandboxing is cut |
 | Vector index: HNSW, 1–4096 dims, `cosine`/`euclidean` only; `CALL db.idx.vector.queryNodes(label, attr, k, vecf32(...)) YIELD node, score` | Embeddings on `Event`. Note the yielded column is `node`, not `entity` |
-| **Vector filters are a top-k post-cut, not a ban** | Spike B2: `WHERE` after `YIELD` runs, and recall drops outside the window. Per-investigation graphs are a good choice, not a forced one. See check.md claim 7 |
+| **Vector filters are a top-k post-cut, not a ban** | Spike B2: `WHERE` after `YIELD` runs, and recall drops outside the window. Per-investigation graphs are a good choice, not a forced one. See [`facts.md`](../facts.md) |
 | Algorithm list is exactly BFS, SPpaths, AStar, SSpaths, MSF, pageRank, betweenness, harmonicCentrality, WCC, labelPropagation, maxFlow. `algo.CDLP` and `algo.betweennessCentrality` **do not exist on the running engine**; `algo.labelPropagation` **does**. Whole-graph algos take **no args** — `algo.WCC('S','L')` fails silently with `[]` | **EXECUTED & CORRECTED — see `research/v3_00_p0_engine_spike_findings.md`.** Use `algo.labelPropagation()` for label propagation, `algo.betweenness()` for bridging, `algo.WCC()` with no args. `algo.SPpaths` takes a map with **node references** (not ID strings). `algo.AStar` needs lat/long — it is geographic, not general A* |
 | **Relationship-uniqueness limitation:** a relation not referenced elsewhere "will only verify that at least one matching relation exists" | Breaks `count()` over unaliased relationship patterns. Alias every relationship you count through |
 | Indexes do **not** handle `<>` (not-equal) filters | `WHERE d.status <> 'done'` is a full scan. Fine at demo scale; know before tuning |

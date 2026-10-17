@@ -6,7 +6,7 @@
 |---|---|---|
 | `test_smoke.py` | yes | Module `42201`, and `GRAPH.COPY` round trip |
 | `test_races.py` | yes, once the stub flags flip | 20 claimers, one winner. 20 bad refutes, all rejected |
-| `test_contracts.py` | no | One statement per query, no inline Cypher, shared image pin, no forbidden claims, no rival-team names |
+| `test_contracts.py` | no | One statement per query, no inline Cypher, shared image pin, no forbidden claims, no competitive-note shapes |
 
 ## Gotchas
 

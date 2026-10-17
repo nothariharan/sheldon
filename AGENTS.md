@@ -35,7 +35,7 @@ Not in the README, the pitch, or code comments:
 - "reaching the task board is ours"
 - any speed number that has not been measured on our harness
 
-Also drop the list in [`docs/decisions/REPORT.md`](docs/decisions/REPORT.md) §5. Say "we measured" and "none we found".
+Also drop the list in [`docs/facts.md`](docs/facts.md) and [`docs/decisions/REPORT.md`](docs/decisions/REPORT.md) §5. Say "we measured" and "none we found".
 
 ## Repo map
 
@@ -50,7 +50,7 @@ Also drop the list in [`docs/decisions/REPORT.md`](docs/decisions/REPORT.md) §5
 | `sheldon/eval/` | eval | `GRAPH.COPY` reset and the repeated-step count |
 | `queries/` | whoever owns the caller | One Cypher statement per file |
 | `spikes/` | whoever changes the image | P0 scripts. Not the test suite |
-| `docs/decisions/` | rarely | `REPORT.md` and `check.md` win |
+| `docs/decisions/` | rarely | `REPORT.md`, `docs/facts.md`, and `docs/engine/papers.md` win |
 
 Each of those folders has its own `AGENTS.md`. Read that one before editing.
 
@@ -72,6 +72,8 @@ Smoke test: module version is `42201`, and `GRAPH.COPY` of a one-node graph roun
 
 ## Docs
 
-[`docs/decisions/REPORT.md`](docs/decisions/REPORT.md) and [`docs/decisions/check.md`](docs/decisions/check.md) override `docs/design/` and `docs/research/`. Index: [`docs/README.md`](docs/README.md).
+[`docs/facts.md`](docs/facts.md), [`docs/decisions/REPORT.md`](docs/decisions/REPORT.md), and [`docs/engine/papers.md`](docs/engine/papers.md) override `docs/design/` and `docs/research/`. `papers.md` retires the personalized-PageRank design row: that procedure does not exist. Index: [`docs/README.md`](docs/README.md).
+
+Do not copy a quote from [`docs/research/pains.md`](docs/research/pains.md) into the README or any UI text until someone has opened that quote's link. The Reddit quotes were taken from an archive and have not been checked live.
 
 No Cursor rules. They would repeat this file.

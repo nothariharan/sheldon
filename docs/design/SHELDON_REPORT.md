@@ -1,7 +1,7 @@
-> **Precedence:** [`REPORT.md`](../decisions/REPORT.md) and [`check.md`](../decisions/check.md) override this file. They are the 17 Oct 2026 verdict.
+> **Precedence:** [`facts.md`](../facts.md), [`REPORT.md`](../decisions/REPORT.md), and [`papers.md`](../engine/papers.md) override this file.
 >
 > **Do not quote or implement these. They were disproved:**
-> - "vector queries can't combine with filters" — a `WHERE` after `YIELD` runs, but only on the top-k, so recall drops. Per-investigation graphs are a choice, not a requirement (check.md claim 7).
+> - "vector queries can't combine with filters" — a `WHERE` after `YIELD` runs, but only on the top-k, so recall drops. Per-investigation graphs are a choice, not a requirement (see [`facts.md`](../facts.md)).
 > - "no competitor has GRAPH.COPY" — false. It is an eval-reset method, not a novelty claim.
 > - MIRIX arXiv `2501.02388` — the id is **`2507.07957`** ("MIRIX: Multi-Agent Memory System for LLM-Based Agents").
 > - HippoRAG "+38.6%" — it is **+38.6 points** AR@5 on 2Wiki (37.1 → 75.7), not a relative percent.
@@ -115,7 +115,7 @@ Every row below was fetched and verified on 15 Oct 2026. Nothing is recalled fro
 | **LoCoMo** — arXiv:2402.17753 | 50 conversations, 7,512 questions, human 87.9 F1 vs best system 41.4 | Same |
 | **MemoryAgentBench** — arXiv:2507.05257 | four competencies: accurate retrieval, test-time learning, long-range understanding, selective forgetting | Framing for the forgetting problem, which the MVP does not solve |
 
-**Engine facts, from `docs.falkordb.com`, fetched 15 Oct 2026:** per-graph reader-writer model with parallel reads and serialized writes; every write query atomic; no native multi-query transactions; `GRAPH.COPY` gives a consistent snapshot and copies indexes and constraints; vector index is HNSW, 1–4096 dims, cosine/euclidean only; vector queries don't combine well with property filters (overstated: a post-filter runs on the top-k; see check.md claim 7); the documented algorithm list contains no Personalized PageRank; `LIMIT` does not restrict eager write operations; indexes do not optimise `<>` filters; `MULTI`/`EXEC` serialises across all graphs. Full detail: `research/v2_05_falkordb_technical.md`.
+**Engine facts, from `docs.falkordb.com`, fetched 15 Oct 2026:** per-graph reader-writer model with parallel reads and serialized writes; every write query atomic; no native multi-query transactions; `GRAPH.COPY` gives a consistent snapshot and copies indexes and constraints; vector index is HNSW, 1–4096 dims, cosine/euclidean only; vector queries don't combine well with property filters (overstated: a post-filter runs on the top-k; see [`facts.md`](../facts.md)); the documented algorithm list contains no Personalized PageRank; `LIMIT` does not restrict eager write operations; indexes do not optimise `<>` filters; `MULTI`/`EXEC` serialises across all graphs. Full detail: `research/v2_05_falkordb_technical.md`.
 
 ## 6. What already exists, and what that means
 
@@ -212,7 +212,7 @@ Sequenced by **risk retired**, not by feature list. Each phase has a gate; do no
 
 | Deliverable | Detail |
 |---|---|
-| **Multi-tenancy and auth** | Per-tenant graphs, access control, isolation guarantees. The MVP's graph-per-investigation scoping is a choice. A vector filter runs after the top-k cut (check.md claim 7); it does not force a graph per investigation. At scale this still needs a deliberate answer |
+| **Multi-tenancy and auth** | Per-tenant graphs, access control, isolation guarantees. The MVP's graph-per-investigation scoping is a choice. A vector filter runs after the top-k cut (see [`facts.md`](../facts.md)); it does not force a graph per investigation. At scale this still needs a deliberate answer |
 | **Scale characterisation** | FalkorDB's documented model serializes writes per graph — a verified, structural ceiling. Characterise the real throughput ceiling on Sheldon's write pattern, batch where possible, and publish the number rather than discovering it in production |
 | **Cost model** | LLM calls sit in the consolidation worker, not the hot path. Quantify cost per investigation and make it a measured, reportable number |
 | **SDK and integrations** | MCP server, LangGraph/LlamaIndex adapters, and the client libraries for the languages our users actually use |

@@ -16,20 +16,24 @@ from sheldon.schema import (
 
 ROOT = Path(__file__).resolve().parents[1]
 
-RIVAL_NAMES = (
-    "kintsugi",
-    "dan-el-7",
-    "opsmemory",
-    "kunalsz",
-    "relayops",
-    "incidentgraph",
-    "threadline",
-    "batchzero",
-    "safecortex",
-    "crewbrain",
-    "memofull",
-    "swarmgraph",
-    "itz-agasta",
+# Shapes of notes that do not belong in a public tree: a removed filename,
+# a writeup about other entries in this event, or a note about what people
+# at the sponsor posted. Built so this file is not itself a reference.
+REMOVED_NOTES = (
+    "check" + ".md",
+    "learnings" + ".md",
+    "intel" + ".md",
+)
+
+COMPETITIVE_SHAPES = (
+    "field-scout",
+    "field scout",
+    "rival repo",
+    "rival team",
+    "other submission",
+    "sponsor-intel",
+    "idea-validator",
+    "x.com/falkordb",
 )
 
 FORBIDDEN_IN_CODE = (
@@ -109,7 +113,7 @@ def test_pitch_files_do_not_make_forbidden_claims() -> None:
         assert phrase not in blob
 
 
-def test_no_rival_team_names_in_the_tree() -> None:
+def _tracked_text() -> str:
     blobs = []
     for path in ROOT.rglob("*"):
         if not path.is_file():
@@ -121,18 +125,31 @@ def test_no_rival_team_names_in_the_tree() -> None:
         if path.name == "test_contracts.py":
             continue
         blobs.append(path.read_text().lower())
-    blob = "\n".join(blobs)
-    for name in RIVAL_NAMES:
-        assert name not in blob
+    return "\n".join(blobs)
+
+
+def test_removed_notes_and_competitive_shapes_are_absent() -> None:
+    for name in REMOVED_NOTES:
+        assert list(ROOT.rglob(name)) == []
+    blob = _tracked_text()
+    for shape in (*REMOVED_NOTES, *COMPETITIVE_SHAPES):
+        assert shape not in blob
 
 
 def test_docs_say_what_wins() -> None:
     agents = (ROOT / "AGENTS.md").read_text()
     index = (ROOT / "docs" / "README.md").read_text()
-    for text in (agents, index):
+    docs_agents = (ROOT / "docs" / "AGENTS.md").read_text()
+    for text in (agents, index, docs_agents):
         assert "REPORT.md" in text
-        assert "check.md" in text
+        assert "facts.md" in text
+        assert "papers.md" in text
         assert "override" in text
+    assert "pains.md" in agents
+    assert "opened" in agents
+    pains = (ROOT / "docs" / "research" / "pains.md").read_text().lower()
+    assert "archive" in pains
+    assert "do not copy" in pains
 
 
 def test_investigation_graph_key() -> None:

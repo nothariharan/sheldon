@@ -1,4 +1,4 @@
-> **Precedence:** [`REPORT.md`](../decisions/REPORT.md) and [`check.md`](../decisions/check.md) override this file. They are the 17 Oct 2026 verdict.
+> **Precedence:** [`facts.md`](../facts.md), [`REPORT.md`](../decisions/REPORT.md), and [`papers.md`](../engine/papers.md) override this file.
 
 # Multi-Agent Coordination & State Sharing: Research & Design
 **Track 02 — Agent Memory and Coordination**  

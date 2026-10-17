@@ -1,7 +1,7 @@
-> **Precedence:** [`REPORT.md`](../decisions/REPORT.md) and [`check.md`](../decisions/check.md) override this file. They are the 17 Oct 2026 verdict.
+> **Precedence:** [`facts.md`](../facts.md), [`REPORT.md`](../decisions/REPORT.md), and [`papers.md`](../engine/papers.md) override this file.
 >
 > **Do not quote or implement these. They were disproved:**
-> - "vector queries can't combine with filters" — a `WHERE` after `YIELD` runs, but only on the top-k, so recall drops. Per-investigation graphs are a choice, not a requirement (check.md claim 7).
+> - "vector queries can't combine with filters" — a `WHERE` after `YIELD` runs, but only on the top-k, so recall drops. Per-investigation graphs are a choice, not a requirement (see [`facts.md`](../facts.md)).
 > - "no competitor has GRAPH.COPY" — false. It is an eval-reset method, not a novelty claim.
 > - MIRIX arXiv `2501.02388` — the id is **`2507.07957`** ("MIRIX: Multi-Agent Memory System for LLM-Based Agents").
 > - HippoRAG "+38.6%" — it is **+38.6 points** AR@5 on 2Wiki (37.1 → 75.7), not a relative percent.
@@ -30,7 +30,7 @@ ai-first: true
 
 ## 1. Engine Heritage & Lineage
 
-FalkorDB is the direct spiritual and architectural successor to **RedisGraph**, engineered by its original creators: **Guy Korland** (former CTO of Redis Labs) and **Roi Lipman** (author of RedisGraph). When Redis Ltd shifted its corporate licensing and deprecated RedisGraph in 2023, the core authors fork-migrated the engine into an independent company (FalkorDB Inc.), optimizing it specifically as the **low-latency context layer for AI agent loops**.
+FalkorDB continues the RedisGraph engine after RedisGraph was deprecated in 2023. The execution model below is what Sheldon depends on.
 
 ---
 

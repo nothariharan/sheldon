@@ -24,7 +24,7 @@ The database is on port 6379. FalkorDB Browser is on port 3000.
 
 ## Where to read
 
-Agents and people start at [`AGENTS.md`](AGENTS.md). Product scope is [`docs/decisions/REPORT.md`](docs/decisions/REPORT.md). The claims drop list is [`docs/decisions/check.md`](docs/decisions/check.md). Those two override the older design notes. Work items are in [`TASKS.md`](TASKS.md). Branch rules are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Agents and people start at [`AGENTS.md`](AGENTS.md). Product scope is [`docs/decisions/REPORT.md`](docs/decisions/REPORT.md). Engine limits and the claims drop list are [`docs/facts.md`](docs/facts.md). Paper corrections, including the personalized-PageRank row that cannot be built, are [`docs/engine/papers.md`](docs/engine/papers.md). Those three override the older design notes. Work items are in [`TASKS.md`](TASKS.md). Branch rules are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## What is in scope
 

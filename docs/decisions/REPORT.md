@@ -2,7 +2,7 @@
 
 Written Sat 17 Oct 2026. Deadline: Sun 18 Oct 2026, 11:59 PM IST.
 
-This file is the source of truth for product scope. [`check.md`](check.md) is the source of truth for which older claims are wrong. Both override `docs/design/` and `docs/research/`.
+This file is the source of truth for product scope. [`docs/facts.md`](../facts.md) is the short list of engine limits and claims that are wrong. [`docs/engine/papers.md`](../engine/papers.md) is the paper check, including the personalized-PageRank row that cannot be built. Those three override `docs/design/` and `docs/research/`.
 
 Team names, handles, repo paths, and overlap notes from the validation pass are not in this tree.
 
@@ -121,7 +121,7 @@ More papers, each marked with the FalkorDB version it was checked against: [`doc
 - "Mandatory MATCH can't follow OPTIONAL MATCH" and "MERGE on a whole path duplicates nodes" — not on the known-limitations page. Test them or don't say them
 - the product name SynapseOS
 
-The full claims table is [`check.md`](check.md).
+The short list is [`docs/facts.md`](../facts.md). The paper corrections are in [`docs/engine/papers.md`](../engine/papers.md).
 
 ## 6. Build notes
 

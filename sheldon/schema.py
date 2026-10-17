@@ -88,7 +88,7 @@ REFUTED_BY = "REFUTED_BY"
 DEPENDS_ON = "DEPENDS_ON"
 PRODUCED = "PRODUCED"
 
-# stuff.md says INVESTIGATES. The Q* sketch in check.md says JUSTIFIED_BY.
+# stuff.md says INVESTIGATES. An earlier Q* sketch said JUSTIFIED_BY.
 # Confirm before the demo. Queries should use this constant's value.
 TASK_TO_HYPOTHESIS = "INVESTIGATES"
 

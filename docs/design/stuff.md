@@ -1,7 +1,7 @@
-> **Precedence:** [`REPORT.md`](../decisions/REPORT.md) and [`check.md`](../decisions/check.md) override this file. They are the 17 Oct 2026 verdict.
+> **Precedence:** [`facts.md`](../facts.md), [`REPORT.md`](../decisions/REPORT.md), and [`papers.md`](../engine/papers.md) override this file.
 >
 > **Do not quote or implement these. They were disproved:**
-> - "vector queries can't combine with filters" — a `WHERE` after `YIELD` runs, but only on the top-k, so recall drops. Per-investigation graphs are a choice, not a requirement (check.md claim 7).
+> - "vector queries can't combine with filters" — a `WHERE` after `YIELD` runs, but only on the top-k, so recall drops. Per-investigation graphs are a choice, not a requirement (see [`facts.md`](../facts.md)).
 > - "no competitor has GRAPH.COPY" — false. It is an eval-reset method, not a novelty claim.
 > - MIRIX arXiv `2501.02388` — the id is **`2507.07957`** ("MIRIX: Multi-Agent Memory System for LLM-Based Agents").
 > - HippoRAG "+38.6%" — it is **+38.6 points** AR@5 on 2Wiki (37.1 → 75.7), not a relative percent.
@@ -38,7 +38,7 @@ I checked these against current docs/papers (Oct 2026). Items marked ⚠️ **ch
 | 1 | MAGMA's substrate has **four relational views** (semantic, temporal, causal, entity); its **three logical layers** are query process, data structure, write/update. Published at ACL 2026. Retrieval is "policy-guided traversal" that routes by query intent. | arXiv 2601.03236; ACL Anthology 2026.acl-long.1709 | Use the four views as edge families. Episodic/semantic/procedural is *not* MAGMA's taxonomy (see #9). |
 | 2 | FalkorDB speaks the Redis protocol and implements a **subset of OpenCypher** plus extensions. Docs warn not to assume Neo4j-only syntax. | docs.falkordb.com | Test every query on a real instance early. Do not copy Neo4j/APOC snippets. |
 | 3 | **Vector index**: HNSW, cosine or Euclidean, 1–4096 dims. Query with `CALL db.idx.vector.queryNodes(label, attribute, k, vecf32([...])) YIELD node, score`. Edge vector indexes also exist (`queryRelationships`). | docs.falkordb.com/cypher/indexing/vector-index | Embeddings live on `Event` nodes. |
-| 4 | ⚠️ The cheat sheet says vector queries **don't combine well** with property filters. Spike B2 shows a `WHERE` after `YIELD` runs, on the top-k only (check.md claim 7). | docs.falkordb.com/cypher/cheat-sheet | Per-investigation graphs are a good choice, not a requirement. An empty filtered vector result can mean "outside the top-k", not "no match". |
+| 4 | ⚠️ The cheat sheet says vector queries **don't combine well** with property filters. Spike B2 shows a `WHERE` after `YIELD` runs, on the top-k only (see [`facts.md`](../facts.md)). | docs.falkordb.com/cypher/cheat-sheet | Per-investigation graphs are a good choice, not a requirement. An empty filtered vector result can mean "outside the top-k", not "no match". |
 | 5 | **Full-text index**: `CREATE FULLTEXT INDEX FOR (n:Label) ON (n.prop)`; query with `db.idx.fulltext.queryNodes(label, string)`. | docs.falkordb.com | Keyword anchors for exact error strings, hostnames, IDs. |
 | 6 | ⚠️ `algo.pageRank(label, relationship-type)` exists but is **global PageRank** over a label/edge type. Docs show no seed/personalization parameter. | docs.falkordb.com/algorithms/pagerank | **Personalized PageRank is not available natively.** Do not build on "native PPR". Use bounded traversal + scoring (§6). |
 | 7 | Other built-in algos: BFS, shortest paths, WCC, MSF, betweenness, label propagation. | docs.falkordb.com/cypher/procedures | BFS/shortest-path usable for evidence paths; WCC/label-propagation optional for clustering. |
@@ -194,7 +194,7 @@ CREATE VECTOR INDEX FOR (e:Event) ON (e.embedding)
   OPTIONS {dimension: 768, similarityFunction: 'cosine'}
 ```
 
-**Scoping decision** (per-investigation graphs are a choice; a vector `WHERE` is a post-cut on the top-k, not a hard ban — see check.md claim 7):
+**Scoping decision** (per-investigation graphs are a choice; a vector `WHERE` is a post-cut on the top-k, not a hard ban — see [`facts.md`](../facts.md)):
 
 - *Recommended for MVP:* one FalkorDB graph key per investigation (e.g., `synapse_inc_0042`). Vector/full-text results are automatically scoped. Playbooks live in a separate shared graph (`synapse_playbooks`) and are queried separately.
 - *Alternative:* one graph for everything; over-fetch (`k = 5× needed`) and post-filter by `investigation_id`. Simpler schema, noisier results as data grows.
