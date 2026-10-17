@@ -50,6 +50,22 @@ def test_no_passing_run_returns_no_approval(graph: str) -> None:
     assert _approvals(graph) == 0
 
 
+def test_a_repeated_evidence_id_is_accepted(graph: str) -> None:
+    assert _done(graph, ["E-pass", "E-pass"]) is not None
+    assert _approvals(graph) == 1
+
+
+def test_a_second_call_does_not_write_another_approval(graph: str) -> None:
+    first = _done(graph, ["E-pass"])
+    _done(graph, ["E-pass"])
+    assert first is not None
+    count = connect().select_graph(graph).query(
+        "MATCH (a:Approval {id: $id}) RETURN count(a)",
+        {"id": first},
+    ).result_set[0][0]
+    assert count == 1
+
+
 def test_a_passing_run_on_the_head_writes_an_approval(graph: str) -> None:
     approval = _done(graph, ["E-pass"])
     assert approval is not None

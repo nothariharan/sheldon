@@ -6,11 +6,11 @@ approval unless it cites a passing executed test run on that sha.
 
 from sheldon.cypher import load_query
 from sheldon.db import connect
+from sheldon.evidence.run import TEST_RUN
 from sheldon.schema import ApprovalStatus
 
-# Kind strings from the plan. evidence/run.py writes test_run once that lands.
+# Claim kind from the plan. The test_run kind lives on the producer.
 DONE = "done"
-TEST_RUN = "test_run"
 
 
 def _write(graph: str, name: str, params: dict) -> list[dict]:
@@ -37,7 +37,7 @@ def claim_done(
         {
             "cid": claim_id,
             "done_kind": DONE,
-            "ids": evidence_ids,
+            "ids": list(dict.fromkeys(evidence_ids)),
             "sha": head_sha,
             "test_run": TEST_RUN,
             "aid": f"A-{claim_id}",
