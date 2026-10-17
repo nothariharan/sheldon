@@ -36,6 +36,7 @@ RUNNABLE: tuple[str, ...] = (
     "check_cited_evidence",
     "seed_demo",
     "count_nodes",
+    "writes_with_provenance",
 )
 
 # Present so the decision is visible, not yet a statement we should run.
