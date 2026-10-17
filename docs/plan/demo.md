@@ -6,6 +6,23 @@ Ids on screen (INC-12, E-41, E-52, C-7, A-3, T-9) are seed data, not a result. S
 
 Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval freeze), use that step's fallback. Do not show a stub as if it ran.
 
+## Seed ids
+
+`sheldon.seed.load_seed` writes these. They are seed data, not a result.
+
+| Id | What it is | Step |
+|---|---|---|
+| INC-12 | Checkout times out under load. Touched `checkout/session.py` | 1, 5 |
+| C-5 | The cache-TTL fix for INC-12. Refuted | 1, 5 |
+| E-41 | CI run that refuted C-5 | 1, 5 |
+| ACT-1 | The earlier attempt at C-5 that preflight matches against | 1 |
+| PR 7 | Head `b2`. Changes `checkout/cache.py`, which co-changes with `checkout/session.py` | 2, 3, 5 |
+| E-52 | A test run that never executed. Agent B cites it | 2 |
+| C-7 | Root cause: session lock contention. Open until step 3 | 3 |
+| A-3 | Approval on PR 7. Cites E-31, relies on C-7 | 2, 3 |
+| T-9 | Task that depends on C-7 | 3 |
+| E-60 | New failing CI run. W2 refutes C-7 with it | 3 |
+
 ## Before recording
 
 - [ ] Every row in each step's "Needs" list is merged, or that step uses its fallback.
@@ -89,7 +106,7 @@ Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval fre
 
 **Needs:** ingest, R1 recall (merged), the provenance read.
 
-**On screen:** the repo graph in the Browser. A PR touching `checkout/cache.py` with the R1 line `refuted: C-7 by E-41 (INC-12, via checkout/session.py)`. The provenance query showing the model and session on each write.
+**On screen:** the repo graph in the Browser. A PR touching `checkout/cache.py` with the R1 line `refuted: C-5 by E-41 (INC-12, via checkout/session.py)`. The provenance query showing the model and session on each write.
 
 **Say:** "Repo mapping builds on FalkorDB code-graph and RepoGraph. At PR time, one bounded read walks from the changed file to the incident, the claim, and the evidence that refuted it. Every write records the model and session that made it."
 
