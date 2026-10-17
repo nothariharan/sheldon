@@ -16,7 +16,7 @@ Product scope is [`docs/plan/README.md`](../docs/plan/README.md). Every function
 | `gate.approve` | `approve` | W1 query ran; function to build | Hariharan |
 | `gate.done` | `claim_done` | to build | Hariharan |
 | `belief.refute` | `refute_hypothesis` | W2 query ran; function to build | Hariharan |
-| `evidence.run` | `record_run` | to build | Hariharan |
+| `evidence.run` | `record_run` | built. test_run.py writes executed Evidence | Hariharan |
 | `provenance` | `writes_with_provenance` | to build | Hariharan |
 | `coordination.board` | `claim_task`, `heartbeat`, `complete_task`, `handoff_task` | to build | Hariharan |
 | `coordination.resume` | `resume` | to build | Satyansh |
