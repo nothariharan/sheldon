@@ -1,0 +1,14 @@
+# Pin is sheldon.schema.FALKORDB_IMAGE. Change the tag in schema.py, here, and CI together.
+# 4.x tags start with v. To use 6.0.2 for a JS UDF, the tag is falkordb/falkordb:6.0.2 (no v).
+services:
+  falkordb:
+    image: falkordb/falkordb:v4.22.1
+    ports:
+      - "6379:6379"
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 2s

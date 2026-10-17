@@ -1,0 +1,1 @@
+CREATE FULLTEXT INDEX FOR (e:Event) ON (e.text)

@@ -1,0 +1,33 @@
+[project]
+name = "sheldon"
+version = "0.0.1"
+description = "Multi-agent incident-investigation memory on FalkorDB"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["falkordb>=1.7"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["sheldon*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["sheldon", "tests"]
+extend-exclude = ["spikes"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["sheldon"]
