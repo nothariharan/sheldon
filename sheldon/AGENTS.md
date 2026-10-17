@@ -15,7 +15,7 @@ Product scope is [`docs/plan/README.md`](../docs/plan/README.md). Every function
 | `check.app`, `check.webhook` | `decide_check`, `check_run_payload`, `handle_event`, `make_app` | wired; not yet run against GitHub | Akshat |
 | `gate.approve` | `approve` | built. test_approve.py | Hariharan |
 | `gate.done` | `claim_done` | to build | Hariharan |
-| `belief.refute` | `refute_hypothesis` | W2 query ran; function to build | Hariharan |
+| `belief.refute` | `refute_claim`, `refute_hypothesis` | `refute_claim` is built (test_refute.py). `refute_hypothesis` is a sketch: it matches `:Event` and does not check `executed` | Hariharan |
 | `evidence.run` | `record_run` | built. test_run.py writes executed Evidence | Hariharan |
 | `provenance` | `writes_with_provenance` | to build | Hariharan |
 | `coordination.board` | `claim_task`, `heartbeat`, `complete_task`, `handoff_task` | claim, heartbeat, and complete are built (test_claim.py and the claim race). `handoff_task` is partly built: it releases a claimed lease and drops `to_agent` and `note` | Hariharan |
