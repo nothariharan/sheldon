@@ -3,12 +3,16 @@
 import os
 
 from falkordb import FalkorDB
+from redis.exceptions import ResponseError
 
 from sheldon.cypher import load_query
 from sheldon.schema import FALKORDB_MODULE_VERSION
 
 # The image's default. A read the server kills raises. It is not an empty answer.
 READ_TIMEOUT_MS = 1000
+
+# RO_QUERY on a key that holds no graph yet raises this instead of returning no rows.
+_EMPTY_KEY = "empty key"
 
 
 def connect() -> FalkorDB:
@@ -46,10 +50,16 @@ def read(
     """Run one file from queries/ through GRAPH.RO_QUERY. Rows come back keyed by column.
 
     The server refuses a write sent this way, so a read helper cannot mutate the graph.
+    A graph that does not exist yet has no rows, so it returns ``[]``. Other errors raise.
     """
     client = db or connect()
-    result = client.select_graph(graph).ro_query(
-        load_query(query_name), params or {}, timeout=timeout_ms
-    )
+    try:
+        result = client.select_graph(graph).ro_query(
+            load_query(query_name), params or {}, timeout=timeout_ms
+        )
+    except ResponseError as exc:
+        if _EMPTY_KEY in str(exc):
+            return []
+        raise
     columns = [name for _, name in result.header]
     return [dict(zip(columns, row)) for row in result.result_set]

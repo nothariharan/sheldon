@@ -58,7 +58,7 @@ Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval fre
 
 **Say:** "Agent B says it's done and cites E-52. E-52 is not an executed test run on this commit. A model can cite evidence. It can't create it. So the claim does not land, and the check stays red, citing E-52. After a real `sheldon run`, the cited id is an executed run on this sha, and the check passes."
 
-**Fallback:** if W3 has not landed, show only the check run going red on E-52. Do not show a W3 call. If the webhook is not live, call `decide_check` from a terminal and show the same `blocked:` line.
+**Fallback:** if W3 has not landed, show only the check run going red on E-52. Do not show a W3 call. If the webhook is not live, run `python -m sheldon.check --repo <owner>/<repo> <pr> <head-sha> --evidence E-52` and show the same `blocked:` line.
 
 ## 3. One-write refute and stale cascade (1:25–2:05)
 

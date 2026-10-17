@@ -2,7 +2,7 @@
 
 Status: `recall` (R1) and the keyword half of `s0` are wired and tested on a fixture in `tests/retrieval/`. Neither has run on the seed yet, because pr-ingest and the seed are to build. `retrieve` and `q_star` are older stubs. Akshat owns this folder. Do not treat `q_star` as the demo read.
 
-Reads go through `sheldon.db.read`: `GRAPH.RO_QUERY`, a 1000ms timeout, rows keyed by column. The server refuses a write sent that way.
+Reads go through `sheldon.db.read`: `GRAPH.RO_QUERY`, a 1000ms timeout, rows keyed by column. The server refuses a write sent that way. A graph key that does not exist yet returns `[]`. On v4.22.1, `RO_QUERY` on a missing key raises `Invalid graph operation on empty key`, and `read` turns only that error into no rows.
 
 Owns anchors, bounded traversal, the evidence bundle, and Q\*.
 
