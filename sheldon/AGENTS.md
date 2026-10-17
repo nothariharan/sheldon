@@ -9,8 +9,8 @@ Product scope is [`docs/plan/README.md`](../docs/plan/README.md). Every function
 | `memory.ingest` | `record_event` | to build | Amaan |
 | `pr.ingest` | `ingest_pull_request` | to build | Amaan |
 | `seed.snapshot` | `load_seed` | to build | Amaan |
-| `retrieval.s0` | `s0` | to build | Akshat |
-| `retrieval.recall` | `recall` | R1 query ran; function to build | Akshat |
+| `retrieval.s0` | `s0` | keyword half wired on a fixture; vector half waits on `EMBEDDING_DIM` | Akshat |
+| `retrieval.recall` | `recall` | wired on a fixture; waits on pr-ingest and the seed for real data | Akshat |
 | `retrieval.read` | `retrieve`, `q_star` | to build | Akshat |
 | `check.app` | `decide_check` | to build | Akshat |
 | `gate.approve` | `approve` | W1 query ran; function to build | Hariharan |

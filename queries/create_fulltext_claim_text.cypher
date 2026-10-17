@@ -1,0 +1,1 @@
+CREATE FULLTEXT INDEX FOR (c:Claim) ON (c.text)
