@@ -1,6 +1,6 @@
 # eval
 
-Status: to build. Not a working feature. Satyansh owns this folder. Write `docs/plan/eval-def.md` before any count.
+Status: built. Satyansh owns this folder.
 
 Owns the repeated-failed-steps count and the frozen-seed reset.
 

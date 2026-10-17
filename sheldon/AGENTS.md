@@ -24,7 +24,7 @@ Product scope is [`docs/plan/README.md`](../docs/plan/README.md). Every function
 | `capsule` | `capsule` | built. test_capsule.py | Satyansh |
 | `mcp.server` | `call_tool` | built. tests/mcp/test_server.py | Satyansh |
 | `answers.compose` | `compose` | built. tests/answers/test_compose.py | Satyansh |
-| `eval.harness` | `reset_from_seed`, `count_repeated_failed_steps` | to build | Satyansh |
+| `eval.harness` | `reset_from_seed`, `count_repeated_failed_steps` | built. tests/eval/test_harness.py | Satyansh |
 
 `db.py` and `cypher.py` are shared. `load_query` strips full-line `//` comments and rejects a second statement.
 
