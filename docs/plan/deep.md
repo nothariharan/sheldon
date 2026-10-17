@@ -66,7 +66,7 @@ FOREACH (x IN ev | CREATE (a)-[:CITES]->(x))
 RETURN a.id
 ```
 
-**W3 is to build.** Same shape, on `Claim {kind:'done'}`, needing a `test_run` with `exit_code = 0` on the current tree sha. `$ids` are de-duplicated in the client. Zero rows means refused: missing, unexecuted, or wrong-sha evidence. `sheldon run` is to build. A Stop hook that refuses "done" is roadmap.
+**W3 is built.** `tests/gate/test_done.py` shows it. Same shape, on `Claim {kind:'done'}`, needing a `test_run` with `exit_code = 0` on the current tree sha. `$ids` are de-duplicated in the client. Zero rows means refused: missing, unexecuted, or wrong-sha evidence. `sheldon run` is to build. A Stop hook that refuses "done" is roadmap.
 
 Trust rule: `sheldon run -- <cmd>` and CI `check_run.completed` are the Evidence writers. A model saying "all tests pass" without one of those nodes is text, and the gate returns 0 rows.
 
