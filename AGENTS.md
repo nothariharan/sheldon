@@ -1,18 +1,34 @@
 # Sheldon
 
-Multi-agent incident-investigation memory on FalkorDB. Track 02 (Agent Memory and Coordination), Graph Hacks. One graph per investigation, a task board on that same graph, and answers that cite the path.
+Sheldon blocks coding agents from retrying fixes that already failed, and from calling work done without a real test run, from the first edit to the merge, on one shared FalkorDB graph per repo.
 
-Scope is frozen. Do not reopen it.
+Read [`docs/plan/README.md`](docs/plan/README.md) first. Product scope and wording are that plan. W1 (evidence gate), W2 (refute plus stale cascade), and R1 (PR-time recall) are the only queries that have run. Every other station is **to build** or **roadmap**. A stub that raises `NotImplementedError` is not a working feature.
+
+## Start here
+
+Docker is required. The image pin is `falkordb/falkordb:v4.22.1`. Do not change it.
+
+Linux:
+
+```bash
+./scripts/setup.sh
+```
+
+Windows (one teammate is on Windows):
+
+```powershell
+powershell -File scripts/setup.ps1
+```
+
+The Windows interpreter is `.venv\Scripts\python.exe`. Linux uses `.venv/bin/python`. Then follow [`TESTING.md`](TESTING.md): `ruff check sheldon tests`, `pytest`, and the smoke test against the pinned image. Paste that output in the PR. Do not mark a row done without it.
 
 ## Locked
 
-- **p0–p4 plus the repeated-failed-steps eval.** Cut: label vector filters, the MCP server, BeliefMem's multi-candidate machinery, ablations, playbooks, `GRAPH.COPY` branch-and-merge, A\*/CCH, Bolt, replication, GraphRAG-SDK, `MULTI`/`EXEC`.
-- **(a)** A refute lands only through one atomic conditional Cypher write that `MATCH`es every cited evidence id. No LLM in the decision. A missing id returns 0 rows and changes nothing.
-- **(b)** That same write marks dependent open tasks stale, bounded `*1..3`, and sets confidence. Refuted hypotheses are never deleted.
-- **(c)** Repeated failed steps, Sheldon vs plain memory, raw counts, at least 3 runs. Every run resets from one frozen `GRAPH.COPY`.
-- **Image:** `falkordb/falkordb:v4.22.1` (module `42201`). Never `latest` or `edge`. 4.x tags start with `v`. 6.x tags do not. To switch for a JS UDF, set the tag to `falkordb/falkordb:6.0.2` in `sheldon/schema.py`, `docker-compose.yml`, and `.github/workflows/ci.yml`, re-run `spikes/`, and put the new `MODULE LIST` version in `FALKORDB_MODULE_VERSION`.
+- **Scope** is p0–p4, the with/without eval, pr-ingest, the GitHub App check, provenance, and MCP preflight. Roadmap stays unbuilt: model allowlist, Stop hooks, hosted MCP, `sameAction` wiring, diff-scope evidence, falkordblite parity, A\*/CCH, Bolt, replication, `MULTI`/`EXEC`.
+- **W1, W2, R1** queries ran. Their Python functions are still to build.
+- **Image:** `falkordb/falkordb:v4.22.1` (module `42201`). Never `latest` or `edge`. 4.x tags start with `v`. 6.x tags do not. Do not switch images in a feature branch.
 
-Hypothesis status words are **not** locked. The working set is `open | supported | refuted` in `sheldon/schema.py`. Confirm it. Do not add another copy of the strings.
+Claim status in the plan is `open | confirmed | refuted`. `sheldon/schema.py` still has the older set. Confirm it in the schema PR. Do not add another copy of the strings.
 
 ## Engine facts
 
@@ -33,7 +49,9 @@ Not in the README, the pitch, or code comments:
 - "nobody else measures this"
 - "no competitor has GRAPH.COPY"
 - "reaching the task board is ours"
+- "revolutionary"
 - any speed number that has not been measured on our harness
+- any cost-saving number
 
 Also drop the list in [`docs/facts.md`](docs/facts.md) and [`docs/decisions/REPORT.md`](docs/decisions/REPORT.md) §5. Say "we measured" and "none we found".
 
@@ -41,16 +59,13 @@ Also drop the list in [`docs/facts.md`](docs/facts.md) and [`docs/decisions/REPO
 
 | Path | Owner | Contract |
 |---|---|---|
-| `sheldon/schema.py` | shared | The only status strings, labels, edge names, image pin |
-| `sheldon/memory/` | p1 | Append-only events. Prev derived inside the query |
-| `sheldon/retrieval/` | p2 | Bounded traversal and Q\* |
-| `sheldon/answers/` | p3 | Citations and abstention. Does not decide refutes |
-| `sheldon/coordination/` | p4 | Claim, lease, handoff, resume |
-| `sheldon/belief/` | lead (a)(b) | The refute write |
-| `sheldon/eval/` | eval | `GRAPH.COPY` reset and the repeated-step count |
+| `sheldon/schema.py` | Amaan | Status strings, labels, edge names, image pin. To build |
+| `sheldon/memory/`, `sheldon/pr/`, `sheldon/seed/` | Amaan | Ingest, pr-ingest, seed. To build |
+| `sheldon/retrieval/`, `sheldon/check/` | Akshat | S0, R1, check run. R1 query ran; wiring is to build |
+| `sheldon/gate/`, `sheldon/belief/`, `sheldon/evidence/`, `sheldon/provenance.py`, `sheldon/coordination/board.py` | Hariharan | W1, W2, W3, claim, lease. Queries ran for W1 and W2; functions are to build |
+| `sheldon/mcp/`, `sheldon/preflight.py`, `sheldon/capsule.py`, `sheldon/coordination/resume.py`, `sheldon/answers/`, `sheldon/eval/` | Satyansh | Retry block, resume, comment, eval. To build |
 | `queries/` | whoever owns the caller | One Cypher statement per file |
-| `spikes/` | whoever changes the image | P0 scripts. Not the test suite |
-| `docs/decisions/` | rarely | `REPORT.md`, `docs/facts.md`, and `docs/engine/papers.md` win |
+| `docs/plan/` | shared | Product scope. Read before the older design notes |
 
 Each of those folders has its own `AGENTS.md`. Read that one before editing.
 
@@ -74,8 +89,8 @@ Smoke test: module version is `42201`, and `GRAPH.COPY` of a one-node graph roun
 
 ## Docs
 
-[`docs/facts.md`](docs/facts.md), [`docs/decisions/REPORT.md`](docs/decisions/REPORT.md), and [`docs/engine/papers.md`](docs/engine/papers.md) override `docs/design/` and `docs/research/`. `papers.md` retires the personalized-PageRank design row: that procedure does not exist. Index: [`docs/README.md`](docs/README.md).
+[`docs/plan/`](docs/plan/README.md) wins on product scope and wording. [`docs/facts.md`](docs/facts.md), [`docs/decisions/REPORT.md`](docs/decisions/REPORT.md), and [`docs/engine/papers.md`](docs/engine/papers.md) still override `docs/design/` and `docs/research/` on engine limits. `papers.md` retires the personalized-PageRank design row: that procedure does not exist. Index: [`docs/README.md`](docs/README.md).
 
-Do not copy a quote from [`docs/research/pains.md`](docs/research/pains.md) into the README or any UI text until someone has opened that quote's link. The Reddit quotes were taken from an archive and have not been checked live.
+The five quotes the plan uses are in [`docs/plan/quotes.md`](docs/plan/quotes.md). Do not add others, and do not paste them into UI text.
 
 No Cursor rules. They would repeat this file.

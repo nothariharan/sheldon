@@ -1,5 +1,7 @@
 # tests
 
+How to run the suite, and what not to do to a test, is [`TESTING.md`](../TESTING.md).
+
 `pytest` is the suite CI runs, with FalkorDB from `docker-compose.yml` or the Actions service container.
 
 | File | Needs the engine | What it locks |

@@ -1,5 +1,7 @@
 # memory (p1)
 
+Status: to build. Not a working feature. Product scope is [`docs/plan/README.md`](../../docs/plan/README.md). Amaan owns this folder.
+
 Owns the append-only event chain and the schema apply.
 
 ## Contract

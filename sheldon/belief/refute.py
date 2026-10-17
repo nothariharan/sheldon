@@ -1,4 +1,8 @@
-"""The evidence gate. One atomic write. No LLM in the decision."""
+"""W2 refute plus stale cascade.
+
+Status: the W2 query ran on v4.22.1. This function is to build.
+It is not a working feature.
+"""
 
 # Flip to False in the PR that runs queries/refute_hypothesis.cypher.
 REFUTE_IS_STUB = True
@@ -11,11 +15,9 @@ def refute_hypothesis(
     agent_id: str,
     at_ms: int,
 ) -> bool:
-    """Return True only when every cited evidence id matched.
+    """To build. Return True when every cited evidence id matched.
 
-    A missing id returns False and changes nothing. The hypothesis is never
-    deleted. Dedupe ``evidence_ids`` before calling. Confidence and the
-    stale mark on dependent open tasks happen in the same write.
+    A missing id returns False and changes nothing. Nothing is deleted.
     """
     del graph, hypothesis_id, evidence_ids, agent_id, at_ms
     if REFUTE_IS_STUB:

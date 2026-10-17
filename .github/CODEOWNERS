@@ -1,0 +1,21 @@
+# Proposed owners. GitHub handles are unknown, so this file assigns nobody.
+# Akshat to confirm. Replace a comment with a real @handle before relying on review requests.
+#
+# /sheldon/schema.py                         proposed: Amaan
+# /sheldon/memory/                           proposed: Amaan
+# /sheldon/pr/                               proposed: Amaan
+# /sheldon/seed/                             proposed: Amaan
+# /tests/test_smoke.py                       proposed: Amaan
+# /sheldon/retrieval/                        proposed: Akshat
+# /sheldon/check/                            proposed: Akshat
+# /sheldon/gate/                             proposed: Hariharan
+# /sheldon/belief/                           proposed: Hariharan
+# /sheldon/evidence/                         proposed: Hariharan
+# /sheldon/provenance.py                     proposed: Hariharan
+# /sheldon/coordination/board.py             proposed: Hariharan
+# /sheldon/mcp/                              proposed: Satyansh
+# /sheldon/preflight.py                      proposed: Satyansh
+# /sheldon/capsule.py                        proposed: Satyansh
+# /sheldon/coordination/resume.py            proposed: Satyansh
+# /sheldon/answers/                          proposed: Satyansh
+# /sheldon/eval/                             proposed: Satyansh

@@ -1,5 +1,9 @@
 # queries
 
+W1, W2, and R1 queries ran outside this package. The files here are sketches until the owning row replaces them. A new statement is to build, not a working feature.
+
+
+
 Every Cypher statement the app runs lives in this folder, one file, one statement. `sheldon.cypher.load_query` reads the file, drops full-line `//` comments, and refuses a semicolon.
 
 Name the file after the operation (`refute_hypothesis.cypher`, `claim_task.cypher`). Pass values as parameters. Do not concatenate ids into the text.

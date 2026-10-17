@@ -1,4 +1,6 @@
-# belief (lead a and b)
+# belief (W2)
+
+Status: the W2 query ran. `refute_hypothesis` is to build and is not a working feature. Hariharan owns this folder. The statement that ran is in `docs/plan/deep.md`. The Cypher file here is the older sketch until that PR replaces it.
 
 Owns the refute. One file, one query.
 

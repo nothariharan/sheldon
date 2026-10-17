@@ -1,5 +1,7 @@
 # eval
 
+Status: to build. Not a working feature. Satyansh owns this folder. Write `docs/plan/eval-def.md` before any count.
+
 Owns the repeated-failed-steps count and the frozen-seed reset.
 
 ## Contract
@@ -13,4 +15,4 @@ Write the definition of "repeated failed step" in `docs/` before `count_repeated
 - The copy is a methods line. It is not a sandbox and not a novelty claim.
 - TIDE's published loop-ratio drop is from model scaling, not memory. Don't report it as our result.
 - Don't quote a copy-time or a query-time number unless this harness measured it.
-- `sameAction` as a JS UDF is optional and means switching the image to `6.0.2`. The fallback is Python. UDFs are read-only, so they don't belong in the refute write.
+- Wiring `sameAction` is roadmap. Do not change the image pin. The pinned image stays `falkordb/falkordb:v4.22.1`. UDFs are read-only, so they don't belong in the refute write.

@@ -145,11 +145,8 @@ def test_docs_say_what_wins() -> None:
         assert "facts.md" in text
         assert "papers.md" in text
         assert "override" in text
-    assert "pains.md" in agents
-    assert "opened" in agents
-    pains = (ROOT / "docs" / "research" / "pains.md").read_text(encoding="utf-8").lower()
-    assert "archive" in pains
-    assert "do not copy" in pains
+    assert "docs/plan" in agents
+    assert not (ROOT / "docs" / "research" / "pains.md").exists()
 
 
 def test_investigation_graph_key() -> None:
@@ -159,6 +156,22 @@ def test_investigation_graph_key() -> None:
     except ValueError:
         return
     raise AssertionError("bad investigation id was accepted")
+
+
+def test_stubs_are_not_described_as_working() -> None:
+    headline = (
+        "Sheldon blocks coding agents from retrying fixes that already failed, "
+        "and from calling work done without a real test run, from the first "
+        "edit to the merge, on one shared FalkorDB graph per repo."
+    )
+    for name in ("README.md", "AGENTS.md"):
+        assert headline in (ROOT / name).read_text(encoding="utf-8")
+    for path in (ROOT / "sheldon").rglob("*.py"):
+        text = path.read_text(encoding="utf-8")
+        if "NotImplementedError" not in text:
+            continue
+        lowered = text.lower()
+        assert "to build" in lowered or "roadmap" in lowered, path
 
 
 def test_hypothesis_status_is_the_chosen_set() -> None:
