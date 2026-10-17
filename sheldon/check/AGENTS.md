@@ -11,6 +11,10 @@ Akshat. Status: `decide_check`, `check_run_payload`, and the webhook are wired a
 - `neutral`: the PR is not in the graph yet (pr-ingest has not run).
 - `refuted` holds R1 rows with `REFUTED_BY`. They turn `comment` on and do not fail the check.
 
+## From a terminal
+
+`python -m sheldon.check --repo owner/name <pr> <head-sha> --evidence E-52` prints what the check would post, with no GitHub involved. `--json` prints the check-run payload. The exit code is 1 when the check fails. This is the demo's fallback when the webhook is not live.
+
 ## Webhook
 
 `python -m sheldon.check.server` serves `POST /webhook`. Set `SHELDON_WEBHOOK_SECRET`, `GITHUB_TOKEN`, and optionally `SHELDON_CHECK_MODE` and `SHELDON_PORT`. On a `pull_request` event (opened, reopened, synchronize, edited) it verifies `X-Hub-Signature-256`, calls pr-ingest with the PR's changed files, runs `decide_check`, and posts the result.
