@@ -1,6 +1,6 @@
 # check
 
-Akshat. Status: `decide_check` and `check_run_payload` are wired and tested on a fixture in `tests/check/test_check_run.py`. The GitHub App webhook and the HTTP post are to build. Neither has run on the seed (check-e2e row).
+Akshat. Status: `decide_check`, `check_run_payload`, and the webhook are wired and tested with fakes in `tests/check/`. The webhook waits on pr-ingest: the real `ingest_pull_request` still raises, so a live event fails loudly. Nothing here has run on the seed or against GitHub (check-e2e row).
 
 ## Contract
 
@@ -10,6 +10,15 @@ Akshat. Status: `decide_check` and `check_run_payload` are wired and tested on a
 - `success`: none of the above. A PR with no approval and nothing cited passes, so the check is silent by default.
 - `neutral`: the PR is not in the graph yet (pr-ingest has not run).
 - `refuted` holds R1 rows with `REFUTED_BY`. They turn `comment` on and do not fail the check.
+
+## Webhook
+
+`python -m sheldon.check.server` serves `POST /webhook`. Set `SHELDON_WEBHOOK_SECRET`, `GITHUB_TOKEN`, and optionally `SHELDON_CHECK_MODE` and `SHELDON_PORT`. On a `pull_request` event (opened, reopened, synchronize, edited) it verifies `X-Hub-Signature-256`, calls pr-ingest with the PR's changed files, runs `decide_check`, and posts the result.
+
+- `SHELDON_CHECK_MODE=check_run` (default) needs a GitHub App installation token. A personal access token cannot create check runs.
+- `SHELDON_CHECK_MODE=status` posts a commit status instead, which any token with status write access can do. `neutral` maps to `pending`.
+- Cited ids come only from `Evidence:` lines in the PR body (`Evidence: E-52, E-60`). An id mentioned in prose is not a citation.
+- The graph key is `sheldon:<owner>/<repo>` (`repo_graph`), from `docs/plan/deep.md` section 3.
 
 ## Gotchas
 
