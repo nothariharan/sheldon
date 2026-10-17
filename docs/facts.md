@@ -20,6 +20,7 @@
 - MIRIX is arXiv `2507.07957`, not `2501.02388`.
 - HippoRAG's figure is +38.6 points AR@5 on 2Wiki (37.1 → 75.7), not "+38.6%".
 - A vector `WHERE` after `YIELD` does run. It runs on the top-k only, so recall drops outside that window. Per-investigation graphs are a choice, not a requirement.
+- The 8.7% → 68.0% staleness figure is a published result from the cited paper, not Sheldon's own number. Always caption it that way.
 
 ## Claims never to write
 
@@ -33,4 +34,5 @@
 - "nobody else measures repeated steps"
 - personalized PageRank, or `algo.pageRank` described as personalized
 - TIDE's 15.8% → 1.0% loop-ratio drop as a memory effect (that drop is model scaling)
+- "IRCoT 4–6 round trips" — that figure isn't in the paper
 - the product name SynapseOS
