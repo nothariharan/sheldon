@@ -11,6 +11,7 @@ A claim or approval only lands if every evidence id it cites is a real executed 
 | [deep.md](deep.md) | Scope, stations, schema, wording. Source of truth. |
 | [work-split.md](work-split.md) | Proposed owners and order. Akshat to confirm. |
 | [quotes.md](quotes.md) | The five quotes this plan uses. No others. |
+| [demo.md](demo.md) | Draft 3-minute demo script, step by step, with the rows each step needs and its fallback. |
 
 ## Status words
 
