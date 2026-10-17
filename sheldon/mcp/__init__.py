@@ -1,4 +1,4 @@
-"""stdio MCP tools. Status: to build. Not a working feature."""
+"""stdio MCP tools. Status: built, except resume, which is to build."""
 
 from sheldon.mcp.server import call_tool
 

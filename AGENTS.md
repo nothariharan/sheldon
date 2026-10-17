@@ -63,7 +63,7 @@ Also drop the list in [`docs/facts.md`](docs/facts.md) and [`docs/decisions/REPO
 | `sheldon/memory/`, `sheldon/pr/`, `sheldon/seed/` | Amaan | Ingest, pr-ingest, seed. To build |
 | `sheldon/retrieval/`, `sheldon/check/` | Akshat | S0, R1, check run. R1 query ran; wiring is to build |
 | `sheldon/gate/`, `sheldon/belief/`, `sheldon/evidence/`, `sheldon/provenance.py`, `sheldon/coordination/board.py` | Hariharan | W1 `approve`, `record_run`, W2 `refute_claim`, W3 `claim_done`, and provenance `writes_with_provenance` are built. Claim and lease are built; `handoff_task` is partly built |
-| `sheldon/mcp/`, `sheldon/preflight.py`, `sheldon/capsule.py`, `sheldon/coordination/resume.py`, `sheldon/answers/`, `sheldon/eval/` | Satyansh | Retry block, resume, comment, eval. To build |
+| `sheldon/mcp/`, `sheldon/preflight.py`, `sheldon/capsule.py`, `sheldon/coordination/resume.py`, `sheldon/answers/`, `sheldon/eval/` | Satyansh | Retry block and MCP stdio server are built. Resume, comment, eval are to build |
 | `queries/` | whoever owns the caller | One Cypher statement per file |
 | `docs/plan/` | shared | Product scope. Read before the older design notes |
 
