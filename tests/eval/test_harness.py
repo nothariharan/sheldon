@@ -85,6 +85,24 @@ def test_count_repeated_failed_steps_detects_retried_actions(seeded_env: str) ->
     assert count_repeated_failed_steps(RUN_KEY) == 2
 
 
+def test_count_repeated_failed_steps_supports_hypothesis_label(seeded_env: str) -> None:
+    reset_from_seed(RUN_KEY, seed_graph=seeded_env)
+    db = connect()
+
+    # Create a refuted Hypothesis node rather than Claim
+    db.select_graph(RUN_KEY).query(
+        """
+        CREATE (e_fail:Evidence {id: 'E-hypo-fail', kind: 'test_run',
+                                 executed: true, exit_code: 1}),
+               (h:Hypothesis {id: 'H-hypo', status: 'refuted'})-[:REFUTED_BY]->(e_fail),
+               (act_prior:Action {id: 'ACT-hypo-prior', cmd: 'hypo cmd', fingerprint: 'hypo cmd'})
+                 -[:ATTEMPTED_FIX_FOR]->(h),
+               (act_retry:Action {id: 'ACT-hypo-retry', cmd: 'hypo cmd', fingerprint: 'hypo cmd'})
+        """
+    )
+    assert count_repeated_failed_steps(RUN_KEY) == 1
+
+
 def test_count_repeated_failed_steps_ignores_legitimate_alternatives(seeded_env: str) -> None:
     reset_from_seed(RUN_KEY, seed_graph=seeded_env)
     db = connect()
