@@ -23,8 +23,8 @@ Times are IST. Submission closes Sun 18 Oct 2026, 11:59 PM IST.
 | ingest | Amaan | to build | `sheldon/memory/` | schema | A git-log fixture writes `Developer-AUTHORED→Commit-MODIFIED→File` and `CO_CHANGED_WITH`. Two concurrent writes do not fork one chain. |
 | pr-ingest | Amaan | to build | `sheldon/pr/` | schema | A fixture diff writes `(:PR)-[:CHANGES]->(:File)` for that head sha. |
 | seed | Amaan | to build | `sheldon/seed/` | ingest | The frozen graph contains INC-12 and E-41. `GRAPH.COPY` of it resets a destination graph. |
-| s0 | Akshat | to build | `sheldon/retrieval/s0.py` | seed | Vector plus keyword, no traversal, run on the demo question. The recorded result is a miss. |
-| r1-recall | Akshat | query ran; wiring to build | `sheldon/retrieval/recall.py` | seed, pr-ingest | `recall` returns incident → claim → evidence rows for a `checkout/` file through `GRAPH.RO_QUERY` with a timeout. |
+| s0 | Akshat | keyword half wired; vector half waits on `EMBEDDING_DIM` | `sheldon/retrieval/s0.py` | seed | Vector plus keyword, no traversal, run on the demo question. The recorded result is a miss. |
+| r1-recall | Akshat | wired on a fixture; seed run to do | `sheldon/retrieval/recall.py` | seed, pr-ingest | `recall` returns incident → claim → evidence rows for a `checkout/` file through `GRAPH.RO_QUERY` with a timeout. |
 | w1-approve | Hariharan | query ran; wiring to build | `sheldon/gate/approve.py` | schema, seed | The call refuses missing, unexecuted, empty, duplicate, and wrong-sha ids. Valid ids create 1 `FOR` and 2 `CITES`. |
 | w2-cascade | Hariharan | query ran; wiring to build | `sheldon/belief/` | schema, seed | One call refutes C-7 and stales A-3 and T-9. A missing evidence id changes nothing. Nothing is deleted. `REFUTE_IS_STUB` is `False` and the refute race is not xfailed. |
 | w3-done | Hariharan | to build | `sheldon/gate/done.py` | w1-approve, evidence-run | A "done" claim with no passing executed `test_run` on the head sha returns no approval id. |

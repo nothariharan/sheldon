@@ -22,6 +22,10 @@ RUNNABLE: tuple[str, ...] = (
     "create_index_task_id",
     "create_index_hypothesis_id",
     "create_fulltext_event_text",
+    "recall_pr",
+    "s0_keyword",
+    "create_fulltext_incident_title",
+    "create_fulltext_claim_text",
 )
 
 # Present so the decision is visible, not yet a statement we should run.
