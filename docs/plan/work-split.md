@@ -2,6 +2,17 @@
 
 Proposed, Akshat to confirm. Written Sat 17 Oct 2026. Submission closes Sun 18 Oct 2026, 11:59 PM IST: repo plus a demo video.
 
+## Who does what
+
+Owners are proposed. Akshat confirms them. The owner of a unit owns its tests. Detail is in [`TASKS.md`](../../TASKS.md). How to run a test is in [`TESTING.md`](../../TESTING.md).
+
+| Person (proposed) | Units | Test files they own | First pickup |
+|---|---|---|---|
+| Akshat (lead) | S0, R1 recall, check run, CI workflow. Demo and submission are guesses. | `tests/retrieval/`, `tests/check/test_check_run.py`, `.github/workflows/ci.yml` | Confirm the split. Then S0. Then the check-run skeleton. |
+| Hariharan | W1, W3, W2, `sheldon run`, claim and lease, provenance. Public repo is a guess. | `tests/gate/`, `tests/belief/test_refute.py`, `tests/evidence/`, `tests/coordination/test_claim.py`, `tests/test_provenance.py` | W1, W3, and W2 wiring, plus provenance. The queries ran. The functions are to build. |
+| Amaan | Docker smoke test, schema, ingest, pr-ingest, seed, race tests. Package name is a guess. | `tests/test_smoke.py`, `tests/test_races.py`, `tests/schema/`, `tests/memory/`, `tests/pr/`, `tests/seed/` | `smoke-docker`, then schema and seed. |
+| Satyansh | Eval definition, with/without eval harness, preflight, capsule, resume, compose. | `tests/eval/` (at least 3 runs per arm, pass rate and tokens), `tests/test_preflight.py`, `tests/mcp/`, `tests/test_capsule.py`, `tests/coordination/test_resume.py`, `tests/answers/` | `eval-def` tonight, before any count. Then the preflight skeleton. |
+
 Core rows follow the build plan. Where a task had no owner yet, the name is a guess and the `TASKS.md` cell says so.
 
 ## Ground rules

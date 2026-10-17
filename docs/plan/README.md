@@ -2,9 +2,9 @@
 
 Read this before writing code. The product wording lives here, not in the older design notes.
 
-**Sheldon gates coding agents on one shared FalkorDB graph per repo, from the first edit to the merge.**
+**Sheldon blocks coding agents from retrying fixes that already failed, and from calling work done without a real test run, from the first edit to the merge, on one shared FalkorDB graph per repo.**
 
-A claim or approval lands when every evidence id it cites is a real executed run. Refuting evidence marks the claim refuted, and every approval and task that relied on it goes stale, in one atomic write. Nothing marks a claim stale. None we found blocks a coding agent from retrying a code fix refuted in the shared graph.
+A claim or approval only lands if every evidence id it cites is a real executed run. Refuting evidence marks the claim refuted, and every approval and task that relied on it goes stale, in one atomic write. Nothing marks a claim stale. None we found blocks a coding agent from retrying a code fix refuted in the shared graph.
 
 | File | What it is |
 |---|---|

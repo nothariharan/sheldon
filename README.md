@@ -1,12 +1,12 @@
 # Sheldon
 
-Sheldon gates coding agents on one shared FalkorDB graph per repo, from the first edit to the merge.
-
-A claim or approval lands if every evidence id it cites is a real executed run. Refuting evidence marks the claim refuted, and every approval and task that relied on it goes stale, in one atomic write. Nothing marks a claim stale. None we found blocks a coding agent from retrying a code fix refuted in the shared graph.
-
-Graph Hacks (WeMakeDevs × FalkorDB), Track 02 — Agent Memory and Coordination. Team SheldonAI.
+Sheldon blocks coding agents from retrying fixes that already failed, and from calling work done without a real test run, from the first edit to the merge, on one shared FalkorDB graph per repo.
 
 W1, W2, and R1 queries have run. Every other station in this tree is to build or roadmap. Stubs raise `NotImplementedError`. They are not working features.
+
+A claim or approval only lands if every evidence id it cites is a real executed run. Refuting evidence marks the claim refuted, and every approval and task that relied on it goes stale, in one atomic write. Nothing marks a claim stale. None we found blocks a coding agent from retrying a code fix refuted in the shared graph.
+
+Graph Hacks (WeMakeDevs × FalkorDB), Track 02 — Agent Memory and Coordination. Team SheldonAI.
 
 ## Start here
 
@@ -45,7 +45,7 @@ The database is on port 6379. FalkorDB Browser is on port 3000.
 
 ## Where to read
 
-People and coding agents start at [`docs/plan/README.md`](docs/plan/README.md). Work items are in [`TASKS.md`](TASKS.md). How to branch is in [`CONTRIBUTING.md`](CONTRIBUTING.md). Engine limits are in [`docs/facts.md`](docs/facts.md) and [`docs/engine/papers.md`](docs/engine/papers.md).
+People and coding agents start at [`docs/plan/README.md`](docs/plan/README.md). Work items are in [`TASKS.md`](TASKS.md). How to test is in [`TESTING.md`](TESTING.md). How to branch is in [`CONTRIBUTING.md`](CONTRIBUTING.md). Engine limits are in [`docs/facts.md`](docs/facts.md) and [`docs/engine/papers.md`](docs/engine/papers.md).
 
 ## What is in scope
 

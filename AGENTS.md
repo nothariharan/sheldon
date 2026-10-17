@@ -1,6 +1,6 @@
 # Sheldon
 
-Sheldon gates coding agents on one shared FalkorDB graph per repo, from the first edit to the merge.
+Sheldon blocks coding agents from retrying fixes that already failed, and from calling work done without a real test run, from the first edit to the merge, on one shared FalkorDB graph per repo.
 
 Read [`docs/plan/README.md`](docs/plan/README.md) first. Product scope and wording are that plan. W1 (evidence gate), W2 (refute plus stale cascade), and R1 (PR-time recall) are the only queries that have run. Every other station is **to build** or **roadmap**. A stub that raises `NotImplementedError` is not a working feature.
 
@@ -20,7 +20,7 @@ Windows (one teammate is on Windows):
 powershell -File scripts/setup.ps1
 ```
 
-The Windows interpreter is `.venv\Scripts\python.exe`. Linux uses `.venv/bin/python`. Then run `pytest` and `ruff check sheldon tests`.
+The Windows interpreter is `.venv\Scripts\python.exe`. Linux uses `.venv/bin/python`. Then follow [`TESTING.md`](TESTING.md): `ruff check sheldon tests`, `pytest`, and the smoke test against the pinned image. Paste that output in the PR. Do not mark a row done without it.
 
 ## Locked
 
