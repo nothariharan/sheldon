@@ -50,19 +50,19 @@ The following concrete examples illustrate the 7 cases mapped to the demo seed g
 * **Candidate Input:** `command = "edit checkout/cache.py"`, `paths = ["checkout/cache.py"]`.
 * **Historical Context:** `INC-12` touched `checkout/session.py` (which co-changes with `checkout/cache.py`). Claim `C-5` ("Raising the cache TTL to 600s fixes the checkout timeout") is marked `status: 'refuted'`. Evidence `E-41` is an executed CI run (`exit_code: 1`). Action `ACT-1` has `fingerprint: "edit checkout/cache.py"`.
 * **Classification:** **Repeated Failed Step (`block`)**.
-* **Reason Emitted:** `"blocked: refuted by E-41; this edit repeats the cache-TTL fix tried for INC-12; E-41 (CI run) refuted it"`.
+* **Reason to emit (preflight is to build):** `"blocked: refuted by E-41; this edit repeats the cache-TTL fix tried for INC-12; E-41 (CI run) refuted it"`.
 
 ### Sample 2: Syntactic Variant of Refuted Fix (Case 2)
 * **Candidate Input:** `command = "edit   ./checkout/cache.py"`, `paths = ["./checkout/cache.py"]`.
 * **Normalization:** Canonical relative path becomes `"checkout/cache.py"`; normalized command becomes `"edit checkout/cache.py"`.
 * **Classification:** **Repeated Failed Step (`block`)**.
-* **Reason Emitted:** Matched to `ACT-1` and `C-5`, citing `E-41`.
+* **Reason to emit (preflight is to build):** Matched to `ACT-1` and `C-5`, citing `E-41`.
 
 ### Sample 3: Legitimate Alternative on Same File (Case 3)
 * **Candidate Input:** `command = "refactor checkout/cache.py"`, `paths = ["checkout/cache.py"]`.
 * **Historical Context:** Touched file `checkout/cache.py` is associated with `INC-12`, but the command does not match `ACT-1`'s TTL modification.
 * **Classification:** **Legitimate Alternative (`warn`)**.
-* **Reason Emitted:** Permitted with informational advisory: `"checkout/cache.py was touched in INC-12; verified alternative attempt"`.
+* **Reason to emit (preflight is to build):** Permitted with informational advisory: `"checkout/cache.py was touched in INC-12; verified alternative attempt"`.
 
 ### Sample 4: Changed Conditions / Manual Override (Case 4)
 * **Candidate Input:** `command = "edit checkout/cache.py"`, `paths = ["checkout/cache.py"]`, with flag `--override` or environment variable `SHELDON_PREFLIGHT_OVERRIDE=1`.
@@ -83,27 +83,27 @@ The following concrete examples illustrate the 7 cases mapped to the demo seed g
 ### Sample 7: Missing Metadata / Database Outage (Case 7)
 * **Candidate Input:** Any action when FalkorDB times out or is unreachable.
 * **Classification:** **Fail-Open Advisory (`warn`)**.
-* **Reason Emitted:** System emits warning on stderr and allows action (exit code 0) so local agent sessions do not freeze.
+* **Reason to emit (preflight is to build):** System emits warning on stderr and allows action (exit code 0) so local agent sessions do not freeze.
 
 ---
 
-## 4. Automation Architecture
+## 4. What to automate (to build)
 
-Automation is split cleanly across the query, decision, and hook layers:
+Automation will be split across the query, decision, and hook layers:
 
 1. **Fingerprint Normalization (`sheldon/preflight.py`):**
-   - Canonicalizes file paths relative to the repository root via `canonicalize_paths(paths, repo_root)`. Rejects traversal outside repository root.
-   - Normalizes whitespace in commands via `normalize_command(command)`.
-   - Computes deterministic action fingerprint via `compute_action_fingerprint(command, paths, repo_root)`.
+   - to build: `sheldon/preflight.py` will canonicalize file paths relative to the repository root via `canonicalize_paths(paths, repo_root)` and reject traversal outside the repository root.
+   - to build: `normalize_command(command)` will normalize whitespace in commands.
+   - to build: `compute_action_fingerprint(command, paths, repo_root)` will compute a deterministic syntactic action fingerprint.
 2. **Query Layer (`queries/preflight_r2.cypher`):**
-   - Evaluates whether the fingerprint matches an action linked to a refuted claim backed by executed non-zero evidence (`executed = true AND exit_code != 0`).
-   - Identifies whether touched file paths intersect past incidents.
-   - Enforces `timeout_ms = 1000` via `GRAPH.RO_QUERY`.
+   - to build: `queries/preflight_r2.cypher` will evaluate whether an action fingerprint matches an action linked to a refuted claim backed by executed non-zero evidence (`executed = true AND exit_code != 0`).
+   - to build: the query will identify whether touched file paths intersect past incidents.
+   - to build: the query will enforce `timeout_ms = 1000` via `GRAPH.RO_QUERY`.
 3. **Decision Layer (`sheldon.preflight.decide_preflight`):**
-   - Maps query results into `ok`, `warn`, or `block` with cited evidence IDs and incident IDs.
+   - to build: `decide_preflight` will map query results into `ok`, `warn`, or `block` with cited evidence IDs and incident IDs.
 4. **Hook Integration Layer (`sheldon/preflight.py` CLI):**
-   - Reads Claude Code `PreToolUse` JSON payload from stdin.
-   - Exits code `2` on `block` with explanatory text on stderr; exits code `0` on `ok` and `warn`.
+   - to build: the CLI hook will read Claude Code `PreToolUse` JSON payloads from stdin.
+   - to build: the hook will exit code `2` on `block` with explanatory text on stderr, and exit code `0` on `ok` and `warn`.
 
 ---
 

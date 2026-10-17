@@ -97,10 +97,7 @@ def classify_attempt(
             if (
                 claim.get("status") == "refuted"
                 and evidence.get("executed") is True
-                and (
-                    evidence.get("exit_code") != 0
-                    or evidence.get("kind") in ("ci_run", "test_run")
-                )
+                and evidence.get("exit_code") not in (None, 0)
             ):
                 refuted_evidence_ids.append(evidence.get("id"))
 
@@ -286,3 +283,24 @@ def test_case_7_db_outage_fails_open() -> None:
     )
     assert decision == ActionDecision.FAIL_OPEN
     assert "bypassed" in reason.lower()
+
+
+def test_executed_run_with_exit_code_zero_does_not_block() -> None:
+    passing_action = {
+        "id": "ACT-PASS",
+        "fingerprint": "edit checkout/cache.py",
+        "claim": {"id": "C-5", "status": "refuted"},
+        "evidence": {
+            "id": "E-PASS",
+            "kind": "test_run",
+            "executed": True,
+            "exit_code": 0,
+        },
+    }
+    decision, _, ev_ids = classify_attempt(
+        command="edit checkout/cache.py",
+        paths=["checkout/cache.py"],
+        historical_actions=[passing_action],
+    )
+    assert decision != ActionDecision.BLOCK
+    assert ev_ids == []
