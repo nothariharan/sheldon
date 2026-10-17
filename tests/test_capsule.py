@@ -98,3 +98,21 @@ def test_capsule_budget_preserves_whole_evidence_ids(seed_graph: str) -> None:
 def test_capsule_missing_task_raises_key_error(seed_graph: str) -> None:
     with pytest.raises(KeyError, match="task 'T-999' not found"):
         capsule(seed_graph, "T-999")
+
+
+def test_capsule_clean_task_has_no_donot_directives(seed_graph: str) -> None:
+    connect().select_graph(seed_graph).query(
+        "CREATE (:Task {id: 'T-clean', title: 'Clean new task'})"
+    )
+    text = capsule(seed_graph, "T-clean")
+    assert "T-clean (Clean new task)" in text
+    assert "sheldon run -- pytest" in text
+    assert "Do-Not Directives" not in text
+
+
+def test_capsule_supports_explicit_db(seed_graph: str) -> None:
+    client = connect()
+    text = capsule(seed_graph, "T-9", db=client)
+    assert "sheldon run -- pytest" in text
+    assert "E-41" in text
+

@@ -4,6 +4,8 @@ Status: built. Generates task capsule with proving command and do-not directives
 from touching refuted attempts, constrained to a token/character budget.
 """
 
+from typing import Any
+
 from sheldon.db import read
 from sheldon.schema import HypothesisStatus
 
@@ -11,7 +13,12 @@ DEFAULT_PROVING_COMMAND = "sheldon run -- pytest"
 DEFAULT_MAX_CHARS = 1200
 
 
-def capsule(graph: str, task_id: str, max_chars: int = DEFAULT_MAX_CHARS) -> str:
+def capsule(
+    graph: str,
+    task_id: str,
+    max_chars: int = DEFAULT_MAX_CHARS,
+    db: Any = None,
+) -> str:
     """Return task context with proving command and do-not directives from refuted attempts.
 
     Refuted attempts and evidence ids are never truncated mid-string. If an entry does not fit
@@ -22,7 +29,7 @@ def capsule(graph: str, task_id: str, max_chars: int = DEFAULT_MAX_CHARS) -> str
         "refuted": HypothesisStatus.REFUTED.value,
     }
 
-    rows = read(graph, "capsule_task", params)
+    rows = read(graph, "capsule_task", params, db=db)
     if not rows:
         raise KeyError(f"task {task_id!r} not found in {graph}")
 
