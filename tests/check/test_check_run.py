@@ -7,6 +7,7 @@ sha. PR 8 is clean. The check-e2e row reruns this on the real seed.
 
 import pytest
 
+from sheldon.belief.refute import refute_claim
 from sheldon.check import check_run_payload, decide_check
 from sheldon.check.webhook import handle_event
 from sheldon.db import connect
@@ -217,8 +218,6 @@ def test_e2e_citing_a_real_run_on_the_head_sha_turns_it_green(take: str) -> None
 
 
 def test_e2e_after_w2_refutes_c7_the_approval_is_reported_stale(take: str) -> None:
-    from sheldon.belief.refute import refute_claim
-
     assert refute_claim(take, "C-7", ["E-60"], "ci", "ci", "CI-60")
     github = _GitHub()
     handle_event("pull_request", _pr7("Evidence: E-31"), github, lambda _: take)
