@@ -1,6 +1,6 @@
 # eval
 
-Status: built. Satyansh owns this folder.
+Status: reset and repeated-step count built; paired runs to build. Report no number from it. Satyansh owns this folder.
 
 Owns the repeated-failed-steps count and the frozen-seed reset.
 

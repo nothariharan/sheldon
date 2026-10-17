@@ -1,6 +1,9 @@
 """With/without eval.
 
-Status: built. Reset runs from frozen seed and count repeated failed steps.
+Status: reset and repeated-step count built; paired runs to build.
+Reset runs from frozen seed and count repeated failed steps.
+simulate_retry_block is a scripted dry run where repeated step counts come
+from the graph; pass and token values are not measured.
 """
 
 from typing import Any
@@ -78,49 +81,50 @@ def format_eval_table(report: dict[str, Any]) -> str:
     wording = report["wording"]
 
     header = (
-        "| Arm | Runs | Pass Rate | Repeated Failed Steps (Mean [Min, Max]) | "
-        "Total Tokens (Mean [Min, Max]) | Quality Framing |"
+        "| Arm | Runs | Repeated Failed Steps (Mean [Min, Max]) | Quality Framing |"
     )
     s0_steps = (
         f"{s0['repeated_steps_mean']:.1f} "
         f"[{s0['repeated_steps_min']}, {s0['repeated_steps_max']}]"
     )
-    s0_tokens = f"{s0['tokens_mean']:.0f} [{s0['tokens_min']}, {s0['tokens_max']}]"
     s3_steps = (
         f"{s3['repeated_steps_mean']:.1f} "
         f"[{s3['repeated_steps_min']}, {s3['repeated_steps_max']}]"
     )
-    s3_tokens = f"{s3['tokens_mean']:.0f} [{s3['tokens_min']}, {s3['tokens_max']}]"
 
     lines = [
+        "Scripted dry run: pass and token values are not measured; "
+        "repeated step counts come from the graph.",
+        "",
         header,
-        "|---|---|---|---|---|---|",
+        "|---|---|---|---|",
         (
-            f"| **S0 (Baseline)** | {len(s0['runs'])} | {s0['pass_rate']:.1%} | "
-            f"{s0_steps} | {s0_tokens} | Baseline |"
+            f"| **S0 (Baseline)** | {len(s0['runs'])} | "
+            f"{s0_steps} | Baseline |"
         ),
         (
-            f"| **S3 (Sheldon Full)** | {len(s3['runs'])} | {s3['pass_rate']:.1%} | "
-            f"{s3_steps} | {s3_tokens} | {wording} |"
+            f"| **S3 (Sheldon Full)** | {len(s3['runs'])} | "
+            f"{s3_steps} | {wording} |"
         ),
     ]
     return "\n".join(lines)
 
 
-def run_paired_eval(
+def simulate_retry_block(
     seed_graph: str = EVAL_SEED_GRAPH,
     runs_per_arm: int = 3,
+    n_tasks: int = 1,
     db: Any = None,
 ) -> dict[str, Any]:
-    """Execute paired evaluation across at least 3 runs per arm.
+    """Execute dry-run simulation of retry block across at least 3 runs per arm.
 
     Arms:
     - S0: Baseline memory without PreToolUse retry block. Retries historically refuted fixes.
     - S3: Sheldon system with PreToolUse retry block intercepting refuted actions.
 
-    Returns raw counts, spreads, pass rates, and formatted markdown table.
-    Enforces the rule that wording stays 'safer at the same quality' unless
-    the pass-rate margin beats a 1-task gap.
+    Repeated failed step counts are measured directly from the graph via
+    ``count_repeated_failed_steps``. Pass rates and token totals are left out
+    until real agent runs are wired.
     """
     if runs_per_arm < 3:
         raise ValueError(
@@ -140,11 +144,6 @@ def run_paired_eval(
     s0_results: list[dict[str, Any]] = []
     s3_results: list[dict[str, Any]] = []
 
-    # Token simulation baselines: S0 spends tokens executing repeated failed steps;
-    # S3 avoids wasted execution loops through immediate preflight block.
-    base_tokens_s0 = 4200
-    base_tokens_s3 = 3100
-
     # Execute Arm S0 (Baseline)
     for r in range(1, runs_per_arm + 1):
         graph_key = f"eval_s0_run_{r}"
@@ -163,15 +162,9 @@ def run_paired_eval(
         )
 
         repeated_count = count_repeated_failed_steps(graph_key, db=client)
-        # S0 fails the checkout timeout task because it repeatedly applies the refuted TTL fix
-        passed = False
-        tokens = base_tokens_s0 + (r * 120)
-
         s0_results.append({
             "run": r,
-            "passed": passed,
             "repeated_failed_steps": repeated_count,
-            "tokens": tokens,
         })
         try:
             client.select_graph(graph_key).delete()
@@ -196,15 +189,9 @@ def run_paired_eval(
             raise AssertionError(f"Expected preflight block in S3 run {r}, got {decision}")
 
         repeated_count = count_repeated_failed_steps(graph_key, db=client)
-        # S3 prevents retry, pivots to valid sharding fix, proving command passes
-        passed = True
-        tokens = base_tokens_s3 + (r * 80)
-
         s3_results.append({
             "run": r,
-            "passed": passed,
             "repeated_failed_steps": repeated_count,
-            "tokens": tokens,
         })
         try:
             client.select_graph(graph_key).delete()
@@ -213,38 +200,34 @@ def run_paired_eval(
 
     def _stats(runs: list[dict[str, Any]]) -> dict[str, Any]:
         n = len(runs)
-        pass_count = sum(1 for x in runs if x["passed"])
         repeated_list = [x["repeated_failed_steps"] for x in runs]
-        tokens_list = [x["tokens"] for x in runs]
 
         return {
             "runs": runs,
-            "pass_rate": pass_count / n,
             "repeated_steps_mean": sum(repeated_list) / n,
             "repeated_steps_min": min(repeated_list),
             "repeated_steps_max": max(repeated_list),
-            "tokens_mean": sum(tokens_list) / n,
-            "tokens_min": min(tokens_list),
-            "tokens_max": max(tokens_list),
         }
 
     s0_stats = _stats(s0_results)
     s3_stats = _stats(s3_results)
 
-    # Wording stays 'safer at the same quality' unless margin beats a 1-task gap (1.0 / n_tasks)
-    # On a 1-task benchmark, beating a 1-task gap requires margin > 1.0 (impossible on N=1),
-    # so wording strictly stays 'safer at the same quality'.
-    margin = s3_stats["pass_rate"] - s0_stats["pass_rate"]
-    if margin > 1.0:
-        wording = "smarter"
-    else:
-        wording = "safer at the same quality"
+    # Wording stays 'safer at the same quality' unless margin beats a 1-task gap (1 / n_tasks).
+    # Since pass rates are unmeasured in dry run, quality framing stays default.
+    wording = "safer at the same quality"
 
     report = {
         "runs_per_arm": runs_per_arm,
+        "n_tasks": n_tasks,
         "s0": s0_stats,
         "s3": s3_stats,
         "wording": wording,
     }
     report["table"] = format_eval_table(report)
     return report
+
+
+# Aliases for backwards compatibility and script callers
+run_paired_eval = simulate_retry_block
+dry_run_paired_eval = simulate_retry_block
+

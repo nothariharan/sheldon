@@ -15,8 +15,10 @@ import pytest
 from sheldon.db import connect, read
 from sheldon.eval.harness import (
     count_repeated_failed_steps,
+    dry_run_paired_eval,
     reset_from_seed,
     run_paired_eval,
+    simulate_retry_block,
 )
 from sheldon.seed import load_seed
 
@@ -181,16 +183,19 @@ def test_run_paired_eval_executes_protocol_and_formats_table(seeded_env: str) ->
     assert s3["repeated_steps_min"] == 0
     assert s3["repeated_steps_max"] == 0
 
-    # Pass rates
-    assert s0["pass_rate"] == 0.0
-    assert s3["pass_rate"] == 1.0
-
     # Wording strictly follows constraint: "safer at the same quality"
     assert report["wording"] == "safer at the same quality"
 
-    # Formatted table checks
+    # Formatted table checks: labels scripted dry run and omits unmeasured pass/tokens
     table = report["table"]
-    assert "| Arm | Runs | Pass Rate | Repeated Failed Steps" in table
+    assert "Scripted dry run: pass and token values are not measured" in table
+    assert "| Arm | Runs | Repeated Failed Steps" in table
     assert "S0 (Baseline)" in table
     assert "S3 (Sheldon Full)" in table
     assert "safer at the same quality" in table
+
+
+def test_simulate_retry_block_alias(seeded_env: str) -> None:
+    rep1 = simulate_retry_block(seed_graph=seeded_env, runs_per_arm=3)
+    rep2 = dry_run_paired_eval(seed_graph=seeded_env, runs_per_arm=3)
+    assert rep1["s0"]["repeated_steps_mean"] == rep2["s0"]["repeated_steps_mean"]
