@@ -25,7 +25,7 @@ The Windows interpreter is `.venv\Scripts\python.exe`. Linux uses `.venv/bin/pyt
 ## Locked
 
 - **Scope** is p0–p4, the with/without eval, pr-ingest, the GitHub App check, provenance, and MCP preflight. Roadmap stays unbuilt: model allowlist, Stop hooks, hosted MCP, `sameAction` wiring, diff-scope evidence, falkordblite parity, A\*/CCH, Bolt, replication, `MULTI`/`EXEC`.
-- **W1, W2, R1** queries ran. Their Python functions are still to build.
+- **W1** `approve` is built. **W2** query ran; its function is still to build. **R1** query ran; recall wiring is on a fixture.
 - **Image:** `falkordb/falkordb:v4.22.1` (module `42201`). Never `latest` or `edge`. 4.x tags start with `v`. 6.x tags do not. Do not switch images in a feature branch.
 
 Claim status in the plan is `open | confirmed | refuted`. `sheldon/schema.py` still has the older set. Confirm it in the schema PR. Do not add another copy of the strings.
@@ -62,7 +62,7 @@ Also drop the list in [`docs/facts.md`](docs/facts.md) and [`docs/decisions/REPO
 | `sheldon/schema.py` | Amaan | Status strings, labels, edge names, image pin. To build |
 | `sheldon/memory/`, `sheldon/pr/`, `sheldon/seed/` | Amaan | Ingest, pr-ingest, seed. To build |
 | `sheldon/retrieval/`, `sheldon/check/` | Akshat | S0, R1, check run. R1 query ran; wiring is to build |
-| `sheldon/gate/`, `sheldon/belief/`, `sheldon/evidence/`, `sheldon/provenance.py`, `sheldon/coordination/board.py` | Hariharan | W1, W2, W3, claim, lease. Queries ran for W1 and W2; functions are to build |
+| `sheldon/gate/`, `sheldon/belief/`, `sheldon/evidence/`, `sheldon/provenance.py`, `sheldon/coordination/board.py` | Hariharan | W1 `approve` and `record_run` are built. W2 query ran; its function is still to build. W3, claim, and lease are to build |
 | `sheldon/mcp/`, `sheldon/preflight.py`, `sheldon/capsule.py`, `sheldon/coordination/resume.py`, `sheldon/answers/`, `sheldon/eval/` | Satyansh | Retry block, resume, comment, eval. To build |
 | `queries/` | whoever owns the caller | One Cypher statement per file |
 | `docs/plan/` | shared | Product scope. Read before the older design notes |
