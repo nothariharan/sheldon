@@ -6,6 +6,8 @@ Does not decide gate or mutate graph beliefs.
 
 from typing import Any
 
+from sheldon.schema import REFUTED_BY, SUPPORTED_BY, HypothesisStatus
+
 COMPOSE_IS_STUB = False
 
 
@@ -57,6 +59,7 @@ def compose(graph: str, question: str, evidence: list[dict[str, Any]]) -> dict[s
                     "title": row.get("title") or inc_id,
                     "refuted": [],
                     "supported": [],
+                    "open": [],
                     "files": set(),
                 }
             if f:
@@ -67,10 +70,13 @@ def compose(graph: str, question: str, evidence: list[dict[str, Any]]) -> dict[s
             status = (row.get("status") or "").lower()
             rel = (row.get("relation") or "").upper()
             pair = (claim_id, ev_id)
-            if status == "refuted" or rel == "REFUTED_BY":
+            if status == HypothesisStatus.REFUTED.value or rel == REFUTED_BY:
                 if pair not in incidents[inc_id]["refuted"]:
                     incidents[inc_id]["refuted"].append(pair)
-            elif rel == "SUPPORTED_BY" or status in ("supported", "open"):
+            elif status == HypothesisStatus.OPEN.value:
+                if pair not in incidents[inc_id]["open"]:
+                    incidents[inc_id]["open"].append(pair)
+            elif status == HypothesisStatus.SUPPORTED.value or rel == SUPPORTED_BY:
                 if pair not in incidents[inc_id]["supported"]:
                     incidents[inc_id]["supported"].append(pair)
 
@@ -97,6 +103,12 @@ def compose(graph: str, question: str, evidence: list[dict[str, Any]]) -> dict[s
                 details.append(f"fix {cid} was refuted by evidence {eid}")
             elif cid:
                 details.append(f"fix {cid} was refuted")
+
+        for cid, eid in inc_info["open"]:
+            if cid and eid:
+                details.append(f"claim {cid} is open (evidence {eid})")
+            elif cid:
+                details.append(f"claim {cid} is open")
 
         for cid, eid in inc_info["supported"]:
             if cid and eid:

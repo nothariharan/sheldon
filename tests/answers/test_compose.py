@@ -168,3 +168,45 @@ def test_compose_deduplicates_repeated_findings() -> None:
     assert result["citations"] == ["INC-12", "C-5", "E-41"]
     assert result["answer"].count("fix C-5 was refuted by evidence E-41") == 1
 
+
+def test_compose_open_claim_not_reported_as_supported() -> None:
+    open_bundle = [
+        {
+            "file": "checkout/session.py",
+            "via": "checkout/session.py",
+            "incident": "INC-12",
+            "title": "Checkout timeout",
+            "claim": "C-7",
+            "kind": "root_cause",
+            "status": "open",
+            "relation": "SUPPORTED_BY",
+            "evidence": "E-30",
+        }
+    ]
+    result = compose("graph", "Check open claim", open_bundle)
+    assert result["abstained"] is False
+    assert "C-7" in result["citations"]
+    assert "E-30" in result["citations"]
+    assert "claim C-7 is open (evidence E-30)" in result["answer"]
+    assert "supported" not in result["answer"].lower()
+
+
+def test_compose_supported_claim_reported_as_supported() -> None:
+    supported_bundle = [
+        {
+            "file": "checkout/session.py",
+            "via": "checkout/session.py",
+            "incident": "INC-12",
+            "title": "Checkout timeout",
+            "claim": "C-7",
+            "kind": "root_cause",
+            "status": "supported",
+            "relation": "SUPPORTED_BY",
+            "evidence": "E-30",
+        }
+    ]
+    result = compose("graph", "Check supported claim", supported_bundle)
+    assert result["abstained"] is False
+    assert "claim C-7 is supported by evidence E-30" in result["answer"]
+
+
