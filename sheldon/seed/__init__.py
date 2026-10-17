@@ -1,5 +1,5 @@
-"""Frozen demo seed. Status: to build. Not a working feature."""
+"""Frozen demo seed. Status: wired and tested."""
 
-from sheldon.seed.snapshot import load_seed
+from sheldon.seed.snapshot import copy_graph, load_seed
 
-__all__ = ["load_seed"]
+__all__ = ["copy_graph", "load_seed"]

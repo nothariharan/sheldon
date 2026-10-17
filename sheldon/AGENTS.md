@@ -8,7 +8,7 @@ Product scope is [`docs/plan/README.md`](../docs/plan/README.md). Every function
 |---|---|---|---|
 | `memory.ingest` | `record_event` | to build | Amaan |
 | `pr.ingest` | `ingest_pull_request` | wired and tested | Amaan |
-| `seed.snapshot` | `load_seed` | to build | Amaan |
+| `seed.snapshot` | `load_seed`, `copy_graph` | wired and tested | Amaan |
 | `retrieval.s0` | `s0` | keyword half wired on a fixture; vector half waits on `EMBEDDING_DIM` | Akshat |
 | `retrieval.recall` | `recall` | wired on a fixture; waits on pr-ingest and the seed for real data | Akshat |
 | `retrieval.read` | `retrieve`, `q_star` | to build | Akshat |
