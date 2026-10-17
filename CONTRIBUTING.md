@@ -19,9 +19,12 @@ Setup for Linux and Windows is in the README section "Start here". One branch pe
 
 ## Checks
 
+Follow [`TESTING.md`](TESTING.md). Paste the output in the PR. Do not mark a row done without that run.
+
 ```bash
 ruff check sheldon tests
 pytest
+pytest tests/test_smoke.py
 ```
 
 `pytest` includes the smoke test, so FalkorDB has to be up (`./scripts/setup.sh`). The claim race and the missing-evidence refute race are expected failures until `CLAIM_IS_STUB` and `REFUTE_IS_STUB` are set to `False`. The PR that implements either write flips that flag and deletes the `NotImplementedError`. CI then fails if the race is wrong.

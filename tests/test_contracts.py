@@ -160,8 +160,9 @@ def test_investigation_graph_key() -> None:
 
 def test_stubs_are_not_described_as_working() -> None:
     headline = (
-        "Sheldon gates coding agents on one shared FalkorDB graph per repo, "
-        "from the first edit to the merge."
+        "Sheldon blocks coding agents from retrying fixes that already failed, "
+        "and from calling work done without a real test run, from the first "
+        "edit to the merge, on one shared FalkorDB graph per repo."
     )
     for name in ("README.md", "AGENTS.md"):
         assert headline in (ROOT / name).read_text(encoding="utf-8")

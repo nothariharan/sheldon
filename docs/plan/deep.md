@@ -8,9 +8,9 @@ The short index is [README.md](README.md). Owners and times are [work-split.md](
 
 ## 0. Headline
 
-Sheldon gates coding agents on one shared FalkorDB graph per repo, from the first edit to the merge.
+Sheldon blocks coding agents from retrying fixes that already failed, and from calling work done without a real test run, from the first edit to the merge, on one shared FalkorDB graph per repo.
 
-A claim or approval lands when every evidence id it cites is a real executed run. Refuting evidence marks the claim refuted, and every approval and task that relied on it goes stale, in one atomic write. Nothing marks a claim stale. None we found blocks a coding agent from retrying a code fix refuted in the shared graph.
+A claim or approval only lands if every evidence id it cites is a real executed run. Refuting evidence marks the claim refuted, and every approval and task that relied on it goes stale, in one atomic write. Nothing marks a claim stale. None we found blocks a coding agent from retrying a code fix refuted in the shared graph.
 
 Memory is how, not what. The three mechanisms need the graph to remember what failed, what was claimed, and what relied on what, across agents, sessions, and PRs. That memory is the mechanism. It is not the headline.
 
@@ -18,7 +18,7 @@ Memory is how, not what. The three mechanisms need the graph to remember what fa
 
 **Retry block.** Before an agent edits a file or runs a command, a preflight asks whether this action repeats a fix that executed evidence already refuted. If it does, the action is blocked and the reason is the refuting evidence id (`blocked: refuted by E-41`). Narrower retry blocks exist in other domains, so the claim stays at this wording: none we found blocks a coding agent from retrying a code fix refuted in the shared graph.
 
-**Evidence gate.** A claim ("done", "fixed", "root cause is X") or an approval lands if every evidence id it cites is a run that actually executed on that commit. A model can cite evidence. It cannot create it. Trusted producers (`sheldon run`, CI webhooks) write Evidence nodes. None we found requires every cited evidence id to be an executed run for a claim or an approval to land on a shared multi-agent graph.
+**Evidence gate.** A claim ("done", "fixed", "root cause is X") or an approval lands only if every evidence id it cites is a run that actually executed on that commit. A model can cite evidence. It cannot create it. Trusted producers (`sheldon run`, CI webhooks) write Evidence nodes. None we found requires every cited evidence id to be an executed run for a claim or an approval to land on a shared multi-agent graph.
 
 **One-write refute plus stale cascade.** When executed evidence refutes a claim, one Cypher statement marks the claim refuted and every approval and task that relied on it (up to 3 hops) stale. Nothing is deleted. Claims are refuted, never stale. Pushing corrections to dependents is common. Doing it in one atomic write that reaches code-merge approvals is the part none we found does.
 
@@ -186,7 +186,7 @@ Write the definition of a repeated failed step before any count is quoted. MAST-
 
 The run: same tasks, same model, at least 3 runs per arm, each reset from one frozen `GRAPH.COPY`. Report pass rate on hidden checks, total tokens, blocked no-run claims, breakage, and refuted-fix retries, with the spread. A 1-task gap is noise. Default wording stays "safer at the same quality". Lower breakage counts when pass rate holds. A gate that blocks everything scores zero breakage and is not a win.
 
-Published motivation, not a Sheldon result: STALE / CUPMem (arXiv 2605.06527) reports gpt-4o-mini 8.7% → 68.0% on the authors' own benchmark. Caption it as their number.
+Published motivation, not a Sheldon result: STALE / CUPMem (arXiv 2605.06527) reports gpt-4o-mini 8.7% → 68.0% with write-time adjudication plus propagation-aware search, on the authors' own benchmark. Caption it as their number.
 
 ## 7. Honest limits
 

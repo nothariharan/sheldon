@@ -1,6 +1,6 @@
 # retrieval (p2)
 
-Status: `recall` (R1) and the keyword half of `s0` are wired and tested on a fixture in `tests/test_retrieval.py`. Neither has run on the seed yet, because pr-ingest and the seed are to build. `retrieve` and `q_star` are older stubs. Akshat owns this folder. Do not treat `q_star` as the demo read.
+Status: `recall` (R1) and the keyword half of `s0` are wired and tested on a fixture in `tests/retrieval/`. Neither has run on the seed yet, because pr-ingest and the seed are to build. `retrieve` and `q_star` are older stubs. Akshat owns this folder. Do not treat `q_star` as the demo read.
 
 Reads go through `sheldon.db.read`: `GRAPH.RO_QUERY`, a 1000ms timeout, rows keyed by column. The server refuses a write sent that way.
 
