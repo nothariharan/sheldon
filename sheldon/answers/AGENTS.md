@@ -1,6 +1,6 @@
 # answers (p3)
 
-Status: to build. Not a working feature. Satyansh owns this folder. The comment is built from traversal rows. It does not decide the gate.
+Status: built. Satyansh owns this folder. The comment is built from traversal rows. It does not decide the gate.
 
 Owns the prose, the citations, and abstention.
 
