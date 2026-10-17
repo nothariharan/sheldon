@@ -60,12 +60,12 @@ def test_vector_index_is_not_runnable_until_the_dimension_is_locked() -> None:
         assert "not runnable" in str(exc)
     else:
         raise AssertionError("vector index sketch should not load yet")
-    raw = (cypher.QUERIES / "create_vector_index_event.cypher").read_text()
+    raw = (cypher.QUERIES / "create_vector_index_event.cypher").read_text(encoding="utf-8")
     assert "EMBEDDING_DIM" in raw
 
 
 def test_refute_query_is_the_gate() -> None:
-    raw = (cypher.QUERIES / "refute_hypothesis.cypher").read_text()
+    raw = (cypher.QUERIES / "refute_hypothesis.cypher").read_text(encoding="utf-8")
     text = cypher.load_query("refute_hypothesis")
     assert "DELETE" not in text.upper()
     assert "*1..3" in text
@@ -78,7 +78,7 @@ def test_refute_query_is_the_gate() -> None:
 
 def test_no_inline_cypher_in_python() -> None:
     for path in (ROOT / "sheldon").rglob("*.py"):
-        source = path.read_text()
+        source = path.read_text(encoding="utf-8")
         assert "MATCH (" not in source
         assert "CREATE (" not in source
         assert "MERGE (" not in source
@@ -96,8 +96,8 @@ def test_stub_flags_match_the_function_body() -> None:
 def test_image_pin_is_shared_and_exact() -> None:
     assert FALKORDB_IMAGE == "falkordb/falkordb:v4.22.1"
     assert FALKORDB_MODULE_VERSION == 42201
-    compose = (ROOT / "docker-compose.yml").read_text()
-    ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
+    compose = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     for text in (compose, ci):
         assert FALKORDB_IMAGE in text
         assert ":latest" not in text
@@ -108,7 +108,7 @@ def test_pitch_files_do_not_make_forbidden_claims() -> None:
     files = [ROOT / "README.md", ROOT / "CONTRIBUTING.md"]
     files += list((ROOT / "sheldon").rglob("*.py"))
     files += list((ROOT / "queries").rglob("*.cypher"))
-    blob = "\n".join(path.read_text().lower() for path in files)
+    blob = "\n".join(path.read_text(encoding="utf-8").lower() for path in files)
     for phrase in FORBIDDEN_IN_CODE:
         assert phrase not in blob
 
@@ -124,7 +124,7 @@ def _tracked_text() -> str:
             continue
         if path.name == "test_contracts.py":
             continue
-        blobs.append(path.read_text().lower())
+        blobs.append(path.read_text(encoding="utf-8").lower())
     return "\n".join(blobs)
 
 
@@ -137,9 +137,9 @@ def test_removed_notes_and_competitive_shapes_are_absent() -> None:
 
 
 def test_docs_say_what_wins() -> None:
-    agents = (ROOT / "AGENTS.md").read_text()
-    index = (ROOT / "docs" / "README.md").read_text()
-    docs_agents = (ROOT / "docs" / "AGENTS.md").read_text()
+    agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    index = (ROOT / "docs" / "README.md").read_text(encoding="utf-8")
+    docs_agents = (ROOT / "docs" / "AGENTS.md").read_text(encoding="utf-8")
     for text in (agents, index, docs_agents):
         assert "REPORT.md" in text
         assert "facts.md" in text
@@ -147,7 +147,7 @@ def test_docs_say_what_wins() -> None:
         assert "override" in text
     assert "pains.md" in agents
     assert "opened" in agents
-    pains = (ROOT / "docs" / "research" / "pains.md").read_text().lower()
+    pains = (ROOT / "docs" / "research" / "pains.md").read_text(encoding="utf-8").lower()
     assert "archive" in pains
     assert "do not copy" in pains
 
