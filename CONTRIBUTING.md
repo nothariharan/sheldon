@@ -13,6 +13,10 @@ Four people, mostly through agents, on one repo. The way to stay out of each oth
 
 `sheldon/schema.py` is shared. Change it only when the team has confirmed the decision, and say so in the PR. Prefer adding a new file under `queries/` to editing a query someone else owns.
 
+## Start here
+
+Setup for Linux and Windows is in the README section "Start here". One branch per row in [`TASKS.md`](TASKS.md). Owners there are proposed. Akshat confirms them.
+
 ## Checks
 
 ```bash

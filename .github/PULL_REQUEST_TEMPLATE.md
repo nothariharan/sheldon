@@ -15,6 +15,7 @@
 - [ ] Status strings and edge names still come from `sheldon/schema.py`
 - [ ] If this lands `claim_task` or `refute_hypothesis`, the stub flag is `False` and the race is not xfailed
 - [ ] README, pitch text, and comments do not contain a forbidden claim (`AGENTS.md`)
+- [ ] Stub docstrings say to build or roadmap. W1, W2, and R1 are the only stations described as ran, and their functions are still to build
 - [ ] No other team's name, handle, repo, or file path
 - [ ] Image tag is unchanged, or `sheldon/schema.py`, `docker-compose.yml`, and CI were updated together
 

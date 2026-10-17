@@ -1,5 +1,7 @@
 # retrieval (p2)
 
+Status: to build, except the R1 query, which ran. `recall` is still to build and is not a working feature. Akshat owns this folder. S0 is `s0.py`. Do not treat `q_star` as the demo read.
+
 Owns anchors, bounded traversal, the evidence bundle, and Q\*.
 
 ## Contract

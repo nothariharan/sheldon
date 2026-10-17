@@ -2,14 +2,29 @@
 
 Import across areas. Do not edit another area's module to make yours work. If you need a new status or edge name, it goes in `schema.py` and the PR says why.
 
-| Module | Public function | Query file |
-|---|---|---|
-| `memory.ingest` | `record_event` | `queries/record_event.cypher` |
-| `retrieval.read` | `retrieve`, `q_star` | `queries/q_star.cypher` |
-| `answers.compose` | `compose` | none — it does not write Cypher |
-| `coordination.board` | `claim_task`, `heartbeat`, `complete_task`, `handoff_task`, `resume` | matching file under `queries/` |
-| `belief.refute` | `refute_hypothesis` | `queries/refute_hypothesis.cypher` |
-| `eval.harness` | `reset_from_seed`, `count_repeated_failed_steps` | `queries/repeated_failed_steps.cypher` |
+Product scope is [`docs/plan/README.md`](../docs/plan/README.md). Every function below is to build unless the row says the query ran. None of them is a working feature.
+
+| Module | Public function | Status | Owner |
+|---|---|---|---|
+| `memory.ingest` | `record_event` | to build | Amaan |
+| `pr.ingest` | `ingest_pull_request` | to build | Amaan |
+| `seed.snapshot` | `load_seed` | to build | Amaan |
+| `retrieval.s0` | `s0` | to build | Akshat |
+| `retrieval.recall` | `recall` | R1 query ran; function to build | Akshat |
+| `retrieval.read` | `retrieve`, `q_star` | to build | Akshat |
+| `check.app` | `decide_check` | to build | Akshat |
+| `gate.approve` | `approve` | W1 query ran; function to build | Hariharan |
+| `gate.done` | `claim_done` | to build | Hariharan |
+| `belief.refute` | `refute_hypothesis` | W2 query ran; function to build | Hariharan |
+| `evidence.run` | `record_run` | to build | Hariharan |
+| `provenance` | `writes_with_provenance` | to build | Hariharan |
+| `coordination.board` | `claim_task`, `heartbeat`, `complete_task`, `handoff_task` | to build | Hariharan |
+| `coordination.resume` | `resume` | to build | Satyansh |
+| `preflight` | `preflight` | to build | Satyansh |
+| `capsule` | `capsule` | to build | Satyansh |
+| `mcp.server` | `call_tool` | to build | Satyansh |
+| `answers.compose` | `compose` | to build | Satyansh |
+| `eval.harness` | `reset_from_seed`, `count_repeated_failed_steps` | to build | Satyansh |
 
 `db.py` and `cypher.py` are shared. `load_query` strips full-line `//` comments and rejects a second statement.
 

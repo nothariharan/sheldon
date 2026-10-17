@@ -1,20 +1,32 @@
 # Sheldon
 
-Multi-agent incident-investigation memory on FalkorDB. An investigation is one graph: an append-only event chain, hypotheses that can be refuted only with cited evidence, and a task board on that same graph.
+Sheldon gates coding agents on one shared FalkorDB graph per repo, from the first edit to the merge.
+
+A claim or approval lands if every evidence id it cites is a real executed run. Refuting evidence marks the claim refuted, and every approval and task that relied on it goes stale, in one atomic write. Nothing marks a claim stale. None we found blocks a coding agent from retrying a code fix refuted in the shared graph.
 
 Graph Hacks (WeMakeDevs × FalkorDB), Track 02 — Agent Memory and Coordination. Team SheldonAI.
 
-## Setup
+W1, W2, and R1 queries have run. Every other station in this tree is to build or roadmap. Stubs raise `NotImplementedError`. They are not working features.
 
-Docker is required.
+## Start here
+
+Docker is required. The image is `falkordb/falkordb:v4.22.1` (module `42201`).
+
+Linux:
 
 ```bash
 ./scripts/setup.sh
 ```
 
-On Windows, run `powershell -File scripts/setup.ps1` (the venv interpreter is `.venv\Scripts\python.exe`).
+Windows:
 
-That starts FalkorDB `v4.22.1`, installs the package into `.venv`, and runs the smoke test. The smoke test checks the engine module version (`42201`) and a `GRAPH.COPY` round trip.
+```powershell
+powershell -File scripts/setup.ps1
+```
+
+On Windows the venv interpreter is `.venv\Scripts\python.exe`. On Linux it is `.venv/bin/python`.
+
+That starts FalkorDB, installs the package into `.venv`, and runs the smoke test. The smoke test checks the engine module version and a `GRAPH.COPY` round trip. It does not yet run W1, W2, or R1. That wider smoke test is to build.
 
 ```bash
 source .venv/bin/activate
@@ -22,14 +34,19 @@ pytest
 ruff check sheldon tests
 ```
 
+Windows, after setup:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest
+.\.venv\Scripts\python.exe -m ruff check sheldon tests
+```
+
 The database is on port 6379. FalkorDB Browser is on port 3000.
 
 ## Where to read
 
-Agents and people start at [`AGENTS.md`](AGENTS.md). Product scope is [`docs/decisions/REPORT.md`](docs/decisions/REPORT.md). Engine limits and the claims drop list are [`docs/facts.md`](docs/facts.md). Paper corrections, including the personalized-PageRank row that cannot be built, are [`docs/engine/papers.md`](docs/engine/papers.md). Those three override the older design notes. Work items are in [`TASKS.md`](TASKS.md). Branch rules are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+People and coding agents start at [`docs/plan/README.md`](docs/plan/README.md). Work items are in [`TASKS.md`](TASKS.md). How to branch is in [`CONTRIBUTING.md`](CONTRIBUTING.md). Engine limits are in [`docs/facts.md`](docs/facts.md) and [`docs/engine/papers.md`](docs/engine/papers.md).
 
 ## What is in scope
 
-p0 through p4, plus a repeated-failed-steps count against plain memory. Each eval run resets from one frozen `GRAPH.COPY`. A refute is one conditional Cypher write. Refuted hypotheses stay in the graph.
-
-This tree is the skeleton. The modules raise `NotImplementedError` until a task branch lands them.
+The evidence gate, the one-write refute plus stale cascade, and the retry block, plus a with/without count that has not been run. Each eval run will reset from one frozen `GRAPH.COPY`. Paper numbers are not Sheldon results. Cost is to measure. The default quality phrase is "safer at the same quality".

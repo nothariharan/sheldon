@@ -1,5 +1,7 @@
 # coordination (p4)
 
+Status: to build. Not a working feature. Hariharan owns `board.py` (claim and lease). Satyansh owns `resume.py`. Do not edit each other's file.
+
 Owns the task board. The refute gate is not in this folder.
 
 ## Contract

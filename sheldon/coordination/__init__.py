@@ -4,8 +4,8 @@ from sheldon.coordination.board import (
     complete_task,
     handoff_task,
     heartbeat,
-    resume,
 )
+from sheldon.coordination.resume import resume
 
 __all__ = [
     "CLAIM_IS_STUB",
