@@ -214,3 +214,18 @@ def test_e2e_citing_a_real_run_on_the_head_sha_turns_it_green(take: str) -> None
     [payload] = github.check_runs
     assert payload["conclusion"] == "success"
     assert payload["output"]["summary"] == "refuted: C-5 by E-41 (INC-12, via checkout/session.py)"
+
+
+def test_e2e_after_w2_refutes_c7_the_approval_is_reported_stale(take: str) -> None:
+    from sheldon.belief.refute import refute_claim
+
+    assert refute_claim(take, "C-7", ["E-60"], "ci", "ci", "CI-60")
+    github = _GitHub()
+    handle_event("pull_request", _pr7("Evidence: E-31"), github, lambda _: take)
+    [payload] = github.check_runs
+    assert payload["conclusion"] == "failure"
+    assert payload["output"]["summary"].splitlines() == [
+        "stale: A-3 marked stale",
+        "refuted: C-5 by E-41 (INC-12, via checkout/session.py)",
+        "refuted: C-7 by E-60 (INC-12, via checkout/session.py)",
+    ]
