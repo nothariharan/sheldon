@@ -1,6 +1,6 @@
 # belief (W2)
 
-Status: the W2 query ran. `refute_hypothesis` is to build and is not a working feature. Hariharan owns this folder. The statement that ran is in `docs/plan/deep.md`. The Cypher file here is the older sketch until that PR replaces it.
+Status: built. `tests/belief/test_refute.py` shows one call refuting C-7 and staling A-3 and T-9. Hariharan owns this folder. `queries/refute_claim.cypher` is the statement that ran. `queries/refute_hypothesis.cypher` stays the older sketch because the contract test locks its text. `refute_hypothesis` runs that sketch. The race test rejects a missing id.
 
 Owns the refute. One file, one query.
 

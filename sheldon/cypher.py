@@ -15,6 +15,7 @@ RUNNABLE: tuple[str, ...] = (
     "handoff_task",
     "resume_state",
     "refute_hypothesis",
+    "refute_claim",
     "q_star",
     "audit_refuted_without_evidence",
     "approve_pr",

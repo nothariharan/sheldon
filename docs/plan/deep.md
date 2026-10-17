@@ -85,7 +85,7 @@ this edit repeats the cache-TTL fix tried for INC-12; E-41 (CI run) refuted it
 
 ### 2.4 Cascade
 
-**W2 ran** on 4.18.3 and v4.22.1. On valid executed evidence it refutes the claim and stales dependents at 1–2 hops in one statement. It refuses unexecuted evidence. `sheldon/belief/refute.py` is to build. It is not a working feature. The Cypher file already in `queries/` is the older sketch. The statement that ran is this one:
+**W2 ran** on 4.18.3 and v4.22.1. On valid executed evidence it refutes the claim and stales dependents at 1–2 hops in one statement. It refuses unexecuted evidence. `tests/belief/test_refute.py` shows `refute_claim` doing that on v4.22.1. The Cypher file `queries/refute_hypothesis.cypher` is the older sketch and stays, because a contract test locks its text. The statement that ran is `queries/refute_claim.cypher`:
 
 ```cypher
 MATCH (c:Claim {id:$cid})
