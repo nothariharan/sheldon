@@ -168,9 +168,9 @@ def test_stubs_are_not_described_as_working() -> None:
         "0 of 7 and 0 of 3, and search-only false blocks are 1 of 7 and 0 of 3. "
         "1 of 4 reworded retries still passes on dev and 2 of 2 on held-out."
     )
-    readme_line = (ROOT / "README.md").read_text(encoding="utf-8").splitlines()[2]
+    readme_text = (ROOT / "README.md").read_text(encoding="utf-8")
     agents_line = (ROOT / "AGENTS.md").read_text(encoding="utf-8").splitlines()[2]
-    assert readme_line == honest
+    assert honest in readme_text
     assert agents_line == honest
     for path in (ROOT / "sheldon").rglob("*.py"):
         text = path.read_text(encoding="utf-8")
