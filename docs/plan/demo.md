@@ -35,9 +35,11 @@ Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval fre
   python -c "from sheldon.seed import load_seed; load_seed('sheldon:frozen', head_sha='$HEAD_SHA')"
   python -c "from sheldon.seed import copy_graph; copy_graph('sheldon:frozen', 'sheldon:demo/checkout')"   # before every take
   export SHELDON_GRAPH=sheldon:demo/checkout
+  export SHELDON_MODEL=agent-model-b SHELDON_SESSION=S-3   # agent B, the done claim's model and session
   ```
 
   The seed creates the S0 full-text indexes, and the copy keeps them.
+  Without `SHELDON_MODEL` and `SHELDON_SESSION` (or `--model` and `--session`), the evidence `sheldon run` writes has no model or session, and step 5's provenance read lists it as missing.
 - [ ] FalkorDB is `falkordb/falkordb:v4.22.1`. The Browser is on `localhost:3000`.
 - [ ] The step 4 numbers match the eval table exactly, or the slide says "to be measured".
 - [ ] `SHELDON_PREFLIGHT_OVERRIDE` is unset in the shell you record from (`env | grep SHELDON_PREFLIGHT_OVERRIDE` prints nothing). When it is set, preflight lets every action through and step 1 shows no block.
