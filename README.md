@@ -1,6 +1,6 @@
 # Sheldon
 
-Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo. On 21 dev and 10 held-out synthetic scenarios we wrote, a narrow test of one job, sheldon blocks 13 of 14 bad dev actions and 5 of 7 bad held-out actions, search-only blocks 8 of 14 and 2 of 7, sheldon false blocks are 0 of 7 and 0 of 3, and search-only false blocks are 1 of 7 and 0 of 3. 1 of 4 reworded retries still passes on dev and 2 on held-out.
+Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo. On 21 dev and 10 held-out synthetic scenarios we wrote, a narrow test of one job, sheldon blocks 13 of 14 bad dev actions and 5 of 7 bad held-out actions, search-only blocks 8 of 14 and 2 of 7, sheldon false blocks are 0 of 7 and 0 of 3, and search-only false blocks are 1 of 7 and 0 of 3. 1 of 4 reworded retries still passes on dev and 2 of 2 on held-out.
 
 Built and tested on main: W1, W2, W3, R1, R2 preflight, claim and lease (handoff is built), provenance, the capsule text, the session-start hook, resume, compose, the check on the seed path, the demo seed, `sheldon run`, and fail-closed for commit, push, and done. Cut or not built: ingest, the S0 vector half, and paired eval runs.
 
@@ -73,7 +73,7 @@ The evidence gate, the one-write refute plus stale cascade, and the retry block,
 
 ## Benchmark
 
-On 21 dev and 10 held-out synthetic scenarios we wrote, a narrow test of one job, four arms check one proposed action each against the same FalkorDB graph (`falkordb/falkordb:v4.22.1`). This is not a general memory benchmark. No benchmark for this exact job that we found. The scenarios are synthetic and deterministic, and no LLM is in the loop. The search-only baseline is a stand-in for a recall-style memory. It is not a named product. The mem0 arm is in the table when `requirements-eval.txt` is installed. CI does not install that file.
+On 21 dev and 10 held-out synthetic scenarios we wrote, a narrow test of one job, four arms check one proposed action each. All read the same FalkorDB graph (`falkordb/falkordb:v4.22.1`); the mem0 arm searches its own local Qdrant store built from that graph's incident and claim text. This is not a general memory benchmark. No benchmark for this exact job that we found. The scenarios are synthetic and deterministic, and no LLM is in the loop. The search-only baseline is a stand-in for a recall-style memory. It is not a named product. The mem0 arm is in the table when `requirements-eval.txt` is installed. CI does not install that file.
 
 Dev N = 21 (14 actions that should be blocked, 7 that should be allowed). Held-out N = 10 (7 that should be blocked, 3 that should be allowed). Each check resets from a frozen `GRAPH.COPY`. The median is the check, not the copy. Command: `python -m eval.traps`. `eval/traps/FROZEN` is the sha256 of both scenario files. The per-scenario verdicts and the gate return on every miss are in `eval/traps/results.md`.
 
@@ -110,7 +110,7 @@ Search-only baseline wrongly blocked good actions: none.
 Sheldon wrongly blocked good actions: none.
 mem0 (infer=False, local embedder) wrongly blocked good actions: none.
 
-1 of 4 reworded retries still passes on dev and 2 on held-out. Sheldon misses one bad action on the dev set, `b4`. The fingerprint is not `edit checkout/cache.py`. `queries/preflight_attempt_search.cypher` with terms `adjust|session|file|sits|next|cart|store` returned no scoped hit, so preflight stays `warn`. Those terms do not occur in the refuted claim. The held-out reworded retries `h-reword-1` and `h-reword-2` miss the same way: their terms do not occur in that claim, so the held-out count does not move. `refactor checkout/cache.py` with no description stays `warn` in `tests/test_preflight.py`.
+1 of 4 reworded retries still passes on dev and 2 of 2 on held-out. Sheldon misses one bad action on the dev set, `b4`. The fingerprint is not `edit checkout/cache.py`. `queries/preflight_attempt_search.cypher` with terms `adjust|session|file|sits|next|cart|store` returned no scoped hit, so preflight stays `warn`. Those terms do not occur in the refuted claim. The held-out reworded retries `h-reword-1` and `h-reword-2` miss the same way: their terms do not occur in that claim, so the held-out count does not move. `refactor checkout/cache.py` with no description stays `warn` in `tests/test_preflight.py`.
 
 Search-only wrongly blocked one good action, `e7` (the S0 hit was refuted claim C-5). Sheldon wrongly blocked good actions: none. On this run, search-only did not block a bad action that sheldon allowed.
 
