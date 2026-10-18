@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "-m",
+    "sheldon.check",
+    "--graph",
+    "sheldon_export_seed_moments",
+    "7",
+    "b2",
+    "--evidence",
+    "E-31"
+  ],
+  "exit_code": 1,
+  "stdout": "sheldon: blocked (failure) PR 7 at b2\nstale: A-3 marked stale\nrefuted: C-5 by E-41 (INC-12, via checkout/session.py)\nrefuted: C-7 by E-60 (INC-12, via checkout/session.py)\n",
+  "stderr": ""
+}

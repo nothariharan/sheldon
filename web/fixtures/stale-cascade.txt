@@ -1,0 +1,4 @@
+sheldon: blocked (failure) PR 7 at b2
+stale: A-3 marked stale
+refuted: C-5 by E-41 (INC-12, via checkout/session.py)
+refuted: C-7 by E-60 (INC-12, via checkout/session.py)

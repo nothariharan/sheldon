@@ -1,0 +1,3 @@
+sheldon: blocked (failure) PR 7 at b2
+blocked: E-52 not executed
+refuted: C-5 by E-41 (INC-12, via checkout/session.py)
