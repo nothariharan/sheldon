@@ -1,14 +1,17 @@
 # Sheldon
 
+[![CI](https://github.com/nothariharan/sheldon/actions/workflows/ci.yml/badge.svg)](https://github.com/nothariharan/sheldon/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
+[![FalkorDB](https://img.shields.io/badge/FalkorDB-v4.22.1-ff3b30.svg)](https://github.com/FalkorDB/FalkorDB)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+
 Sheldon runs your codebase like a Michelin kitchen: every agent, frontier or small, gets its ticket, its prep note and its tools, and no change leaves the kitchen until real evidence says it's ready.
 
 ![Sheldon CLI refusing an unverified approval](docs/demo/refusal.gif)
 
 <p align="center">
   <img src="assets/sheldon-banner.svg" alt="Sheldon Banner" width="100%" />
-</p>
-<p align="center">
-  <img src="assets/sheldon-logo.svg" alt="Sheldon Logo" width="100%" />
 </p>
 
 ## The problem
@@ -20,52 +23,27 @@ Built and tested on main: W1, W2, W3, R1, R2 preflight, claim and lease (handoff
 ## How it works
 
 ```mermaid
-flowchart TD
+flowchart LR
+    classDef step fill:#f8fafc,stroke:#3b82f6,stroke-width:1.5px,color:#0f172a
     classDef refused fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#991b1b,font-weight:bold
     classDef ok fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#166534,font-weight:bold
-    classDef gate fill:#eff6ff,stroke:#3b82f6,stroke-width:1.5px,color:#1e3a8a
-    classDef action fill:#f8fafc,stroke:#64748b,stroke-width:1.5px,color:#0f172a
-    classDef cascade fill:#fef3c7,stroke:#f59e0b,stroke-width:1.5px,color:#92400e
 
-    subgraph S1 ["1. Preflight Retry Gate (R2)"]
-        Agent["Coding Agent proposes action"]:::action
-        R2["Preflight R2<br/>Exact fingerprint & full-text match"]:::gate
-        BlockR2["BLOCKED: Repeats refuted fix<br/>(Exit code 2, cites Evidence ID)"]:::refused
-        Agent --> R2
-        R2 -- "Matches refuted attempt" --> BlockR2
-    end
+    Agent["Agent proposes action"]:::step
+    R2{"Preflight (R2)<br/>Repeated fix?"}:::step
+    BlockR2["Blocked (exit 2)<br/>Cites refuted Evidence"]:::refused
+    Lease["Claim / Lease<br/>Task on board"]:::step
+    Run["sheldon run<br/>Execute & record run"]:::step
+    W1{"Approve (W1)<br/>Evidence Gate"}:::step
+    BlockW1["Refused (0 rows)<br/>Unexecuted or refuted ancestor"]:::refused
+    Done["Done (W3)<br/>Verified Approval"]:::ok
 
-    subgraph S2 ["2. Coordination & Execution"]
-        Lease["Claim Task Lease<br/>Atomic conditional write on Task board"]:::action
-        Work["Agent executes implementation"]:::action
-        Run["sheldon run -- pytest<br/>Subprocess execution on commit SHA"]:::gate
-        Mint["FalkorDB Evidence Node<br/>executed: true, sha: HEAD, exit: 0"]:::ok
-        
-        R2 -- "Clear / Alternative fix" --> Lease
-        Lease --> Work
-        Work --> Run
-        Run --> Mint
-    end
-
-    subgraph S3 ["3. Graph Gates & Stale Cascade (W1, W2, W3)"]
-        W2["Async CI Refute (W2)<br/>1..3 hop atomic stale cascade"]:::cascade
-        Stale["Dependents marked stale<br/>Approvals: stale, Tasks: stale=true"]:::cascade
-        W1["Evidence Gate (W1 & W3)<br/>approve_pr.cypher / claim_done.cypher"]:::gate
-        CheckAncestor["3-Hop Refuted Ancestor Check<br/>queries/refuted_ancestor.cypher"]:::gate
-        RefuseGate["REFUSED: Evidence missing or<br/>cited claim reaches refuted ancestor"]:::refused
-        Approved["Verified Approval Created<br/>(:Approval)-[:CITES]->(:Evidence)"]:::ok
-
-        W2 -- "Failing CI run" --> Stale
-        Mint --> W1
-        W1 --> CheckAncestor
-        CheckAncestor -- "Refuted ancestor or wrong SHA" --> RefuseGate
-        CheckAncestor -- "Valid run & clean history" --> Approved
-    end
-
-    subgraph S4 ["4. Verified Delivery"]
-        Done["PR Check Green & Task Done<br/>Zero unverified changes land"]:::ok
-        Approved --> Done
-    end
+    Agent --> R2
+    R2 -- "Refuted attempt" --> BlockR2
+    R2 -- "Clear / Warn" --> Lease
+    Lease --> Run
+    Run --> W1
+    W1 -- "Gate fails" --> BlockW1
+    W1 -- "Passing run on SHA" --> Done
 ```
 
 ## The graph
