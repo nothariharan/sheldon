@@ -8,6 +8,10 @@ A claim or approval only lands if every evidence id it cites is a real executed 
 
 Graph Hacks (WeMakeDevs × FalkorDB), Track 02 — Agent Memory and Coordination. Team SheldonAI.
 
+> A stale graph is worse than no graph, it lies with confidence.
+
+@falkordb on X, Aug 25 2026.
+
 ## Start here
 
 Docker is required. The image is `falkordb/falkordb:v4.22.1` (module `42201`).

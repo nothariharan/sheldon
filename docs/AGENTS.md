@@ -6,7 +6,7 @@
 
 - Do not add a note that names another team, a handle, a repo, or a file path in someone else's tree.
 - Do not "fix" a superseded file by restating the old claim in new words. Either leave the banner or correct the line in `facts.md`.
-- The five quotes the plan uses are in `plan/quotes.md`. Do not add others, and do not paste them into UI text.
+- The six quotes the plan uses are in `plan/quotes.md`. Do not add others, and do not paste them into UI text.
 - Paper numbers and vendor timings stay labelled as someone else's. They are not Sheldon measurements.
 - Spikes are at `/spikes`, not under `docs/`.
 - The product name is Sheldon. SynapseOS in the older files is a leftover.
