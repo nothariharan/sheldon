@@ -127,24 +127,26 @@ Hariharan:
 
 1. `sheldon run` (#32) is done.
 2. README (#33) is done.
-3. Wire the MCP server so a real agent session calls preflight, `sheldon run`, and `claim_done` end to end.
-4. Store `handoff_task` `note` and `to_agent`.
+3. Wire the MCP server so a real agent session calls preflight, `sheldon run`, and `claim_done` end to end. Done (#36).
+4. Store `handoff_task` `note` and `to_agent`. Done (#35).
 5. Clean-clone install: `requirements.txt` pins the FalkorDB client, `requirements-dev.txt` pins pytest and ruff, and `./scripts/setup.sh` is the one command.
 6. In the last window, push a fresh public repo.
 
 Satyansh:
 
 1. Change `compose` so a refuted claim cites the `REFUTED_BY` evidence. On the seed, E-30 supported C-7. E-60 is the refuting run.
-2. Add a session-start hook that restores the capsule.
-3. Make commit, push, and done fail closed on a database error, or else the `docs/plan/deep.md` line saying they fail open stays.
+2. `cli-ux`, after the compose fix, with Akshat ([cli-spec.md](cli-spec.md)). Satyansh: spinners, colored blocked / passed / stale lines, and the preflight, `sheldon run`, check, and MCP frames through one shared output module.
+3. Session-start hook, and fail-closed for commit, push, and done on a database error. Cut if time runs short. If they stay cut, the `docs/plan/deep.md` line that says commit, push, and done fail open stays.
 
 Akshat:
 
-1. Record the demo.
+1. Record the demo. No dry-run eval numbers, no eval table in the video.
 2. Submit the form by 11:00 PM IST, including the website link.
+3. `cli-ux` with Satyansh ([cli-spec.md](cli-spec.md)): the banner, the interactive mode, help, and the non-TTY / `NO_COLOR` fallback.
 
 Amaan:
 
-1. Build the `website` row: a static judge-facing page on Vercel or GitHub Pages. It shows what Sheldon does, the three seed demo moments as recorded CLI output (the retry block on INC-12 citing E-41, the evidence gate, and the refute plus stale cascade), the demo video, the graph data model, and a link to the public repo. The link goes in the README and the form. Nothing else.
+1. `website`. Landing page in [ui-spec.md](ui-spec.md), from the patterns in [ui-reference.md](ui-reference.md). Must ship by 9 PM IST: hero, the three recorded terminal replays, the static seed graph, how it works, install, and the repo link.
+2. `web-ui`. The read-only seed view in the same spec, after the landing page if time remains.
 
 The schema constraint test is cut for submission. The row stays in `TASKS.md`.
