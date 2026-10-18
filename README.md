@@ -2,7 +2,7 @@
 
 Sheldon blocks coding agents from retrying fixes that already failed, and from calling work done without a real test run, from the first edit to the merge, on one shared FalkorDB graph per repo.
 
-Built and tested on main: W1, W2, W3, R1, R2 preflight, claim and lease (handoff is built), provenance, the capsule text, resume, compose, the check on the seed path, the demo seed, and `sheldon run`. Cut or not built: ingest, the S0 vector half, paired eval runs, session-start hooks, and fail-closed.
+Built and tested on main: W1, W2, W3, R1, R2 preflight, claim and lease (handoff is built), provenance, the capsule text, the session-start hook, resume, compose, the check on the seed path, the demo seed, and `sheldon run`. Cut or not built: ingest, the S0 vector half, paired eval runs, and fail-closed.
 
 A claim or approval only lands if every evidence id it cites is a real executed run. Refuting evidence marks the claim refuted, and every approval and task that relied on it goes stale, in one atomic write. Nothing marks a claim stale. None we found blocks a coding agent from retrying a code fix refuted in the shared graph.
 
@@ -48,6 +48,16 @@ The database is on port 6379. FalkorDB Browser is on port 3000.
 ## MCP client
 
 `python -m sheldon.mcp.server` speaks MCP JSON-RPC on stdin and stdout. Point the client at that command. `sheldon_run` is `sheldon run -- <cmd>`: it runs the command and records one executed Evidence node. `claim_done` writes an Approval when that run passed on the same sha. `tests/mcp/test_e2e_session.py` drives one session on the seed graph: preflight, then the run, then the done claim.
+
+## Session start
+
+Claude Code can print the capsule when a session starts. Set `SHELDON_GRAPH` and `SHELDON_TASK`, then merge [`hooks/claude-session-start.json`](hooks/claude-session-start.json) into `.claude/settings.json`. The command is `python -m sheldon.hooks.session_start`. It writes the capsule to stdout. A missing task exits 1 and names the task.
+
+```bash
+export SHELDON_GRAPH=sheldon:demo
+export SHELDON_TASK=T-9
+python -m sheldon.hooks.session_start
+```
 
 ## Where to read
 
