@@ -73,13 +73,14 @@ The evidence gate, the one-write refute plus stale cascade, and the retry block,
 
 ## Benchmark
 
-On 21 synthetic scenarios we wrote, three arms check one proposed action each against the same FalkorDB graph (`falkordb/falkordb:v4.22.1`). Ten more scenarios are held out and scored separately. This is a narrow test of one job, not a general memory benchmark. No benchmark for this exact job that we found. The scenarios are synthetic and deterministic, and no LLM is in the loop. The search-only baseline is a stand-in for a recall-style memory. It is not a named product.
+On 21 synthetic scenarios we wrote, four arms check one proposed action each against the same FalkorDB graph (`falkordb/falkordb:v4.22.1`). Ten more scenarios are held out and scored separately. This is a narrow test of one job, not a general memory benchmark. No benchmark for this exact job that we found. The scenarios are synthetic and deterministic, and no LLM is in the loop. The search-only baseline is a stand-in for a recall-style memory. It is not a named product. The mem0 arm is in the table when `requirements-eval.txt` is installed. CI does not install that file.
 
 Dev N = 21 (14 actions that should be blocked, 7 that should be allowed). Held-out N = 10 (7 that should be blocked, 3 that should be allowed). Each check resets from a frozen `GRAPH.COPY`. The median is the check, not the copy. Command: `python -m eval.traps`. `eval/traps/FROZEN` is the sha256 of both scenario files. The per-scenario verdicts and the gate return on every miss are in `eval/traps/results.md`.
 
 - **no-memory** always allows.
 - **search-only baseline** runs the S0 keyword path (`queries/s0_keyword.cypher`) on the action text and blocks when a hit is a refuted claim, or an incident whose cause claim is refuted.
 - **sheldon** runs preflight R2, W3 `claim_done`, and W1 `approve`. Preflight counts as a block only when the decision is `block`. `warn` counts as allow. The exact fingerprint is checked first. When it misses, full-text (`db.idx.fulltext.queryNodes` in `queries/preflight_attempt_search.cypher`) runs over failed attempts. A hit counts only when that attempt touched the same file, or the hit is the same refuted claim. Path tokens are left out of the query. `approve` checks cited evidence. When the action names a claim, the same write refuses if that claim is refuted or reaches a refuted claim in 1..3 `RELIES_ON` or `DEPENDS_ON` hops, the window W2 uses. The refusal reason is that path: the claim ids, the edge type on each hop, and the refuting evidence id. `python -m sheldon.gate.approve` prints it, and `--json` includes it. `claim_done` uses the same hop check on the done claim.
+- **mem0 (infer=False, local embedder)** stores the same incident titles and claim text, with `infer=False` and a local Hugging Face embedder (`sentence-transformers/all-MiniLM-L6-v2`). No API key. It uses the search-only block rule, and a hit also needs a cosine score of at least 0.5. `LIMIT` and `THRESHOLD` were set before this run.
 
 ### Dev
 
@@ -88,8 +89,12 @@ Dev N = 21 (14 actions that should be blocked, 7 that should be allowed). Held-o
 | no-memory | 0/14 | 0/7 | 0.00 |
 | search-only baseline | 8/14 | 1/7 | 4.35 |
 | sheldon | 13/14 | 0/7 | 5.40 |
+| mem0 (infer=False, local embedder) | 7/14 | 0/7 | 8.74 |
 
+No-memory wrongly blocked good actions: none.
+Search-only baseline wrongly blocked good actions: e7 (Replace the cart cache with a write-through store).
 Sheldon wrongly blocked good actions: none.
+mem0 (infer=False, local embedder) wrongly blocked good actions: none.
 
 ### Held-out
 
@@ -98,8 +103,12 @@ Sheldon wrongly blocked good actions: none.
 | no-memory | 0/7 | 0/3 | 0.00 |
 | search-only baseline | 2/7 | 0/3 | 4.48 |
 | sheldon | 5/7 | 0/3 | 6.02 |
+| mem0 (infer=False, local embedder) | 1/7 | 0/3 | 7.75 |
 
+No-memory wrongly blocked good actions: none.
+Search-only baseline wrongly blocked good actions: none.
 Sheldon wrongly blocked good actions: none.
+mem0 (infer=False, local embedder) wrongly blocked good actions: none.
 
 Sheldon misses one bad action on the dev set, `b4`. The fingerprint is not `edit checkout/cache.py`. `queries/preflight_attempt_search.cypher` with terms `adjust|session|file|sits|next|cart|store` returned no scoped hit, so preflight stays `warn`. Those terms do not occur in the refuted claim. The held-out reworded retries `h-reword-1` and `h-reword-2` miss the same way: their terms do not occur in that claim, so the held-out count does not move. `refactor checkout/cache.py` with no description stays `warn` in `tests/test_preflight.py`.
 
