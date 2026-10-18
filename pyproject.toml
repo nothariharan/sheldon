@@ -9,6 +9,9 @@ dependencies = ["falkordb>=1.7"]
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
 
+[project.scripts]
+sheldon = "sheldon.cli:console_main"
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
