@@ -12,6 +12,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
+from eval.traps import mem0_arm
 from eval.traps.arms import Arm, NoMemory, SearchOnlyBaseline, SheldonArm
 from sheldon.cypher import load_query
 from sheldon.db import connect
@@ -32,6 +33,10 @@ HEAD_SHA = "b2"
 
 # Append an arm here. It must implement Arm.name and Arm.blocks.
 ARMS: tuple[Arm, ...] = (NoMemory(), SearchOnlyBaseline(), SheldonArm())
+# Optional real-tool arms join only when their package is installed
+# (requirements-eval.txt), so CI and the base suite run without them.
+if mem0_arm.available():
+    ARMS += (mem0_arm.Mem0Arm(),)
 
 
 def load_scenarios(path: Path = SCENARIOS) -> list[dict[str, Any]]:
@@ -122,8 +127,8 @@ def _scenario_table(
     scenarios: list[dict[str, Any]],
     decisions: dict[str, dict[str, bool]],
 ) -> str:
-    header = "| id | category | expected | no-memory | search-only baseline | sheldon |"
-    rule = "| --- | --- | --- | --- | --- | --- |"
+    header = "| id | category | expected | " + " | ".join(arm.name for arm in ARMS) + " |"
+    rule = "| --- | --- | --- | " + " | ".join("---" for _ in ARMS) + " |"
     lines = [header, rule]
     for scenario in scenarios:
         sid = scenario["id"]
