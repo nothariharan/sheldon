@@ -36,10 +36,10 @@ To avoid ambiguity between a refuted fix, an unexecuted run, and a legitimate al
 | **Case 1** | Exact repeat of a refuted fix | $A_{prior}$ exists on refuted $C_5$, backed by failing $E_{41}$ (`executed = true`, `exit_code = 1`) | **Repeated Failed Step** | `block` (Exit code 2) |
 | **Case 2** | Syntactically equivalent fix (whitespace / relative path variation) | Normalized fingerprint matches $A_{prior}$ on refuted $C_5$ | **Repeated Failed Step** | `block` (Exit code 2) |
 | **Case 3** | Different fix touching the same file | Same file path, but command / intent differs from $A_{prior}$ | **Context Overlap / Legitimate Alternative** | `warn` (Exit code 0, allowed) |
-| **Case 4** | Refuted fix attempted after underlying condition changed | Action matches $A_{prior}$, but graph claim updated or override provided | **Re-evaluated / Overridden Attempt** | `warn` (Exit code 0 with audit trail) |
+| **Case 4** | Refuted fix attempted after underlying condition changed | Action matches $A_{prior}$, but graph claim updated or override provided | **Re-evaluated / Overridden Attempt** | `warn` (Exit code 0). The override is a flag on the check. The reason names the refuting evidence. It is not written to the graph. |
 | **Case 5** | Unexecuted command or missing test run | Cited evidence has `executed = false` or exit code missing | **Unverified Evidence** | Rejected by Gate (Cannot support or refute) |
 | **Case 6** | Genuinely new action with clean history | No matching action fingerprint; no touched file overlap | **Clean Action** | `ok` (Exit code 0, allowed) |
-| **Case 7** | Malformed metadata or database outage | Unreachable database or malformed parameters | **System Fail-Open** | `ok` / `warn` (Fail-open to avoid agent lockup) |
+| **Case 7** | Database outage | FalkorDB is unreachable or times out | **Fail closed for commit, push, and done. Fail open for reads.** | Commit, push, and done: `block` (exit 2). Reads (recall, resume, and the check summary): `warn` (exit 0). `SHELDON_FAIL_OPEN=1` makes commit, push, and done warn and exit 0. |
 
 ---
 
@@ -62,7 +62,7 @@ The following concrete examples illustrate the 7 cases mapped to the demo seed g
 ### Sample 3: Legitimate Alternative on Same File (Case 3)
 * **Candidate Input:** `command = "refactor checkout/cache.py"`, `paths = ["checkout/cache.py"]`.
 * **Historical Context:** Touched file `checkout/cache.py` is associated with `INC-12`, but the command does not match `ACT-1`'s TTL modification.
-* **Classification:** **Legitimate Alternative (`warn`)**.
+* **Classification:** **Legitimate Alternative (`warn`)**. A different action after a refusal is allowed.
 * **Reason to emit (preflight is to build):** Permitted with informational advisory: `"checkout/cache.py was touched in INC-12; verified alternative attempt"`.
 
 ### Sample 4: Changed Conditions / Manual Override (Case 4)
@@ -81,10 +81,10 @@ The following concrete examples illustrate the 7 cases mapped to the demo seed g
 * **Historical Context:** `checkout/api.py` has no connection to refuted claims or open incidents.
 * **Classification:** **Clean Action (`ok`)**.
 
-### Sample 7: Missing Metadata / Database Outage (Case 7)
-* **Candidate Input:** Any action when FalkorDB times out or is unreachable.
-* **Classification:** **Fail-Open Advisory (`warn`)**.
-* **Reason to emit (preflight is to build):** System emits warning on stderr and allows action (exit code 0) so local agent sessions do not freeze.
+### Sample 7: Database Outage (Case 7)
+* **Candidate Input:** FalkorDB times out or is unreachable.
+* **Classification:** **Fail closed for commit, push, and done. Fail open for reads.**
+* **Decision:** Commit, push, and done return `block` and exit 2. Reads (recall, resume, and the check summary) return `warn` and exit 0. `SHELDON_FAIL_OPEN=1` makes commit, push, and done warn and exit 0.
 
 ---
 

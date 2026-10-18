@@ -164,6 +164,17 @@ def test_eval_def_contains_seven_taxonomy_cases() -> None:
         assert f"Case {i}" in content
 
 
+def test_eval_def_states_the_outage_and_alternative_rules() -> None:
+    content = EVAL_DEF_PATH.read_text(encoding="utf-8")
+    lowered = content.lower()
+    assert "audit trail" not in lowered
+    assert "a different action after a refusal is allowed" in lowered
+    assert "fail closed for commit, push, and done" in lowered
+    assert "fail open for reads" in lowered
+    assert "recall, resume, and the check summary" in lowered
+    assert "SHELDON_FAIL_OPEN=1" in content
+
+
 def test_eval_def_paired_eval_formulas() -> None:
     content = EVAL_DEF_PATH.read_text(encoding="utf-8")
     assert "Pass Rate" in content
