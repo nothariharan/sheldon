@@ -11,7 +11,7 @@ An arm is one class with:
 - `name: str` — the label in the table
 - `blocks(self, graph: str, scenario: dict) -> bool` — `True` when the arm refuses the action
 
-`graph` is a fresh copy of the frozen seed for that scenario. The arm may read or write it. `scenario` is one object from `scenarios.json`:
+`graph` is a fresh copy of the frozen seed for that scenario. The arm may read or write it. `scenario` is one object from `scenarios.json` or `heldout/scenarios.json`. Both files use the same shape. `blocks` is the whole interface: do not add a required argument. A `trace` string set inside `blocks` is optional and is not part of the interface.
 
 - `id`, `family`, `expected` (`block` or `allow`), `text`, `action`
 - `action.type` is `preflight`, `done`, or `approve`
@@ -27,4 +27,6 @@ An arm is one class with:
 
 ## Scenarios
 
-`scenarios.json` holds the cases: 4 exact retries of the recorded refuted fix, 4 reworded retries on the same file, 3 done claims with no executed passing run on the head sha, 3 approvals that cite a claim 1, 2, and 3 `RELIES_ON` hops from a refuted claim, and at least 6 actions that should be allowed.
+`scenarios.json` is the dev set: 4 exact retries of the recorded refuted fix, 4 reworded retries on the same file, 3 done claims with no executed passing run on the head sha, 3 approvals that cite a claim 1, 2, and 3 `RELIES_ON` hops from a refuted claim, and at least 6 actions that should be allowed.
+
+`heldout/scenarios.json` is a second set, scored separately. `FROZEN` is the sha256 of both files. A test fails if either file changes. Do not edit an expected verdict after a run.

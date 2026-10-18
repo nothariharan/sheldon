@@ -1,17 +1,20 @@
 """The trap suite finishes, prints a table, and repeats the same counts.
 
 Scores are not asserted. Two runs must match each other on the counts.
+The scenario files are frozen: a hash mismatch fails this module.
 """
 
+import hashlib
 import subprocess
 import sys
 from pathlib import Path
 
-from eval.traps.runner import ensure_frozen, load_scenarios, run_suite
+from eval.traps.runner import HELDOUT, SCENARIOS, ensure_frozen, load_scenarios, run_suite
 from sheldon.db import connect
 from sheldon.schema import FALKORDB_IMAGE
 
 ROOT = Path(__file__).resolve().parents[2]
+FROZEN = ROOT / "eval" / "traps" / "FROZEN"
 
 
 def test_scenario_file_has_the_required_mix() -> None:
@@ -48,6 +51,35 @@ def test_overlay_hops_are_one_two_and_three() -> None:
     assert one and two and three
 
 
+def test_scenario_files_match_the_frozen_hashes() -> None:
+    lines = [line for line in FROZEN.read_text(encoding="utf-8").splitlines() if line.strip()]
+    assert len(lines) >= 2
+    seen = set()
+    for line in lines:
+        digest, rel = line.split()
+        seen.add(rel)
+        actual = hashlib.sha256((ROOT / rel).read_bytes()).hexdigest()
+        assert actual == digest
+    assert "eval/traps/scenarios.json" in seen
+    assert "eval/traps/heldout/scenarios.json" in seen
+
+
+def test_heldout_file_has_the_required_mix() -> None:
+    scenarios = load_scenarios(HELDOUT)
+    assert len(scenarios) == 10
+    by: dict[str, list[dict]] = {}
+    for scenario in scenarios:
+        by.setdefault(scenario["family"], []).append(scenario)
+    for family in ("exact", "reworded", "done", "hop", "good"):
+        assert by.get(family)
+    assert len(by["good"]) >= 3
+    bad = [scenario for scenario in scenarios if scenario["family"] != "good"]
+    assert all(scenario["expected"] == "block" for scenario in bad)
+    assert all(scenario["expected"] == "allow" for scenario in by["good"])
+    dev_ids = {scenario["id"] for scenario in load_scenarios(SCENARIOS)}
+    assert dev_ids.isdisjoint({scenario["id"] for scenario in scenarios})
+
+
 def test_suite_completes_and_writes_the_table() -> None:
     proc = subprocess.run(
         [sys.executable, "-m", "eval.traps"],
@@ -57,13 +89,25 @@ def test_suite_completes_and_writes_the_table() -> None:
         text=True,
     )
     assert proc.returncode == 0, proc.stderr
-    for label in ("| Arm |", "no-memory", "search-only baseline", "sheldon"):
+    for label in (
+        "## Dev",
+        "## Held-out",
+        "| Arm |",
+        "no-memory",
+        "search-only baseline",
+        "sheldon",
+    ):
         assert label in proc.stdout
     body = (ROOT / "eval" / "traps" / "results.md").read_text(encoding="utf-8")
     assert FALKORDB_IMAGE in body
     assert "python -m eval.traps" in body
     assert "| Arm |" in body
     assert "Main sha:" in body
+    assert "### Dev scenarios" in body
+    assert "| a1 |" in body
+    assert "### Held-out scenarios" in body
+    assert "| h-exact-1 |" in body
+    assert "### Dev misses" in body
 
 
 def test_two_runs_report_identical_counts() -> None:

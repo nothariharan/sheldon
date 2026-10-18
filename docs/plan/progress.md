@@ -11,10 +11,10 @@ ruff check sheldon tests eval
 All checks passed!
 
 pytest
-200 passed in 51.63s
+202 passed in 69.93s
 
 pytest tests/test_smoke.py
-3 passed in 0.12s
+3 passed in 0.20s
 ```
 
 Run on `ec328d9` plus this change, against `falkordb/falkordb:v4.22.1`. The trap suite is inside that pytest run.

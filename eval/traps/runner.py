@@ -20,6 +20,7 @@ from sheldon.seed.snapshot import copy_graph, load_seed
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 SCENARIOS = HERE / "scenarios.json"
+HELDOUT = HERE / "heldout" / "scenarios.json"
 RESULTS = HERE / "results.md"
 COMMAND = "python -m eval.traps"
 
@@ -105,26 +106,74 @@ def _false_block_line(
     return "Sheldon wrongly blocked good actions: " + "; ".join(parts) + "."
 
 
-def run_suite(write_path: Path | None = RESULTS) -> dict[str, Any]:
-    """Score every arm. ``write_path`` None skips ``results.md``."""
-    scenarios = load_scenarios()
-    frozen = ensure_frozen()
+def _counts(rows: list[dict[str, Any]]) -> tuple:
+    return tuple(
+        (row["name"], row["bad_blocked"], row["bad_total"], row["good_wrong"], row["good_total"])
+        for row in rows
+    )
+
+
+def _verdict(blocked: bool) -> str:
+    return "block" if blocked else "allow"
+
+
+def _scenario_table(
+    scenarios: list[dict[str, Any]],
+    decisions: dict[str, dict[str, bool]],
+) -> str:
+    header = "| id | category | expected | no-memory | search-only baseline | sheldon |"
+    rule = "| --- | --- | --- | --- | --- | --- |"
+    lines = [header, rule]
+    for scenario in scenarios:
+        sid = scenario["id"]
+        cells = " | ".join(_verdict(decisions[arm.name][sid]) for arm in ARMS)
+        lines.append(
+            f"| {sid} | {scenario['family']} | {scenario['expected']} | {cells} |"
+        )
+    return "\n".join(lines)
+
+
+def _miss_lines(
+    scenarios: list[dict[str, Any]],
+    decisions: dict[str, dict[str, bool]],
+    traces: dict[str, dict[str, str]],
+) -> list[str]:
+    lines = []
+    for scenario in scenarios:
+        for arm in ARMS:
+            got = _verdict(decisions[arm.name][scenario["id"]])
+            if got == scenario["expected"]:
+                continue
+            reason = traces[arm.name][scenario["id"]]
+            lines.append(
+                f"- {scenario['id']} {arm.name}: expected {scenario['expected']}, "
+                f"got {got}. {reason}"
+            )
+    if not lines:
+        return ["None."]
+    return lines
+
+
+def score_set(frozen: str, scenarios: list[dict[str, Any]]) -> dict[str, Any]:
+    """Score ``scenarios`` on a fresh copy per check. Time the check, not the copy."""
     bad_total = sum(1 for scenario in scenarios if scenario["expected"] == "block")
     good_total = sum(1 for scenario in scenarios if scenario["expected"] == "allow")
     rows: list[dict[str, Any]] = []
     decisions: dict[str, dict[str, bool]] = {}
-
+    traces: dict[str, dict[str, str]] = {}
     for arm in ARMS:
         bad_blocked = 0
         good_wrong = 0
         samples_ms: list[float] = []
         decisions[arm.name] = {}
+        traces[arm.name] = {}
         for scenario in scenarios:
             copy_graph(frozen, RUN_GRAPH)
             t0 = perf_counter()
             blocked = arm.blocks(RUN_GRAPH, scenario)
             samples_ms.append((perf_counter() - t0) * 1000)
             decisions[arm.name][scenario["id"]] = blocked
+            traces[arm.name][scenario["id"]] = getattr(arm, "trace", "")
             if scenario["expected"] == "block" and blocked:
                 bad_blocked += 1
             elif scenario["expected"] == "allow" and blocked:
@@ -139,9 +188,25 @@ def run_suite(write_path: Path | None = RESULTS) -> dict[str, Any]:
                 "median_ms": statistics.median(samples_ms),
             }
         )
+    return {
+        "rows": rows,
+        "decisions": decisions,
+        "traces": traces,
+        "table": format_table(rows),
+        "scenarios_table": _scenario_table(scenarios, decisions),
+        "misses": _miss_lines(scenarios, decisions, traces),
+        "false_blocks": _false_block_line(scenarios, decisions),
+        "n": len(scenarios),
+    }
 
-    table = format_table(rows)
-    false_blocks = _false_block_line(scenarios, decisions)
+
+def run_suite(write_path: Path | None = RESULTS) -> dict[str, Any]:
+    """Score dev and held-out separately. ``write_path`` None skips ``results.md``."""
+    dev_scenarios = load_scenarios(SCENARIOS)
+    held_scenarios = load_scenarios(HELDOUT)
+    frozen = ensure_frozen()
+    dev = score_set(frozen, dev_scenarios)
+    held = score_set(frozen, held_scenarios)
     date = datetime.now(timezone.utc).date().isoformat()
     sha = _main_sha()
     body = "\n".join(
@@ -153,36 +218,62 @@ def run_suite(write_path: Path | None = RESULTS) -> dict[str, Any]:
             f"Image: {FALKORDB_IMAGE}",
             f"Command: `{COMMAND}`",
             "",
-            table,
+            "## Dev",
             "",
-            false_blocks,
+            dev["table"],
+            "",
+            dev["false_blocks"],
+            "",
+            "### Dev scenarios",
+            "",
+            dev["scenarios_table"],
+            "",
+            "### Dev misses",
+            "",
+            *dev["misses"],
+            "",
+            "## Held-out",
+            "",
+            held["table"],
+            "",
+            held["false_blocks"],
+            "",
+            "### Held-out scenarios",
+            "",
+            held["scenarios_table"],
+            "",
+            "### Held-out misses",
+            "",
+            *held["misses"],
             "",
         ]
     )
     if write_path is not None:
         write_path.write_text(body, encoding="utf-8")
-    counts = tuple(
-        (row["name"], row["bad_blocked"], row["bad_total"], row["good_wrong"], row["good_total"])
-        for row in rows
-    )
     return {
-        "rows": rows,
-        "counts": counts,
-        "decisions": decisions,
-        "table": table,
-        "false_blocks": false_blocks,
+        "dev": dev,
+        "heldout": held,
+        "counts": {"dev": _counts(dev["rows"]), "heldout": _counts(held["rows"])},
+        "decisions": {"dev": dev["decisions"], "heldout": held["decisions"]},
         "markdown": body,
         "date": date,
         "sha": sha,
         "image": FALKORDB_IMAGE,
         "command": COMMAND,
-        "n": len(scenarios),
     }
 
 
 def main() -> int:
     report = run_suite()
-    print(report["table"])
+    print("## Dev")
     print()
-    print(report["false_blocks"])
+    print(report["dev"]["table"])
+    print()
+    print(report["dev"]["false_blocks"])
+    print()
+    print("## Held-out")
+    print()
+    print(report["heldout"]["table"])
+    print()
+    print(report["heldout"]["false_blocks"])
     return 0

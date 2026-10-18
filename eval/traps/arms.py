@@ -13,11 +13,24 @@ from typing import Any, Protocol
 from sheldon.db import read
 from sheldon.gate.approve import approve
 from sheldon.gate.done import claim_done
-from sheldon.preflight import preflight
-from sheldon.retrieval.s0 import s0
+from sheldon.preflight import compute_action_fingerprint, preflight
+from sheldon.retrieval.s0 import keyword_terms, s0
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REFUTED = "refuted"
+
+
+def _compact_status(rows: list[dict]) -> list[dict]:
+    compact = []
+    for row in rows:
+        compact.append(
+            {
+                "id": row.get("id"),
+                "claim_status": row.get("claim_status"),
+                "incident_cause_status": row.get("incident_cause_status"),
+            }
+        )
+    return compact
 
 
 class Arm(Protocol):
@@ -36,6 +49,7 @@ class NoMemory:
 
     def blocks(self, graph: str, scenario: dict[str, Any]) -> bool:
         del graph, scenario
+        self.trace = "no-memory has no gate and returns allow"
         return False
 
 
@@ -51,16 +65,19 @@ class SearchOnlyBaseline:
     name = "search-only baseline"
 
     def blocks(self, graph: str, scenario: dict[str, Any]) -> bool:
+        terms = keyword_terms(scenario["text"])
         hits = s0(graph, scenario["text"])
-        if not hits:
-            return False
-        rows = read(graph, "trap_hit_status", {"ids": [hit["id"] for hit in hits]})
-        for row in rows:
-            if row.get("claim_status") == REFUTED:
-                return True
-            if row.get("incident_cause_status") == REFUTED:
-                return True
-        return False
+        ids = [hit["id"] for hit in hits]
+        rows = read(graph, "trap_hit_status", {"ids": ids}) if ids else []
+        blocked = any(
+            row.get("claim_status") == REFUTED or row.get("incident_cause_status") == REFUTED
+            for row in rows
+        )
+        self.trace = (
+            f"s0_keyword terms={terms!r} hits={ids} "
+            f"trap_hit_status={_compact_status(rows)} blocked={blocked}"
+        )
+        return blocked
 
 
 class SheldonArm:
@@ -79,13 +96,22 @@ class SheldonArm:
         action = scenario["action"]
         kind = action["type"]
         if kind == "preflight":
+            fingerprint = compute_action_fingerprint(
+                action["command"], list(action["paths"]), REPO_ROOT
+            )
             decision = preflight(
                 graph,
                 command=action["command"],
                 paths=list(action["paths"]),
                 repo_root=REPO_ROOT,
             )
-            return decision["decision"] == "block"
+            blocked = decision["decision"] == "block"
+            self.trace = (
+                "preflight queries/preflight_r2.cypher "
+                f"fingerprint={fingerprint!r} returned decision={decision['decision']!r} "
+                f"reason={decision['reason']!r} evidence_ids={decision['evidence_ids']}"
+            )
+            return blocked
         if kind == "done":
             approval_id = claim_done(
                 graph,
@@ -95,6 +121,7 @@ class SheldonArm:
                 model="trap",
                 session="trap",
             )
+            self.trace = f"claim_done queries/claim_done.cypher returned {approval_id!r}"
             return approval_id is None
         if kind == "approve":
             approval_id = approve(
@@ -108,5 +135,6 @@ class SheldonArm:
                 model="trap",
                 session="trap",
             )
+            self.trace = f"approve queries/approve_pr.cypher returned {approval_id!r}"
             return approval_id is None
         raise ValueError(f"unknown action type {kind!r} on {scenario['id']}")

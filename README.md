@@ -69,23 +69,41 @@ The evidence gate, the one-write refute plus stale cascade, and the retry block,
 
 ## Benchmark
 
-On 21 synthetic scenarios we wrote, three arms check one proposed action each against the same FalkorDB graph (`falkordb/falkordb:v4.22.1`). This is a narrow test of one job, not a general memory benchmark. No benchmark for this exact job that we found. The scenarios are synthetic and deterministic, and no LLM is in the loop. The search-only baseline is a stand-in for a recall-style memory. It is not a named product.
+On 21 synthetic scenarios we wrote, three arms check one proposed action each against the same FalkorDB graph (`falkordb/falkordb:v4.22.1`). Ten more scenarios are held out and scored separately. This is a narrow test of one job, not a general memory benchmark. No benchmark for this exact job that we found. The scenarios are synthetic and deterministic, and no LLM is in the loop. The search-only baseline is a stand-in for a recall-style memory. It is not a named product.
 
-N = 21 (14 actions that should be blocked, 7 that should be allowed). Each check resets from a frozen `GRAPH.COPY`. The median is the check, not the copy. Command: `python -m eval.traps`.
+Dev N = 21 (14 actions that should be blocked, 7 that should be allowed). Held-out N = 10 (7 that should be blocked, 3 that should be allowed). Each check resets from a frozen `GRAPH.COPY`. The median is the check, not the copy. Command: `python -m eval.traps`. `eval/traps/FROZEN` is the sha256 of both scenario files. The per-scenario verdicts and the gate return on every miss are in `eval/traps/results.md`.
 
 - **no-memory** always allows.
 - **search-only baseline** runs the S0 keyword path (`queries/s0_keyword.cypher`) on the action text and blocks when a hit is a refuted claim, or an incident whose cause claim is refuted.
-- **sheldon** runs preflight R2, W3 `claim_done`, and W1 `approve` as they are on main. Preflight counts as a block only when the decision is `block`. `warn` counts as allow. `approve` checks cited evidence and does not walk `RELIES_ON` or `DEPENDS_ON`.
+- **sheldon** runs preflight R2, W3 `claim_done`, and W1 `approve` as they are on main. Preflight counts as a block only when the decision is `block`. `warn` counts as allow. `approve` checks cited evidence. It does not read W2 stale state. W2's `refute_claim` is the refute write; this arm does not call it on a proposed approval.
+
+### Dev
 
 | Arm | Bad blocked | Good wrongly blocked | Median ms |
 | --- | --- | --- | --- |
 | no-memory | 0/14 | 0/7 | 0.00 |
-| search-only baseline | 8/14 | 1/7 | 5.20 |
-| sheldon | 7/14 | 0/7 | 3.82 |
+| search-only baseline | 8/14 | 1/7 | 5.33 |
+| sheldon | 7/14 | 0/7 | 4.30 |
+| sheldon | 7/14 | 0/7 | 4.21 |
 
 Sheldon wrongly blocked good actions: none.
 
-How another arm is added is in [`eval/traps/README.md`](eval/traps/README.md).
+### Held-out
+
+| Arm | Bad blocked | Good wrongly blocked | Median ms |
+| --- | --- | --- | --- |
+| no-memory | 0/7 | 0/3 | 0.00 |
+| search-only baseline | 2/7 | 0/3 | 4.87 |
+| sheldon | 3/7 | 0/3 | 3.71 |
+| sheldon | 3/7 | 0/3 | 4.21 |
+
+Sheldon wrongly blocked good actions: none.
+
+Sheldon missed seven bad actions on the dev set. Four are reworded retries of the refuted fix (`b1`–`b4`): the command is not the recorded fingerprint `edit checkout/cache.py`, so `queries/preflight_r2.cypher` returns no block and preflight returns decision `warn` (`Files touched in prior incident(s) INC-12; alternative fix attempt allowed`). That is a limit of exact-fingerprint preflight. The other three are approvals that cite a claim 1, 2, and 3 `RELIES_ON` hops from a refuted claim (`d1`–`d3`). `queries/approve_pr.cypher` returned an approval id because evidence E-31 executed on sha `b2`. The arm calls that W1 gate only. It does not call W2.
+
+On the dev set, search-only blocked five bad actions sheldon allowed: `b1`, `b2`, `b3`, `d1`, and `d2`. Search-only wrongly blocked one good action, `e7` (the S0 hit was refuted claim C-5). Sheldon wrongly blocked good actions: none.
+
+How another arm is added is in [`eval/traps/README.md`](eval/traps/README.md). The check interface is `name` and `blocks(graph, scenario) -> bool`.
 
 ## Graph data model
 
