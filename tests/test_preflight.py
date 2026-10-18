@@ -178,8 +178,9 @@ def test_preflight_manual_override_bypasses_block(seed_graph: str) -> None:
     assert "E-41" in res["evidence_ids"]
 
 
-def test_preflight_fails_open_on_db_outage() -> None:
-    """Fail-open: database outage or connection error must return warn with explanatory reason."""
+def test_preflight_blocks_on_db_outage(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A database outage blocks commit, push, and done. The old test expected warn."""
+    monkeypatch.delenv("SHELDON_FAIL_OPEN", raising=False)
 
     class FailingDB:
         def select_graph(self, name: str) -> None:
@@ -187,7 +188,25 @@ def test_preflight_fails_open_on_db_outage() -> None:
 
     res = preflight(
         "any_graph",
-        command="edit checkout/cache.py",
+        command="git commit",
+        paths=["checkout/cache.py"],
+        db=FailingDB(),  # type: ignore[arg-type]
+    )
+    assert res["decision"] == "block"
+    assert "Database unavailable" in res["reason"]
+    assert "blocked" in res["reason"]
+
+
+def test_preflight_fail_open_escape_hatch(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SHELDON_FAIL_OPEN", "1")
+
+    class FailingDB:
+        def select_graph(self, name: str) -> None:
+            raise ConnectionError("Connection refused: FalkorDB is down")
+
+    res = preflight(
+        "any_graph",
+        command="git push",
         paths=["checkout/cache.py"],
         db=FailingDB(),  # type: ignore[arg-type]
     )
