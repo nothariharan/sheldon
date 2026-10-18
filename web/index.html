@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Sheldon · no repeat of a refuted fix</title>
+  <title>Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo.</title>
   <meta name="description" content="Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo.">
   <meta property="og:title" content="Sheldon">
   <meta property="og:description" content="Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo.">
@@ -51,8 +51,7 @@
   <main>
     <section class="hero wrap" id="top">
       <p class="label">Graph Hacks 2026 <i>·</i> Track 02 <i>·</i> FalkorDB</p>
-      <h1><span>No repeat of a refuted fix.</span> <span>No “done” without a real run.</span></h1>
-      <p class="sub">Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo.</p>
+      <h1>Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo.</h1>
       <div class="cmds">
         <button class="cmd copy" type="button" data-copy="./scripts/setup.sh" aria-label="Copy Linux setup command">
           <span class="cmd__ps">$</span><code>./scripts/setup.sh</code><span class="copy__state" aria-hidden="true"></span>
@@ -138,7 +137,7 @@
 
     <section class="block wrap" id="how">
       <p class="label">How it works</p>
-      <h2>Three Cypher files do the work.</h2>
+      <h2>Four Cypher files do the work.</h2>
       <div class="cards">
         <a class="card" href="https://github.com/nothariharan/sheldon/blob/main/queries/preflight_r2.cypher">
           <span class="card__tag">R2</span>
@@ -150,7 +149,7 @@
           <span class="card__tag">W1 · W3</span>
           <h3>Evidence gate</h3>
           <p>An approval or done claim lands only on runs that executed on that sha. Zero rows back means refused.</p>
-          <code><a href="https://github.com/nothariharan/sheldon/blob/main/queries/approve_pr.cypher">approve_pr.cypher</a> · <a href="https://github.com/nothariharan/sheldon/blob/main/queries/claim_done.cypher">claim_done.cypher</a></code>
+          <span class="card__files"><a href="https://github.com/nothariharan/sheldon/blob/main/queries/approve_pr.cypher">approve_pr.cypher</a><a href="https://github.com/nothariharan/sheldon/blob/main/queries/claim_done.cypher">claim_done.cypher</a></span>
         </div>
         <a class="card" href="https://github.com/nothariharan/sheldon/blob/main/queries/refute_claim.cypher">
           <span class="card__tag">W2</span>
