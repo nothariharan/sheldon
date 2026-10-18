@@ -81,11 +81,11 @@ blocked: refuted by E-41
 this edit repeats the cache-TTL fix tried for INC-12; E-41 (CI run) refuted it
 ```
 
-`sheldon-mcp` exposes `preflight` for hosts that call tools. Fingerprint match is exact. The `sameAction` JS UDF was tested as our own library on 4.22.1 and 6.0.1. Wiring it is roadmap. Do not change the image pin to load it. FLEX is not preloaded and is not needed. Fail-closed for commit, push, and "done". Fail-open for reads, so an outage does not freeze the agent. Other hosts are roadmap.
+`sheldon-mcp` exposes `preflight` for hosts that call tools. Fingerprint match is exact. The `sameAction` JS UDF was tested as our own library on 4.22.1 and 6.0.1. Wiring it is roadmap. Do not change the image pin to load it. FLEX is not preloaded and is not needed. Commit, push, and done fail open today: on a database error, preflight returns warn and the CLI exits 0. Reads fail open as well, so an outage does not freeze the agent. Other hosts are roadmap.
 
 ### 2.4 Cascade
 
-**W2 ran** on 4.18.3 and v4.22.1. On valid executed evidence it refutes the claim and stales dependents at up to 3 hops in one statement. It refuses unexecuted evidence. `tests/belief/test_refute.py` shows `refute_claim` doing that on v4.22.1. The Cypher file `queries/refute_hypothesis.cypher` is the older sketch and stays, because a contract test locks its text. The statement that ran is `queries/refute_claim.cypher`:
+**W2** is tested on the pinned `falkordb/falkordb:v4.22.1` image. On valid executed evidence it refutes the claim and stales dependents at up to 3 hops in one statement. It refuses unexecuted evidence. `tests/belief/test_refute.py` shows `refute_claim` doing that on v4.22.1. The Cypher file `queries/refute_hypothesis.cypher` is the older sketch and stays, because a contract test locks its text. The statement under test is `queries/refute_claim.cypher`:
 
 ```cypher
 MATCH (c:Claim {id: $cid})
