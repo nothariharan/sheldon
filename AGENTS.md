@@ -91,6 +91,6 @@ Smoke test: module version is `42201`, and `GRAPH.COPY` of a one-node graph roun
 
 [`docs/plan/`](docs/plan/README.md) wins on product scope and wording. [`docs/facts.md`](docs/facts.md), [`docs/decisions/REPORT.md`](docs/decisions/REPORT.md), and [`docs/engine/papers.md`](docs/engine/papers.md) still override `docs/design/` and `docs/research/` on engine limits. `papers.md` retires the personalized-PageRank design row: that procedure does not exist. Index: [`docs/README.md`](docs/README.md).
 
-The five quotes the plan uses are in [`docs/plan/quotes.md`](docs/plan/quotes.md). Do not add others, and do not paste them into UI text.
+The six quotes the plan uses are in [`docs/plan/quotes.md`](docs/plan/quotes.md). Do not add others, and do not paste them into UI text.
 
 No Cursor rules. They would repeat this file.

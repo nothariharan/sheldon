@@ -10,7 +10,7 @@ Graph Hacks (WeMakeDevs × FalkorDB), Track 02 — Agent Memory and Coordination
 
 > A stale graph is worse than no graph, it lies with confidence.
 
-Guy Korland, FalkorDB, 14 Sep 2026. https://x.com/g_korland/status/2099372201292013619
+@falkordb on X, Aug 25 2026.
 
 ## Start here
 

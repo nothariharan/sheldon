@@ -15,7 +15,7 @@ Read in this order:
 
 | Path | What it is |
 |---|---|
-| `plan/` | Product scope, stations, owners, and the five quotes |
+| `plan/` | Product scope, stations, owners, and the six quotes |
 | `facts.md` | Pin, engine limits, research corrections, claims never to write |
 | `decisions/REPORT.md` | Older scope note. The plan wins on the product |
 | `engine/features.md` | FalkorDB feature list with doc links. Read before guessing that a command exists |
