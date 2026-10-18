@@ -159,18 +159,15 @@ def test_investigation_graph_key() -> None:
 
 
 def test_stubs_are_not_described_as_working() -> None:
-    readme_line = (ROOT / "README.md").read_text(encoding="utf-8").splitlines()[2]
-    assert readme_line == (
+    honest = (
         "Sheldon blocks an exact repeat of a refuted fix, and blocks calling "
         "work done without a real test run, on one shared FalkorDB graph per repo. "
         "A reworded retry of that fix is allowed: the dev table blocks 0 of 4."
     )
-    agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
-    assert (
-        "Sheldon blocks coding agents from retrying fixes that already failed, "
-        "and from calling work done without a real test run, from the first "
-        "edit to the merge, on one shared FalkorDB graph per repo."
-    ) in agents
+    readme_line = (ROOT / "README.md").read_text(encoding="utf-8").splitlines()[2]
+    agents_line = (ROOT / "AGENTS.md").read_text(encoding="utf-8").splitlines()[2]
+    assert readme_line == honest
+    assert agents_line == honest
     for path in (ROOT / "sheldon").rglob("*.py"):
         text = path.read_text(encoding="utf-8")
         if "NotImplementedError" not in text:

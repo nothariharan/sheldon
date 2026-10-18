@@ -105,42 +105,39 @@ def test_heldout_file_has_the_required_mix() -> None:
     assert dev_ids.isdisjoint({scenario["id"] for scenario in scenarios})
 
 
-def test_suite_completes_and_writes_the_table() -> None:
+def test_suite_completes_and_writes_the_table(tmp_path: Path) -> None:
     results = ROOT / "eval" / "traps" / "results.md"
-    previous = results.read_text(encoding="utf-8")
-    try:
-        proc = subprocess.run(
-            [sys.executable, "-m", "eval.traps"],
-            cwd=ROOT,
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        assert proc.returncode == 0, proc.stderr
-        for label in (
-            "## Dev",
-            "## Held-out",
-            "| Arm |",
-            "no-memory",
-            "search-only baseline",
-            "sheldon",
-        ):
-            assert label in proc.stdout
-        body = results.read_text(encoding="utf-8")
-        assert FALKORDB_IMAGE in body
-        assert "python -m eval.traps" in body
-        assert "| Arm |" in body
-        assert "Main sha:" in body
-        assert "### Dev scenarios" in body
-        assert "| a1 |" in body
-        assert "### Held-out scenarios" in body
-        assert "| h-exact-1 |" in body
-        assert "### Dev misses" in body
-    finally:
-        # The run rewrites results.md, including the median. The e2e child
-        # pytest checks the README against this file, so put the committed
-        # run back.
-        results.write_text(previous, encoding="utf-8")
+    before = results.read_bytes()
+    out = tmp_path / "results.md"
+    proc = subprocess.run(
+        [sys.executable, "-m", "eval.traps", "--out", str(out)],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+    for label in (
+        "## Dev",
+        "## Held-out",
+        "| Arm |",
+        "no-memory",
+        "search-only baseline",
+        "sheldon",
+    ):
+        assert label in proc.stdout
+    body = out.read_text(encoding="utf-8")
+    assert FALKORDB_IMAGE in body
+    assert "python -m eval.traps" in body
+    assert "| Arm |" in body
+    assert "Main sha:" in body
+    assert "### Dev scenarios" in body
+    assert "| a1 |" in body
+    assert "### Held-out scenarios" in body
+    assert "| h-exact-1 |" in body
+    assert "### Dev misses" in body
+    assert results.read_bytes() == before
+    assert results.read_text(encoding="utf-8") == before.decode("utf-8")
 
 
 def test_two_runs_report_identical_counts() -> None:

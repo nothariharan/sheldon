@@ -1,6 +1,6 @@
 # Sheldon
 
-Sheldon blocks coding agents from retrying fixes that already failed, and from calling work done without a real test run, from the first edit to the merge, on one shared FalkorDB graph per repo.
+Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo. A reworded retry of that fix is allowed: the dev table blocks 0 of 4.
 
 Read [`docs/plan/README.md`](docs/plan/README.md) first. Product scope and wording are that plan. W1 (evidence gate), W2 (refute plus stale cascade), and R1 (PR-time recall) are the only queries that have run. Every other station is **to build** or **roadmap**. A stub that raises `NotImplementedError` is not a working feature.
 

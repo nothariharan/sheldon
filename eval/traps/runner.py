@@ -3,6 +3,7 @@
 Reset each check from one frozen ``GRAPH.COPY``. Time the check, not the copy.
 """
 
+import argparse
 import json
 import statistics
 import subprocess
@@ -263,8 +264,16 @@ def run_suite(write_path: Path | None = RESULTS) -> dict[str, Any]:
     }
 
 
-def main() -> int:
-    report = run_suite()
+def main(argv: list[str] | None = None) -> int:
+    """Print the tables. ``--out PATH`` chooses the report file.
+
+    The default path is ``eval/traps/results.md``. The suite test passes a
+    temporary path so that file stays the committed run.
+    """
+    parser = argparse.ArgumentParser(prog="python -m eval.traps")
+    parser.add_argument("--out", default=str(RESULTS))
+    args = parser.parse_args(argv)
+    report = run_suite(write_path=Path(args.out))
     print("## Dev")
     print()
     print(report["dev"]["table"])
