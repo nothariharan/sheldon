@@ -40,6 +40,7 @@ RUNNABLE: tuple[str, ...] = (
     "preflight_r2",
     "capsule_task",
     "record_eval_action",
+    "export_graph",
 )
 
 # Present so the decision is visible, not yet a statement we should run.

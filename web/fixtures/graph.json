@@ -1,0 +1,436 @@
+{
+  "schema": "sheldon.export.v1",
+  "graph": "sheldon_export_seed",
+  "nodes": [
+    {
+      "key": "A-3",
+      "labels": [
+        "Approval"
+      ],
+      "properties": {
+        "id": "A-3",
+        "by": "reviewer-agent",
+        "actor_kind": "agent",
+        "sha": "b2",
+        "status": "active",
+        "at": 1792070000000,
+        "model": "agent-model-c",
+        "session": "S-4"
+      }
+    },
+    {
+      "key": "ACT-1",
+      "labels": [
+        "Action"
+      ],
+      "properties": {
+        "id": "ACT-1",
+        "cmd": "edit checkout/cache.py",
+        "files": [
+          "checkout/cache.py"
+        ],
+        "fingerprint": "edit checkout/cache.py",
+        "model": "agent-model-a",
+        "session": "S-1"
+      }
+    },
+    {
+      "key": "C-5",
+      "labels": [
+        "Claim"
+      ],
+      "properties": {
+        "id": "C-5",
+        "kind": "fix",
+        "status": "refuted",
+        "confidence": 0.1,
+        "text": "Raising the cache TTL to 600s fixes the checkout timeout",
+        "model": "agent-model-a",
+        "session": "S-1"
+      }
+    },
+    {
+      "key": "C-7",
+      "labels": [
+        "Claim"
+      ],
+      "properties": {
+        "id": "C-7",
+        "kind": "root_cause",
+        "status": "open",
+        "confidence": 0.7,
+        "text": "Session lock contention under load causes the checkout timeout",
+        "model": "agent-model-a",
+        "session": "S-1"
+      }
+    },
+    {
+      "key": "Commit",
+      "labels": [
+        "Commit"
+      ],
+      "properties": {
+        "hash": "a0",
+        "message": "Cache cart totals",
+        "timestamp": 1791900000000
+      }
+    },
+    {
+      "key": "E-30",
+      "labels": [
+        "Evidence"
+      ],
+      "properties": {
+        "id": "E-30",
+        "kind": "trace",
+        "executed": true,
+        "sha": "a1",
+        "exit_code": 0,
+        "model": "ci",
+        "session": "CI-30"
+      }
+    },
+    {
+      "key": "E-31",
+      "labels": [
+        "Evidence"
+      ],
+      "properties": {
+        "id": "E-31",
+        "kind": "test_run",
+        "executed": true,
+        "sha": "b2",
+        "exit_code": 0,
+        "model": "sheldon-run",
+        "session": "S-2"
+      }
+    },
+    {
+      "key": "E-41",
+      "labels": [
+        "Evidence"
+      ],
+      "properties": {
+        "id": "E-41",
+        "kind": "ci_run",
+        "executed": true,
+        "sha": "a1",
+        "exit_code": 1,
+        "model": "ci",
+        "session": "CI-41"
+      }
+    },
+    {
+      "key": "E-52",
+      "labels": [
+        "Evidence"
+      ],
+      "properties": {
+        "id": "E-52",
+        "kind": "test_run",
+        "executed": false,
+        "sha": "b2",
+        "model": "agent-model-b",
+        "session": "S-3"
+      }
+    },
+    {
+      "key": "E-60",
+      "labels": [
+        "Evidence"
+      ],
+      "properties": {
+        "id": "E-60",
+        "kind": "ci_run",
+        "executed": true,
+        "sha": "b2",
+        "exit_code": 1,
+        "model": "ci",
+        "session": "CI-60"
+      }
+    },
+    {
+      "key": "INC-12",
+      "labels": [
+        "Incident"
+      ],
+      "properties": {
+        "id": "INC-12",
+        "title": "Checkout times out under load",
+        "severity": "sev2",
+        "at": 1792050000000
+      }
+    },
+    {
+      "key": "PR-7",
+      "labels": [
+        "PR"
+      ],
+      "properties": {
+        "number": 7,
+        "head_sha": "b2",
+        "status": "open"
+      }
+    },
+    {
+      "key": "T-9",
+      "labels": [
+        "Task"
+      ],
+      "properties": {
+        "id": "T-9",
+        "status": "open",
+        "title": "Shard the session lock"
+      }
+    },
+    {
+      "key": "checkout/api.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "path": "checkout/api.py",
+        "extension": "py",
+        "language": "python"
+      }
+    },
+    {
+      "key": "checkout/cache.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "path": "checkout/cache.py",
+        "extension": "py",
+        "language": "python"
+      }
+    },
+    {
+      "key": "checkout/session.py",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "path": "checkout/session.py",
+        "extension": "py",
+        "language": "python"
+      }
+    },
+    {
+      "key": "demo/checkout",
+      "labels": [
+        "Repository"
+      ],
+      "properties": {
+        "name": "demo/checkout"
+      }
+    },
+    {
+      "key": "dev-a",
+      "labels": [
+        "Developer"
+      ],
+      "properties": {
+        "name": "dev-a"
+      }
+    },
+    {
+      "key": "docs/readme.md",
+      "labels": [
+        "File"
+      ],
+      "properties": {
+        "path": "docs/readme.md",
+        "extension": "md",
+        "language": "markdown"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "type": "ATTEMPTED_FIX_FOR",
+      "from": "ACT-1",
+      "to": "C-5",
+      "properties": {}
+    },
+    {
+      "type": "AUTHORED",
+      "from": "dev-a",
+      "to": "Commit",
+      "properties": {}
+    },
+    {
+      "type": "BELONGS_TO",
+      "from": "checkout/api.py",
+      "to": "demo/checkout",
+      "properties": {}
+    },
+    {
+      "type": "BELONGS_TO",
+      "from": "checkout/cache.py",
+      "to": "demo/checkout",
+      "properties": {}
+    },
+    {
+      "type": "BELONGS_TO",
+      "from": "checkout/session.py",
+      "to": "demo/checkout",
+      "properties": {}
+    },
+    {
+      "type": "BELONGS_TO",
+      "from": "docs/readme.md",
+      "to": "demo/checkout",
+      "properties": {}
+    },
+    {
+      "type": "CHANGES",
+      "from": "PR-7",
+      "to": "checkout/cache.py",
+      "properties": {
+        "sha": "b2"
+      }
+    },
+    {
+      "type": "CITES",
+      "from": "A-3",
+      "to": "E-31",
+      "properties": {}
+    },
+    {
+      "type": "CO_CHANGED_WITH",
+      "from": "checkout/cache.py",
+      "to": "checkout/session.py",
+      "properties": {
+        "frequency": 4
+      }
+    },
+    {
+      "type": "DEPENDS_ON",
+      "from": "T-9",
+      "to": "C-7",
+      "properties": {}
+    },
+    {
+      "type": "FOR",
+      "from": "A-3",
+      "to": "PR-7",
+      "properties": {}
+    },
+    {
+      "type": "HAS_CAUSE",
+      "from": "INC-12",
+      "to": "C-5",
+      "properties": {}
+    },
+    {
+      "type": "HAS_CAUSE",
+      "from": "INC-12",
+      "to": "C-7",
+      "properties": {}
+    },
+    {
+      "type": "MODIFIED",
+      "from": "Commit",
+      "to": "checkout/cache.py",
+      "properties": {
+        "additions": 40,
+        "deletions": 6
+      }
+    },
+    {
+      "type": "MODIFIED",
+      "from": "Commit",
+      "to": "checkout/cache.py",
+      "properties": {
+        "additions": 15,
+        "deletions": 1
+      }
+    },
+    {
+      "type": "MODIFIED",
+      "from": "Commit",
+      "to": "checkout/session.py",
+      "properties": {
+        "additions": 22,
+        "deletions": 3
+      }
+    },
+    {
+      "type": "REFUTED_BY",
+      "from": "C-5",
+      "to": "E-41",
+      "properties": {
+        "agent": "ci",
+        "at": 1792060000000,
+        "model": "ci",
+        "session": "CI-41"
+      }
+    },
+    {
+      "type": "RELIES_ON",
+      "from": "A-3",
+      "to": "C-7",
+      "properties": {}
+    },
+    {
+      "type": "SUPPORTED_BY",
+      "from": "C-7",
+      "to": "E-30",
+      "properties": {}
+    },
+    {
+      "type": "TOUCHED",
+      "from": "INC-12",
+      "to": "checkout/session.py",
+      "properties": {}
+    }
+  ],
+  "moments": {
+    "retry_block": {
+      "argv": [
+        "-m",
+        "sheldon.preflight",
+        "--graph",
+        "sheldon_export_seed_moments",
+        "--command",
+        "edit checkout/cache.py",
+        "--paths",
+        "checkout/cache.py"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "blocked: refuted by E-41; this edit repeats the fix tried for INC-12; E-41 refuted it: Raising the cache TTL to 600s fixes the checkout timeout\n"
+    },
+    "evidence_gate": {
+      "argv": [
+        "-m",
+        "sheldon.check",
+        "--graph",
+        "sheldon_export_seed_moments",
+        "7",
+        "b2",
+        "--evidence",
+        "E-52"
+      ],
+      "exit_code": 1,
+      "stdout": "sheldon: blocked (failure) PR 7 at b2\nblocked: E-52 not executed\nrefuted: C-5 by E-41 (INC-12, via checkout/session.py)\n",
+      "stderr": ""
+    },
+    "stale_cascade": {
+      "argv": [
+        "-m",
+        "sheldon.check",
+        "--graph",
+        "sheldon_export_seed_moments",
+        "7",
+        "b2",
+        "--evidence",
+        "E-31"
+      ],
+      "exit_code": 1,
+      "stdout": "sheldon: blocked (failure) PR 7 at b2\nstale: A-3 marked stale\nrefuted: C-5 by E-41 (INC-12, via checkout/session.py)\nrefuted: C-7 by E-60 (INC-12, via checkout/session.py)\n",
+      "stderr": ""
+    }
+  }
+}

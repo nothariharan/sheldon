@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "-m",
+    "sheldon.preflight",
+    "--graph",
+    "sheldon_export_seed_moments",
+    "--command",
+    "edit checkout/cache.py",
+    "--paths",
+    "checkout/cache.py"
+  ],
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "blocked: refuted by E-41; this edit repeats the fix tried for INC-12; E-41 refuted it: Raising the cache TTL to 600s fixes the checkout timeout\n"
+}

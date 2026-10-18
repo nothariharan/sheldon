@@ -1,0 +1,1 @@
+blocked: refuted by E-41; this edit repeats the fix tried for INC-12; E-41 refuted it: Raising the cache TTL to 600s fixes the checkout timeout

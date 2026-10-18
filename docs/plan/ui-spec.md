@@ -55,6 +55,34 @@ Color `stale` differently from `blocked` and from a passing line. T-9 is the tas
 
 Row `web-ui`. A page over a frozen snapshot of the seed, checked into the site. It lists claims, evidence, and approvals, and it shows the stale cascade after the recorded refute (C-7 refuted by E-60, A-3 stale, T-9 stale). No write button, no login, no public database. If this needs a framework, Next.js on Vercel reading that snapshot is enough.
 
+The snapshot and the transcripts are already in `web/fixtures/`. Regenerate them with:
+
+```bash
+python -m sheldon.export --seed --graph sheldon_export_seed --out web/fixtures
+```
+
+`--seed` deletes that graph key and loads the demo seed. Do not point it at a graph you need to keep.
+
+`python -m sheldon.export --graph <key> --serve 8765` serves the same document on `http://127.0.0.1:8765/export.json`. GET is the method. There is no write route.
+
+### Export schema `sheldon.export.v1`
+
+`web/fixtures/graph.json`:
+
+- `schema`: `sheldon.export.v1`
+- `graph`: the key that was exported
+- `nodes`: `{key, labels, properties}`. `key` is `id`, else `path`, else `PR-<number>`, else `name`
+- `edges`: `{type, from, to, properties}` using those keys
+- `moments.retry_block`, `moments.evidence_gate`, `moments.stale_cascade`: each is `{argv, exit_code, stdout, stderr}` from a real CLI run
+
+Plain transcripts next to the JSON:
+
+- `retry-block.txt` is preflight stderr for `edit checkout/cache.py`. Exit 2. It cites E-41 and INC-12.
+- `evidence-gate.txt` is `python -m sheldon.check` citing E-52. It contains `blocked: E-52 not executed`.
+- `stale-cascade.txt` is the check after C-7 is refuted by E-60. It contains `stale: A-3 marked stale` and `refuted: C-7 by E-60`.
+
+The `.json` file beside each transcript is that moment's `{argv, exit_code, stdout, stderr}`.
+
 ## Must ship by 9 PM IST
 
 - Hero, the three recorded terminal replays, the static seed graph, how it works, install, and the repo link.
