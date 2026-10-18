@@ -9,6 +9,10 @@
 // Step 5 (R1): PR 7 changes checkout/cache.py, which co-changes with
 //   checkout/session.py, which INC-12 touched.
 // Claim status is open | confirmed | refuted (deep.md section 5).
+// $head is PR 7's head sha (default 'b2'). Seed at the real commit you record
+// from, so a `sheldon run` there lands on the same sha the check reads.
+// Step 2 (gate): C-11 is Agent B's done claim. W3 approves it only with a
+// passing executed test_run on $head.
 
 CREATE (repo:Repository {name: 'demo/checkout'}),
        (dev:Developer {name: 'dev-a'}),
@@ -37,16 +41,18 @@ CREATE (repo:Repository {name: 'demo/checkout'}),
                   text: 'Session lock contention under load causes the checkout timeout',
                   model: 'agent-model-a', session: 'S-1'}),
        (inc)-[:HAS_CAUSE]->(c5), (inc)-[:HAS_CAUSE]->(c7),
+       (:Claim {id: 'C-11', kind: 'done', status: 'open',
+                text: 'Done, all tests pass on PR 7', model: 'agent-model-b', session: 'S-3'}),
 
        (e41:Evidence {id: 'E-41', kind: 'ci_run', executed: true, sha: 'a1', exit_code: 1,
                       model: 'ci', session: 'CI-41'}),
        (e30:Evidence {id: 'E-30', kind: 'trace', executed: true, sha: 'a1', exit_code: 0,
                       model: 'ci', session: 'CI-30'}),
-       (e31:Evidence {id: 'E-31', kind: 'test_run', executed: true, sha: 'b2', exit_code: 0,
+       (e31:Evidence {id: 'E-31', kind: 'test_run', executed: true, sha: $head, exit_code: 0,
                       model: 'sheldon-run', session: 'S-2'}),
-       (:Evidence {id: 'E-52', kind: 'test_run', executed: false, sha: 'b2',
+       (:Evidence {id: 'E-52', kind: 'test_run', executed: false, sha: $head,
                    model: 'agent-model-b', session: 'S-3'}),
-       (:Evidence {id: 'E-60', kind: 'ci_run', executed: true, sha: 'b2', exit_code: 1,
+       (:Evidence {id: 'E-60', kind: 'ci_run', executed: true, sha: $head, exit_code: 1,
                    model: 'ci', session: 'CI-60'}),
        (c5)-[:REFUTED_BY {agent: 'ci', at: 1792060000000, model: 'ci', session: 'CI-41'}]->(e41),
        (c7)-[:SUPPORTED_BY]->(e30),
@@ -55,8 +61,8 @@ CREATE (repo:Repository {name: 'demo/checkout'}),
                  fingerprint: 'edit checkout/cache.py', model: 'agent-model-a', session: 'S-1'})
          -[:ATTEMPTED_FIX_FOR]->(c5),
 
-       (pr:PR {number: 7, head_sha: 'b2', status: 'open'})-[:CHANGES {sha: 'b2'}]->(cache),
-       (a3:Approval {id: 'A-3', by: 'reviewer-agent', actor_kind: 'agent', sha: 'b2',
+       (pr:PR {number: 7, head_sha: $head, status: 'open'})-[:CHANGES {sha: $head}]->(cache),
+       (a3:Approval {id: 'A-3', by: 'reviewer-agent', actor_kind: 'agent', sha: $head,
                      status: 'active', at: 1792070000000, model: 'agent-model-c', session: 'S-4'}),
        (a3)-[:FOR]->(pr), (a3)-[:CITES]->(e31), (a3)-[:RELIES_ON]->(c7),
        (:Task {id: 'T-9', status: 'open', title: 'Shard the session lock'})-[:DEPENDS_ON]->(c7)

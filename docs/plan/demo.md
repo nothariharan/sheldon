@@ -16,7 +16,8 @@ Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval fre
 | C-5 | The cache-TTL fix for INC-12. Refuted | 1, 5 |
 | E-41 | CI run that refuted C-5 | 1, 5 |
 | ACT-1 | The earlier attempt at C-5 that preflight matches against | 1 |
-| PR 7 | Head `b2`. Changes `checkout/cache.py`, which co-changes with `checkout/session.py` | 2, 3, 5 |
+| PR 7 | Head `b2` by default, or the sha passed to `load_seed`. Changes `checkout/cache.py`, which co-changes with `checkout/session.py` | 2, 3, 5 |
+| C-11 | Agent B's done claim ("Done, all tests pass on PR 7"). W3 approves it only with a passing executed run on the head sha | 2 |
 | E-52 | A test run that never executed. Agent B cites it | 2 |
 | C-7 | Root cause: session lock contention. Open until step 3 | 3 |
 | A-3 | Approval on PR 7. Cites E-31, relies on C-7 | 2, 3 |
@@ -27,7 +28,16 @@ Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval fre
 
 - [ ] Every row in each step's "Needs" list is merged, or that step uses its fallback.
 - [ ] Re-open the malladiphani quote's link ([quotes.md](quotes.md) #1). The wording and date match the live post, or the quote is cut.
-- [ ] Reset the demo graph from the frozen seed with `GRAPH.COPY`. Same seed for every take.
+- [ ] Seed once at the commit you record from, freeze it, then copy it before every take. `sheldon run` records the real `git rev-parse HEAD`, so the seed's PR 7 head has to be that same sha or step 2 cannot turn green:
+
+  ```bash
+  HEAD_SHA=$(git rev-parse HEAD)
+  python -c "from sheldon.seed import load_seed; load_seed('sheldon:frozen', head_sha='$HEAD_SHA')"
+  python -c "from sheldon.seed import copy_graph; copy_graph('sheldon:frozen', 'sheldon:demo/checkout')"   # before every take
+  export SHELDON_GRAPH=sheldon:demo/checkout
+  ```
+
+  The seed creates the S0 full-text indexes, and the copy keeps them.
 - [ ] FalkorDB is `falkordb/falkordb:v4.22.1`. The Browser is on `localhost:3000`.
 - [ ] The step 4 numbers match the eval table exactly, or the slide says "to be measured".
 - [ ] `SHELDON_PREFLIGHT_OVERRIDE` is unset in the shell you record from (`env | grep SHELDON_PREFLIGHT_OVERRIDE` prints nothing). When it is set, preflight lets every action through and step 1 shows no block.
@@ -51,13 +61,20 @@ Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval fre
 3. The hook's stderr:
 
    ```text
-   blocked: refuted by E-41
-   this edit repeats the cache-TTL fix tried for INC-12; E-41 (CI run) refuted it
+   blocked: refuted by E-41; this edit repeats the fix tried for INC-12; E-41 refuted it: Raising the cache TTL to 600s fixes the checkout timeout
    ```
+
+   The hook exits 2, which is what makes Claude Code refuse the edit.
 
 **Say:** "Agent A is about to try the cache-TTL fix again. A CI run, E-41, already refuted that fix for INC-12. These ids are seed data. The preflight finds it in the graph and the hook blocks the edit, with the evidence id as the reason. None we found blocks a coding agent from retrying a code fix refuted in the shared graph."
 
-**Fallback:** if the hook is not wired, run `sheldon preflight` by hand and show it returning `block` with E-41. Say "the hook is to build" out loud.
+**Fallback:** if the hook is not wired, run preflight by hand from a terminal and show the same `blocked:` line and exit code 2:
+
+```bash
+python -m sheldon.preflight --graph "$SHELDON_GRAPH" --command "edit checkout/cache.py" --paths checkout/cache.py; echo "exit $?"
+```
+
+There is no `sheldon preflight` subcommand; `sheldon` has only `run`. Run it from a real terminal: when stdin is a pipe that stays open, it waits for hook input.
 
 ## 2. Evidence gate (0:45–1:25)
 
@@ -66,14 +83,19 @@ Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval fre
 **On screen:**
 
 1. Agent B opens a PR and writes "Done, all tests pass." with `Evidence: E-52` in the PR body. It ran nothing.
-2. The W3 call returning no id (0 rows).
+2. `claim_done` on C-11 citing E-52 returning `None` (0 rows).
 3. The PR's `sheldon` check, red:
 
    ```text
    blocked: E-52 not executed
    ```
 
-4. Agent B runs `sheldon run -- pytest`, which writes a real executed run. Agent B cites that id instead, and the check turns green.
+4. Agent B runs `sheldon run -- pytest`. It runs the tests and records an executed run named `E-<first 12 hex of the output digest>` on the real head sha. Agent B cites that id instead, `claim_done` on C-11 returns `A-C-11`, and the check turns green.
+
+   ```bash
+   sheldon run -- pytest            # uses $SHELDON_GRAPH
+   python -m sheldon.check --graph "$SHELDON_GRAPH" 7 "$HEAD_SHA" --evidence <that E- id>
+   ```
 
 **Say:** "Agent B says it's done and cites E-52. E-52 is not an executed test run on this commit. A model can cite evidence. It can't create it. So the claim does not land, and the check stays red, citing E-52. After a real `sheldon run`, the cited id is an executed run on this sha, and the check passes."
 
