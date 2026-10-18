@@ -46,7 +46,7 @@ def seed_graph() -> Generator[str, None, None]:
 
 
 def test_tools_constant_has_required_tools() -> None:
-    expected = {"preflight", "recall", "claim", "refute", "resume"}
+    expected = {"preflight", "recall", "claim", "refute", "resume", "sheldon_run", "claim_done"}
     assert set(TOOLS) == expected
 
 
@@ -182,7 +182,15 @@ def test_jsonrpc_tools_list() -> None:
     assert resp["id"] == 2
     tools = resp["result"]["tools"]
     names = [t["name"] for t in tools]
-    assert set(names) == {"preflight", "recall", "claim", "refute", "resume"}
+    assert set(names) == {
+        "preflight",
+        "recall",
+        "claim",
+        "refute",
+        "resume",
+        "sheldon_run",
+        "claim_done",
+    }
     for t in tools:
         assert "inputSchema" in t
         assert t["inputSchema"]["type"] == "object"

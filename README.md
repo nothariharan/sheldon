@@ -43,6 +43,10 @@ Windows, after setup:
 
 The database is on port 6379. FalkorDB Browser is on port 3000.
 
+## MCP client
+
+`python -m sheldon.mcp.server` speaks MCP JSON-RPC on stdin and stdout. Point the client at that command. `sheldon_run` is `sheldon run -- <cmd>`: it runs the command and records one executed Evidence node. `claim_done` writes an Approval when that run passed on the same sha. `tests/mcp/test_e2e_session.py` drives one session on the seed graph: preflight, then the run, then the done claim.
+
 ## Where to read
 
 People and coding agents start at [`docs/plan/README.md`](docs/plan/README.md). Work items are in [`TASKS.md`](TASKS.md). How to test is in [`TESTING.md`](TESTING.md). How to branch is in [`CONTRIBUTING.md`](CONTRIBUTING.md). Engine limits are in [`docs/facts.md`](docs/facts.md) and [`docs/engine/papers.md`](docs/engine/papers.md).
