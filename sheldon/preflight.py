@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from sheldon.db import read
-from sheldon.gate.closed import outage_decision
+from sheldon.gate.closed import is_closed_action, outage_decision
 from sheldon.output import CommandResult, emit
 
 
@@ -212,7 +212,8 @@ def preflight(
     try:
         query_res = query_r2(graph, fingerprint, c_paths, db=db)
     except Exception as exc:  # noqa: BLE001
-        return outage_decision("commit, push, and done", exc)
+        action = normalize_command(command) or "preflight"
+        return outage_decision(action, exc, closed=is_closed_action(command))
 
     return decide_preflight(
         query_res["blocks"],

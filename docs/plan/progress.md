@@ -52,7 +52,7 @@ Commits on main, 29 total: Hariharan 12 (41%), Akshat Bhaskar 10 (34%), Satyansh
 | evidence-run | partly built. `record_run` is tested. The `sheldon run` command is not started. |
 | claim-lease | built and tested. `handoff_task` is partly built: it drops `to_agent` and `note`. |
 | provenance | built and tested |
-| preflight | built and tested. On a database error it returns `warn` and exit 0. |
+| preflight | built and tested. On a database error, commit, push, and done return `block` and exit 2 (`SHELDON_FAIL_OPEN=1` keeps warn). A read returns `warn` and exit 0. |
 | capsule | partly built. The text is tested, including `sheldon run -- pytest`. No session-start hook restores it. |
 | resume | built and tested |
 | compose | partly built. The comment is tested. After a refute it can name the old supporting evidence as the refutation. |
@@ -97,10 +97,10 @@ Checked against main on this date.
 |---|---|
 | The `sheldon run` command does not exist. The capsule tells agents to run it. Only `record_run` exists. | Holds. No console script and no `sheldon run` module. `sheldon/capsule.py` sets the proving command to `sheldon run -- pytest`. |
 | No session-start hook restores the capsule. | Holds. `capsule()` returns text. Nothing in the tree installs a `SessionStart` hook. |
-| Commit, push, and done do not fail closed when the database is down. | Holds. `preflight` returns `warn` on `ConnectionError` (`test_preflight_fails_open_on_db_outage`). No commit, push, or done command checks the database before it proceeds. |
+| Commit, push, and done do not fail closed when the database is down. | Fixed by this pull request for commit, push, and done. `preflight` returns `block` and exit 2 (`test_preflight_blocks_on_db_outage`). `SHELDON_FAIL_OPEN=1` keeps warn. Reads (recall, resume, and the check summary) still warn (`test_a_read_warns_on_an_outage`). |
 | The eval is a scripted dry run with no paired runs, so no eval numbers go in the pitch. | Holds. `run_paired_eval` is `simulate_retry_block`. Pass rate and token totals are not measured. |
 | After the cascade, the PR comment cites E-30 as refuting C-7, but E-30 supported it. | Holds for `compose`. After `refute_claim` on the seed, recall still returns `SUPPORTED_BY` E-30 with status `refuted`, and `compose` prints "fix C-7 was refuted by evidence E-30". The check summary is a different path: it keeps `REFUTED_BY` rows, and the test on main expects "refuted: C-7 by E-60". |
-| `deep.md` line 84 claims fail-closed, and line 88 overstates the W2 run. | Holds. Line 84 says fail-closed for commit, push, and done. The code does not. Line 88 says the W2 statement ran on 4.18.3 and v4.22.1. Tests in this tree run on the pinned v4.22.1 image. The rest of that paragraph matches `queries/refute_claim.cypher` and `tests/belief/test_refute.py`. |
+| `deep.md` line 84 claims fail-closed, and line 88 overstates the W2 run. | Fixed for the fail-closed claim. Line 84 now says commit, push, and done fail closed, and reads (recall, resume, and the check summary) fail open with a warning. Line 88 was corrected earlier: the W2 statement is tested on the pinned v4.22.1 image. |
 | The README is missing the data model, the Cypher list, the AI disclosure, a LICENSE file, and credit for code-graph and RepoGraph. | Holds. `README.md` has none of those. There is no `LICENSE` file. `docs/plan/deep.md` section 2.1 does credit code-graph and RepoGraph. The README does not. |
 
 Nothing in that list is false.
@@ -136,7 +136,7 @@ Satyansh:
 
 1. Change `compose` so a refuted claim cites the `REFUTED_BY` evidence. On the seed, E-30 supported C-7. E-60 is the refuting run.
 2. `cli-ux`, after the compose fix, with Akshat ([cli-spec.md](cli-spec.md)). Satyansh: spinners, colored blocked / passed / stale lines, and the preflight, `sheldon run`, check, and MCP frames through one shared output module.
-3. The session-start hook is built (`python -m sheldon.hooks.session_start`). Fail-closed for commit, push, and done on a database error is the cut if time runs short. If it stays cut, the `docs/plan/deep.md` line that says commit, push, and done fail open stays.
+3. The session-start hook is built (`python -m sheldon.hooks.session_start`). Commit, push, and done fail closed on a database error. Reads (recall, resume, and the check summary) fail open with a warning.
 
 Akshat:
 

@@ -194,7 +194,28 @@ def test_preflight_blocks_on_db_outage(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     assert res["decision"] == "block"
     assert "Database unavailable" in res["reason"]
-    assert "blocked" in res["reason"]
+    assert "git commit blocked" in res["reason"]
+
+
+def test_preflight_warns_when_the_outage_is_not_a_closed_action(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An edit is not commit, push, or done, so an outage warns."""
+    monkeypatch.delenv("SHELDON_FAIL_OPEN", raising=False)
+
+    class FailingDB:
+        def select_graph(self, name: str) -> None:
+            raise ConnectionError("Connection refused: FalkorDB is down")
+
+    res = preflight(
+        "any_graph",
+        command="edit checkout/cache.py",
+        paths=["checkout/cache.py"],
+        db=FailingDB(),  # type: ignore[arg-type]
+    )
+    assert res["decision"] == "warn"
+    assert "Database unavailable" in res["reason"]
+    assert "blocked" not in res["reason"]
 
 
 def test_preflight_fail_open_escape_hatch(monkeypatch: pytest.MonkeyPatch) -> None:
