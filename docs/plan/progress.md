@@ -1,38 +1,38 @@
 # Progress
 
-Sun 18 Oct 2026. Main is `e3efdf0`. Submission closes 11:59 PM IST. The last about 3 hours are for the video, the form, the README, and the fresh public push.
+Sun 18 Oct 2026. Main is `ec328d9`. Submission closes 11:59 PM IST. The last about 3 hours are for the video, the form, the README, and the fresh public push.
 
-A row is built when the code is on main and a test exercises it. Merged since the last note: #44 (smoke runs W1, W2, and R1 on the seed), #42 (session-start hook), #43 (fail-closed for commit, push, and done), #46 (banner, `sheldon --help`, and plain text off a terminal), #47 (`sheldon` with no args on a terminal opens a prompt), #48 (status lines), and #49 (cli-ux colors, frames, and the spinner). No other open pull request.
+A row is built when the code is on main and a test exercises it. Merged since the last note: #44 (smoke runs W1, W2, and R1 on the seed), #42 (session-start hook), #43 (fail-closed for commit, push, and done), #46 (banner, `sheldon --help`, and plain text off a terminal), #47 (`sheldon` with no args on a terminal opens a prompt), #48 (status lines), #49 (cli-ux colors, frames, and the spinner), and #50 (the spinner tests patch the spinner `sheldon run` calls).
 
 ## Suite on main
 
 ```
-ruff check sheldon tests
+ruff check sheldon tests eval
 All checks passed!
 
 pytest
-196 passed in 12.07s
+200 passed in 51.63s
 
 pytest tests/test_smoke.py
 3 passed in 0.12s
 ```
 
-Run on `e3efdf0` plus this change, against `falkordb/falkordb:v4.22.1`.
+Run on `ec328d9` plus this change, against `falkordb/falkordb:v4.22.1`. The trap suite is inside that pytest run.
 
 ## Overall
 
-20 of 32 `TASKS.md` rows are built and tested. That is 63%. Counted on `e3efdf0`, including #49 (`cli-ux` is built). A row counts as built only when this note says built, not partly built.
+21 of 33 `TASKS.md` rows are built and tested. That is 64%. Counted on `ec328d9` plus this change (`eval-traps` is built). A row counts as built only when this note says built, not partly built.
 
 | Person | Rows | Built and tested | Left | % built |
 |---|---|---|---|---|
 | Akshat (aksbhaskar) | 7 | 4 | 3 | 57% |
 | Hariharan (nothariharan) | 9 | 8 | 1 | 89% |
 | Amaan | 9 | 3 | 6 | 33% |
-| Satyansh | 8 | 6 | 2 | 75% |
+| Satyansh | 9 | 7 | 2 | 78% |
 
-`cli-ux` is shared, so it is counted under Akshat and under Satyansh.
+`cli-ux` is shared, so it is counted under Akshat and under Satyansh. That is why the person rows sum to 34.
 
-Commits on main, 49 total, counted on `e3efdf0`: Hariharan 27 (55%), Akshat Bhaskar 14 (29%), Satyansh Gaur 7 (14%), Cursor Agent 1 (2%). Amaan has 0.
+Commits on main, 50 total, counted on `ec328d9`: Hariharan 28 (56%), Akshat Bhaskar 14 (28%), Satyansh Gaur 7 (14%), Cursor Agent 1 (2%). Amaan has 0.
 
 ## Rows
 
@@ -64,6 +64,7 @@ Commits on main, 49 total, counted on `e3efdf0`: Hariharan 27 (55%), Akshat Bhas
 | gate-tests | built and tested |
 | provenance-tests | built and tested |
 | eval-harness | partly built. Reset and the repeated-step count are tested. Paired runs are cut for submission. |
+| eval-traps | built and tested. `python -m eval.traps` on the 21 scenarios in `eval/traps/scenarios.json`. The table is in the README. The test does not assert scores. |
 | package-name | not started. Cut for submission. |
 | demo-submit | not started. `docs/plan/demo.md` is a draft. The video and the portal submission are not. |
 | public-repo | not started |
@@ -89,7 +90,7 @@ Commits on main, 49 total, counted on `e3efdf0`: Hariharan 27 (55%), Akshat Bhas
 | CLI | partly built. #46 added the banner, `sheldon --help`, and plain text when stdout is not a terminal. #47 is merged: on a terminal, `sheldon` with no args opens a prompt for preflight, run, check, and help. Off a terminal, no args is still a usage error. `sheldon run` is built. `sheldon init` and `sheldon ingest` are not. |
 | demo seed | built and tested |
 | demo script | partly built. Draft only. |
-| eval | partly built. Definition and dry run are tested. No paired measured runs, so no eval numbers in the pitch. |
+| eval | partly built. Definition and dry run are tested. Paired pass rate and token totals are not measured. The trap-suite table is in the README. |
 | README pieces | built. Data model, Cypher list, AI disclosure, credits, and `LICENSE` are on main (#33). |
 
 ## Review notes
@@ -101,7 +102,7 @@ Checked against main on this date.
 | The `sheldon run` command does not exist. The capsule tells agents to run it. Only `record_run` exists. | Fixed by #32. `pyproject.toml` has `sheldon = "sheldon.cli:console_main"`, and `sheldon run -- pytest` records one executed Evidence node. |
 | No session-start hook restores the capsule. | Fixed by #42. `python -m sheldon.hooks.session_start` prints `capsule()` for `SHELDON_TASK`. `hooks/claude-session-start.json` is the `SessionStart` snippet (startup, resume, clear, compact). |
 | Commit, push, and done do not fail closed when the database is down. | Fixed by #43 for commit, push, and done. `preflight` returns `block` and exit 2 (`test_preflight_blocks_on_db_outage`). `SHELDON_FAIL_OPEN=1` keeps warn. Reads (recall, resume, and the check summary) still warn (`test_a_read_warns_on_an_outage`). |
-| The eval is a scripted dry run with no paired runs, so no eval numbers go in the pitch. | Holds. `run_paired_eval` is `simulate_retry_block`. Pass rate and token totals are not measured. |
+| The eval is a scripted dry run with no paired runs, so no eval numbers go in the pitch. | Paired pass rate and token totals are still unmeasured. `run_paired_eval` is `simulate_retry_block`. The README benchmark is the trap-suite table from `python -m eval.traps`. |
 | After the cascade, the PR comment cites E-30 as refuting C-7, but E-30 supported it. | Fixed by #41. `compose` cites the `REFUTED_BY` evidence. On the seed the comment says C-7 was refuted by E-60, not E-30 (`tests/answers/test_compose.py`). The check summary still keeps `REFUTED_BY` rows. |
 | `deep.md` line 84 claims fail-closed, and line 88 overstates the W2 run. | Fixed by #43 for the fail-closed claim. Line 84 now says commit, push, and done fail closed, and reads (recall, resume, and the check summary) fail open with a warning. Line 88 was corrected earlier: the W2 statement is tested on the pinned v4.22.1 image. |
 | The README is missing the data model, the Cypher list, the AI disclosure, a LICENSE file, and credit for code-graph and RepoGraph. | Fixed by #33. README has Graph data model, Cypher files, AI disclosure, and Credits sections, and `LICENSE` is in the repo root. |
@@ -110,9 +111,9 @@ Rows marked Fixed were true at 10 AM and are fixed on main. Rows marked Holds ar
 
 ## On track?
 
-Not every station in `docs/plan/deep.md` is built. The retry block (`sheldon/preflight.py`), the evidence gate (W1 and W3), and the cascade (`refute_claim`) are built and tested. Ingest, the S0 vector half, paired eval runs, and a live GitHub App are not. The pitch has no eval numbers. Use the fallbacks in `docs/plan/demo.md` when a step is not recorded: run preflight by hand, run `python -m sheldon.check` if the webhook is not live, and skip the ingest step.
+Not every station in `docs/plan/deep.md` is built. The retry block (`sheldon/preflight.py`), the evidence gate (W1 and W3), and the cascade (`refute_claim`) are built and tested. Ingest, the S0 vector half, paired eval runs, and a live GitHub App are not. The README benchmark is the trap-suite table. Paired pass rate and token totals are not in it. Use the fallbacks in `docs/plan/demo.md` when a step is not recorded: run preflight by hand, run `python -m sheldon.check` if the webhook is not live, and skip the ingest step.
 
-Hariharan has the most built rows (8 of 9). Amaan has no commit on main; schema stays with him because `schema.py` is his file. Satyansh's compose citation and the session-start hook are on main. Paired eval runs stay cut.
+Hariharan has the most built rows (8 of 9). Amaan has no commit on main; schema stays with him because `schema.py` is his file. Satyansh's compose citation and the session-start hook are on main. Paired eval runs stay cut. The trap suite is this change.
 
 ## Cuts
 

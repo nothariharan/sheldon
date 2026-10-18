@@ -26,6 +26,6 @@ jobs:
       - name: install
         run: pip install -e ".[dev]"
       - name: lint
-        run: ruff check sheldon tests
+        run: ruff check sheldon tests eval
       - name: test
         run: pytest

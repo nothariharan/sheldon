@@ -67,6 +67,26 @@ People and coding agents start at [`docs/plan/README.md`](docs/plan/README.md). 
 
 The evidence gate, the one-write refute plus stale cascade, and the retry block, plus a with/without count that has not been run. Each eval run will reset from one frozen `GRAPH.COPY`. Paper numbers are not Sheldon results. Cost is to measure. The default quality phrase is "safer at the same quality".
 
+## Benchmark
+
+On 21 synthetic scenarios we wrote, three arms check one proposed action each against the same FalkorDB graph (`falkordb/falkordb:v4.22.1`). This is a narrow test of one job, not a general memory benchmark. No benchmark for this exact job that we found. The scenarios are synthetic and deterministic, and no LLM is in the loop. The search-only baseline is a stand-in for a recall-style memory. It is not a named product.
+
+N = 21 (14 actions that should be blocked, 7 that should be allowed). Each check resets from a frozen `GRAPH.COPY`. The median is the check, not the copy. Command: `python -m eval.traps`.
+
+- **no-memory** always allows.
+- **search-only baseline** runs the S0 keyword path (`queries/s0_keyword.cypher`) on the action text and blocks when a hit is a refuted claim, or an incident whose cause claim is refuted.
+- **sheldon** runs preflight R2, W3 `claim_done`, and W1 `approve` as they are on main. Preflight counts as a block only when the decision is `block`. `warn` counts as allow. `approve` checks cited evidence and does not walk `RELIES_ON` or `DEPENDS_ON`.
+
+| Arm | Bad blocked | Good wrongly blocked | Median ms |
+| --- | --- | --- | --- |
+| no-memory | 0/14 | 0/7 | 0.00 |
+| search-only baseline | 8/14 | 1/7 | 5.20 |
+| sheldon | 7/14 | 0/7 | 3.82 |
+
+Sheldon wrongly blocked good actions: none.
+
+How another arm is added is in [`eval/traps/README.md`](eval/traps/README.md).
+
 ## Graph data model
 
 Labels, relationships, and properties below are the names in `sheldon/schema.py` and the statements in `queries/`.
@@ -165,6 +185,8 @@ Each file under `queries/` is one statement, except `queries/AGENTS.md`, which i
 - `queries/resume_state.cypher` — read tried, failed, believed, and next, each citing ids.
 - `queries/s0_keyword.cypher` — keyword hits over stored text, with no traversal. The vector half waits on `EMBEDDING_DIM`.
 - `queries/seed_demo.cypher` — demo seed in one `CREATE`. The ids are seed data, not a result.
+- `queries/trap_hit_status.cypher` — read claim status, or the cause-claim status of an incident, for S0 hit ids. Used by the trap suite.
+- `queries/trap_overlay.cypher` — one `CREATE` of the trap-suite hop chain and the wrong-sha test run, applied after the demo seed.
 - `queries/writes_with_provenance.cypher` — read `id`, label, `model`, and `session` for `Claim`, `Evidence`, `Approval`, and `Action`.
 
 ## AI disclosure

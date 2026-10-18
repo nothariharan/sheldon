@@ -13,7 +13,7 @@ FalkorDB is up from `./scripts/setup.sh` (Windows: `powershell -File scripts/set
 Linux, from the repo root, with the venv active:
 
 ```bash
-ruff check sheldon tests
+ruff check sheldon tests eval
 pytest
 pytest tests/test_smoke.py
 ```
@@ -21,7 +21,7 @@ pytest tests/test_smoke.py
 Windows:
 
 ```powershell
-.\.venv\Scripts\python.exe -m ruff check sheldon tests
+.\.venv\Scripts\python.exe -m ruff check sheldon tests eval
 .\.venv\Scripts\python.exe -m pytest
 .\.venv\Scripts\python.exe -m pytest tests/test_smoke.py
 ```
