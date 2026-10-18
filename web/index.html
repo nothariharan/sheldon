@@ -72,7 +72,7 @@
         <div class="term__bar"><span class="term__dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="term__title">preflight</span><span class="term__exit" data-exit hidden></span><button class="term__replay" type="button" data-replay aria-label="Replay">replay</button></div>
         <div class="term__body" data-body></div>
       </div>
-      <p class="note">Exact match only. A reworded retry of the same fix is not blocked yet.</p>
+      <p class="note">The exact fingerprint is checked first. A reworded retry is blocked only when full-text search hits the same failed attempt, so some reworded retries still pass.</p>
     </section>
 
     <section class="block wrap" id="gate">
@@ -146,12 +146,12 @@
           <p>Read-only. Matches the action against fixes refuted by executed evidence.</p>
           <code>preflight_r2.cypher</code>
         </a>
-        <a class="card" href="https://github.com/nothariharan/sheldon/blob/main/queries/claim_done.cypher">
+        <div class="card">
           <span class="card__tag">W1 · W3</span>
           <h3>Evidence gate</h3>
           <p>An approval or done claim lands only on runs that executed on that sha. Zero rows back means refused.</p>
-          <code>claim_done.cypher</code>
-        </a>
+          <code><a href="https://github.com/nothariharan/sheldon/blob/main/queries/approve_pr.cypher">approve_pr.cypher</a> · <a href="https://github.com/nothariharan/sheldon/blob/main/queries/claim_done.cypher">claim_done.cypher</a></code>
+        </div>
         <a class="card" href="https://github.com/nothariharan/sheldon/blob/main/queries/refute_claim.cypher">
           <span class="card__tag">W2</span>
           <h3>Refute</h3>
