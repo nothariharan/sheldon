@@ -1,0 +1,3 @@
+# Runtime pin. pyproject.toml allows falkordb>=1.7.
+# This is the FalkorDB client version resolved by CI's `pip install -e ".[dev]"` on Python 3.12.
+FalkorDB==1.8.0

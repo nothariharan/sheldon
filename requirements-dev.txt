@@ -1,0 +1,7 @@
+# Dev pin for a clean clone. One command, from the repo root:
+#   python -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+# pyproject.toml allows pytest>=8 and ruff>=0.6. These are the versions that install resolved.
+-r requirements.txt
+-e .
+pytest==9.1.1
+ruff==0.17.1
