@@ -4,6 +4,13 @@ Sheldon runs your codebase like a Michelin kitchen: every agent, frontier or sma
 
 ![Sheldon CLI refusing an unverified approval](docs/demo/refusal.gif)
 
+<p align="center">
+  <img src="assets/sheldon-banner.svg" alt="Sheldon Banner" width="100%" />
+</p>
+<p align="center">
+  <img src="assets/sheldon-logo.svg" alt="Sheldon Logo" width="100%" />
+</p>
+
 ## The problem
 
 Agents forget what's already been tried and proven wrong. They retry failed fixes, approve PRs that rest on refuted claims, and step on each other. Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo. On 21 dev and 10 held-out synthetic scenarios we wrote, a narrow test of one job, sheldon blocks 13 of 14 bad dev actions and 5 of 7 bad held-out actions, search-only blocks 8 of 14 and 2 of 7, sheldon false blocks are 0 of 7 and 0 of 3, and search-only false blocks are 1 of 7 and 0 of 3. 1 of 4 reworded retries still passes on dev and 2 of 2 on held-out.
@@ -13,64 +20,55 @@ Built and tested on main: W1, W2, W3, R1, R2 preflight, claim and lease (handoff
 ## How it works
 
 ```mermaid
-flowchart LR
-    classDef refused fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#991b1b
-    classDef step fill:#f8fafc,stroke:#64748b,stroke-width:1px
+flowchart TD
+    classDef refused fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#991b1b,font-weight:bold
+    classDef ok fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#166534,font-weight:bold
+    classDef gate fill:#eff6ff,stroke:#3b82f6,stroke-width:1.5px,color:#1e3a8a
+    classDef action fill:#f8fafc,stroke:#64748b,stroke-width:1.5px,color:#0f172a
+    classDef cascade fill:#fef3c7,stroke:#f59e0b,stroke-width:1.5px,color:#92400e
 
-    Agent["Agent proposes action"]:::step
-    R2["Preflight (R2)<br/>Check retry history"]:::step
-    RefuseR2["Refused: repeats refuted fix"]:::refused
-    Lease["Claim / Lease<br/>Task on board"]:::step
-    Work["Execute work"]:::step
-    Run["sheldon run<br/>Execute command"]:::step
-    Evidence["Evidence node<br/>Recorded on sha"]:::step
-    W1["Approve (W1)<br/>Evidence gate"]:::step
-    RefuseW1["Refused: missing run or<br/>refuted ancestor"]:::refused
-    Done["Done (W3)<br/>Verified approval"]:::step
+    subgraph S1 ["1. Preflight Retry Gate (R2)"]
+        Agent["Coding Agent proposes action"]:::action
+        R2["Preflight R2<br/>Exact fingerprint & full-text match"]:::gate
+        BlockR2["BLOCKED: Repeats refuted fix<br/>(Exit code 2, cites Evidence ID)"]:::refused
+        Agent --> R2
+        R2 -- "Matches refuted attempt" --> BlockR2
+    end
 
-    Agent --> R2
-    R2 -- "Refuted attempt" --> RefuseR2
-    R2 -- "Clear / Warn" --> Lease
-    Lease --> Work
-    Work --> Run
-    Run --> Evidence
-    Evidence --> W1
-    W1 -- "Unverified / Refuted" --> RefuseW1
-    W1 -- "Passing run on sha" --> Done
+    subgraph S2 ["2. Coordination & Execution"]
+        Lease["Claim Task Lease<br/>Atomic conditional write on Task board"]:::action
+        Work["Agent executes implementation"]:::action
+        Run["sheldon run -- pytest<br/>Subprocess execution on commit SHA"]:::gate
+        Mint["FalkorDB Evidence Node<br/>executed: true, sha: HEAD, exit: 0"]:::ok
+        
+        R2 -- "Clear / Alternative fix" --> Lease
+        Lease --> Work
+        Work --> Run
+        Run --> Mint
+    end
+
+    subgraph S3 ["3. Graph Gates & Stale Cascade (W1, W2, W3)"]
+        W2["Async CI Refute (W2)<br/>1..3 hop atomic stale cascade"]:::cascade
+        Stale["Dependents marked stale<br/>Approvals: stale, Tasks: stale=true"]:::cascade
+        W1["Evidence Gate (W1 & W3)<br/>approve_pr.cypher / claim_done.cypher"]:::gate
+        CheckAncestor["3-Hop Refuted Ancestor Check<br/>queries/refuted_ancestor.cypher"]:::gate
+        RefuseGate["REFUSED: Evidence missing or<br/>cited claim reaches refuted ancestor"]:::refused
+        Approved["Verified Approval Created<br/>(:Approval)-[:CITES]->(:Evidence)"]:::ok
+
+        W2 -- "Failing CI run" --> Stale
+        Mint --> W1
+        W1 --> CheckAncestor
+        CheckAncestor -- "Refuted ancestor or wrong SHA" --> RefuseGate
+        CheckAncestor -- "Valid run & clean history" --> Approved
+    end
+
+    subgraph S4 ["4. Verified Delivery"]
+        Done["PR Check Green & Task Done<br/>Zero unverified changes land"]:::ok
+        Approved --> Done
+    end
 ```
 
 ## The graph
-
-```mermaid
-graph TD
-    Incident["Incident"]
-    File["File"]
-    Claim["Claim"]
-    Evidence["Evidence"]
-    Action["Action"]
-    Approval["Approval"]
-    PR["PR"]
-    Task["Task"]
-    Commit["Commit"]
-    Developer["Developer"]
-    Repository["Repository"]
-
-    Incident -->|TOUCHED| File
-    Incident -->|HAS_CAUSE| Claim
-    Action -->|ATTEMPTED_FIX_FOR| Claim
-    Claim -->|REFUTED_BY| Evidence
-    Claim -->|SUPPORTED_BY| Evidence
-    Approval -->|CITES| Evidence
-    Approval -->|RELIES_ON| Claim
-    Approval -->|FOR| PR
-    PR -->|CHANGES| File
-    Task -->|DEPENDS_ON| Claim
-    Task -->|DEPENDS_ON| Task
-    Developer -->|AUTHORED| Commit
-    Commit -->|MODIFIED| File
-    File -->|BELONGS_TO| Repository
-    File -->|CO_CHANGED_WITH| File
-```
 
 | Node or Edge | Kind | Purpose in Sheldon |
 | --- | --- | --- |
@@ -307,13 +305,6 @@ python -m sheldon.hooks.session_start
 - **GRAPH.COPY:** Used in `eval/traps/` and `sheldon.seed.copy_graph` to reset an evaluation graph from a frozen baseline in milliseconds without re-running seed scripts.
 - **FalkorDB Browser:** Used on port 3000 for visual inspection of repo nodes, trace paths, and the stale cascade.
 
-## Team
-
-Graph Hacks (WeMakeDevs × FalkorDB), Track 02 — Agent Memory and Coordination. Team SheldonAI.
-
-> A stale graph is worse than no graph, it lies with confidence.
-> — @falkordb on X, Aug 25 2026
-
 ## AI disclosure
 
 The team designed the system and wrote and reviewed the code with AI coding assistants (Cursor agents). Every PR went through tests and human or bot review.
@@ -324,3 +315,7 @@ Repo mapping builds on two MIT projects. Section 2.1 of [`docs/plan/deep.md`](do
 
 - [FalkorDB code-graph](https://github.com/FalkorDB/code-graph) (MIT). Structural calls and imports from that project are roadmap.
 - [FalkorDB RepoGraph](https://github.com/FalkorDB/RepoGraph) (MIT). The borrowed vocabulary is `Developer-AUTHORED→Commit-MODIFIED→File`, `File-CO_CHANGED_WITH→File`, `File-PART_OF→Module`, and `File-BELONGS_TO→Repository`. The seed writes `Developer`, `Commit`, `File`, `Repository`, `AUTHORED`, `MODIFIED`, `CO_CHANGED_WITH`, and `BELONGS_TO`.
+
+## License
+
+MIT License. See [LICENSE](LICENSE) for details.
