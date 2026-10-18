@@ -136,7 +136,7 @@ Satyansh:
 
 1. Change `compose` so a refuted claim cites the `REFUTED_BY` evidence. On the seed, E-30 supported C-7. E-60 is the refuting run.
 2. `cli-ux`, after the compose fix, with Akshat ([cli-spec.md](cli-spec.md)). Satyansh: spinners, colored blocked / passed / stale lines, and the preflight, `sheldon run`, check, and MCP frames through one shared output module.
-3. Session-start hook, and fail-closed for commit, push, and done on a database error. Cut if time runs short. If they stay cut, the `docs/plan/deep.md` line that says commit, push, and done fail open stays.
+3. The session-start hook is built (`python -m sheldon.hooks.session_start`). Fail-closed for commit, push, and done on a database error is the cut if time runs short. If it stays cut, the `docs/plan/deep.md` line that says commit, push, and done fail open stays.
 
 Akshat:
 

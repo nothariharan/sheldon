@@ -8,7 +8,7 @@ Akshat: the banner, the interactive mode, help, and the non-TTY / `NO_COLOR` fal
 
 Satyansh: spinners, the colored status lines, and the per-command output for preflight, `sheldon run`, check, and the MCP server. Those four call one shared module, `sheldon/output.py`, so color, spinners, and the plain-text switch live in one place. Akshat's banner, help, and fallback call that same module.
 
-Satyansh's order: the compose fix comes before this CLI work. On the seed, E-30 supported C-7 and E-60 is the refuting run. If time runs short, the session-start hook and fail-closed are the cut. This CLI work stays.
+Satyansh's order: the compose fix comes before this CLI work. On the seed, E-30 supported C-7 and E-60 is the refuting run. The session-start hook is built (`python -m sheldon.hooks.session_start`). If time runs short, fail-closed is the cut. This CLI work stays.
 
 This file does not add a dependency. The implementation pull request pins `rich` in `requirements.txt` and `requirements-dev.txt`. `textual` is a later choice for a full-screen app, not part of the 9 PM cut. Do not add either library in the docs pull request.
 
