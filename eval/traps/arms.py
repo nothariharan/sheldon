@@ -81,13 +81,13 @@ class SearchOnlyBaseline:
 
 
 class SheldonArm:
-    """Gates as they exist on main.
+    """Preflight R2, W3 ``claim_done``, and W1 ``approve``.
 
     A preflight action blocks only when ``preflight`` returns decision
     ``block``. ``warn`` and ``ok`` are allows. A done action blocks when
     ``claim_done`` returns None. An approval blocks when ``approve`` returns
-    None. ``approve`` checks cited evidence. It does not walk ``RELIES_ON``
-    or ``DEPENDS_ON``.
+    None. ``approve`` checks cited evidence. When the action names a claim,
+    that id is ``relies_on`` and the write refuses a refuted ancestor.
     """
 
     name = "sheldon"
@@ -124,6 +124,7 @@ class SheldonArm:
             self.trace = f"claim_done queries/claim_done.cypher returned {approval_id!r}"
             return approval_id is None
         if kind == "approve":
+            cited = action.get("cites_claim") or ""
             approval_id = approve(
                 graph,
                 pr_number=int(action["pr"]),
@@ -134,7 +135,11 @@ class SheldonArm:
                 actor_kind="agent",
                 model="trap",
                 session="trap",
+                relies_on=cited,
             )
-            self.trace = f"approve queries/approve_pr.cypher returned {approval_id!r}"
+            self.trace = (
+                "approve queries/approve_pr.cypher "
+                f"relies_on={cited!r} returned {approval_id!r}"
+            )
             return approval_id is None
         raise ValueError(f"unknown action type {kind!r} on {scenario['id']}")

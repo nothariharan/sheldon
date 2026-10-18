@@ -17,6 +17,8 @@ HELP = """\
 
 Also:
   python -m sheldon.preflight    block a repeated refuted edit (exit 2)
+  python -m sheldon.gate.approve approve a PR, or print the refuted path (exit 2)
+  python -m sheldon.gate.done    mark a claim done, or print the refuted path (exit 2)
   python -m sheldon.check        print the PR check
   python -m sheldon.mcp.server   MCP on stdin/stdout"""
 

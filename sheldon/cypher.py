@@ -21,6 +21,7 @@ RUNNABLE: tuple[str, ...] = (
     "q_star",
     "audit_refuted_without_evidence",
     "approve_pr",
+    "refuted_ancestor",
     "repeated_failed_steps",
     "create_index_event_id",
     "create_index_event_ts",

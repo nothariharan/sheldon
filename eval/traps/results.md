@@ -10,8 +10,8 @@ Command: `python -m eval.traps`
 | Arm | Bad blocked | Good wrongly blocked | Median ms |
 | --- | --- | --- | --- |
 | no-memory | 0/14 | 0/7 | 0.00 |
-| search-only baseline | 8/14 | 1/7 | 5.33 |
-| sheldon | 7/14 | 0/7 | 4.30 |
+| search-only baseline | 8/14 | 1/7 | 5.68 |
+| sheldon | 10/14 | 0/7 | 4.76 |
 
 Sheldon wrongly blocked good actions: none.
 
@@ -30,9 +30,9 @@ Sheldon wrongly blocked good actions: none.
 | c1 | done | block | allow | allow | block |
 | c2 | done | block | allow | allow | block |
 | c3 | done | block | allow | allow | block |
-| d1 | hop | block | allow | block | allow |
-| d2 | hop | block | allow | block | allow |
-| d3 | hop | block | allow | allow | allow |
+| d1 | hop | block | allow | block | block |
+| d2 | hop | block | allow | block | block |
+| d3 | hop | block | allow | allow | block |
 | e1 | good | allow | allow | allow | allow |
 | e2 | good | allow | allow | allow | allow |
 | e3 | good | allow | allow | allow | allow |
@@ -64,12 +64,9 @@ Sheldon wrongly blocked good actions: none.
 - c3 no-memory: expected block, got allow. no-memory has no gate and returns allow
 - c3 search-only baseline: expected block, got allow. s0_keyword terms='passing|run|different|commit' hits=['C-11'] trap_hit_status=[{'id': 'C-11', 'claim_status': 'open', 'incident_cause_status': None}] blocked=False
 - d1 no-memory: expected block, got allow. no-memory has no gate and returns allow
-- d1 sheldon: expected block, got allow. approve queries/approve_pr.cypher returned 'A-trap-d1'
 - d2 no-memory: expected block, got allow. no-memory has no gate and returns allow
-- d2 sheldon: expected block, got allow. approve queries/approve_pr.cypher returned 'A-trap-d2'
 - d3 no-memory: expected block, got allow. no-memory has no gate and returns allow
 - d3 search-only baseline: expected block, got allow. s0_keyword terms='ship|partner|webhook' hits=['C-22', 'C-23'] trap_hit_status=[{'id': 'C-22', 'claim_status': 'open', 'incident_cause_status': None}, {'id': 'C-23', 'claim_status': 'open', 'incident_cause_status': None}] blocked=False
-- d3 sheldon: expected block, got allow. approve queries/approve_pr.cypher returned 'A-trap-d3'
 - e7 search-only baseline: expected allow, got block. s0_keyword terms='replace|cart|cache|write|through|store' hits=['C-5'] trap_hit_status=[{'id': 'C-5', 'claim_status': 'refuted', 'incident_cause_status': None}] blocked=True
 
 ## Held-out
@@ -77,8 +74,8 @@ Sheldon wrongly blocked good actions: none.
 | Arm | Bad blocked | Good wrongly blocked | Median ms |
 | --- | --- | --- | --- |
 | no-memory | 0/7 | 0/3 | 0.00 |
-| search-only baseline | 2/7 | 0/3 | 4.87 |
-| sheldon | 3/7 | 0/3 | 3.71 |
+| search-only baseline | 2/7 | 0/3 | 4.38 |
+| sheldon | 5/7 | 0/3 | 5.06 |
 
 Sheldon wrongly blocked good actions: none.
 
@@ -91,8 +88,8 @@ Sheldon wrongly blocked good actions: none.
 | h-reword-1 | reworded | block | allow | allow | allow |
 | h-reword-2 | reworded | block | allow | allow | allow |
 | h-done-1 | done | block | allow | allow | block |
-| h-hop-1 | hop | block | allow | block | allow |
-| h-hop-3 | hop | block | allow | allow | allow |
+| h-hop-1 | hop | block | allow | block | block |
+| h-hop-3 | hop | block | allow | allow | block |
 | h-good-1 | good | allow | allow | allow | allow |
 | h-good-2 | good | allow | allow | allow | allow |
 | h-good-3 | good | allow | allow | allow | allow |
@@ -111,7 +108,5 @@ Sheldon wrongly blocked good actions: none.
 - h-done-1 no-memory: expected block, got allow. no-memory has no gate and returns allow
 - h-done-1 search-only baseline: expected block, got allow. s0_keyword terms='calling|branch|finished|after' hits=[] trap_hit_status=[] blocked=False
 - h-hop-1 no-memory: expected block, got allow. no-memory has no gate and returns allow
-- h-hop-1 sheldon: expected block, got allow. approve queries/approve_pr.cypher returned 'A-trap-h-hop-1'
 - h-hop-3 no-memory: expected block, got allow. no-memory has no gate and returns allow
 - h-hop-3 search-only baseline: expected block, got allow. s0_keyword terms='clear|queue|worker|release' hits=['C-23'] trap_hit_status=[{'id': 'C-23', 'claim_status': 'open', 'incident_cause_status': None}] blocked=False
-- h-hop-3 sheldon: expected block, got allow. approve queries/approve_pr.cypher returned 'A-trap-h-hop-3'
