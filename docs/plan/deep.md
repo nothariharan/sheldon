@@ -26,16 +26,16 @@ Memory is how, not what. The three mechanisms need the graph to remember what fa
 
 | Station | Mechanism | Status |
 |---|---|---|
-| Ingest and capsule | `sheldon ingest` writes the code and history graph. The capsule is re-injected at session start, after compaction, and at subagent start. | to build (ingest, capsule). code-graph structural import is roadmap |
-| House standards | Gates enforce refuted-fix, done-needs-a-run, and approval-cites-evidence. | W1 query ran. The rest is to build or roadmap |
-| Evidence gate W1 / W3 | "Done" and approvals land with an executed run on that sha. | W1 query ran. W3 is to build |
-| Retry block R2 | Preflight through a PreToolUse hook. | to build |
-| Cascade W2 | One atomic write refutes the claim and stales approvals and tasks. | W2 query ran. The function in this repo is to build |
-| Claim, lease, resume, provenance | Atomic claims, a resume of what was tried, model and session on every write. | to build |
-| PR check run | Last gate before merge. | R1 query ran. Webhook, pr-ingest, and the check run are to build |
+| Ingest and capsule | `sheldon ingest` writes the code and history graph. The capsule is re-injected at session start, after compaction, and at subagent start. | ingest is to build. The capsule text is built and tested. Session start is built: `python -m sheldon.hooks.session_start` prints it, and `hooks/claude-session-start.json` covers startup, resume, clear, and compact. SubagentStart is not in that snippet. code-graph structural import is roadmap |
+| House standards | Gates enforce refuted-fix, done-needs-a-run, and approval-cites-evidence. | W1 and W3 are built and tested. Preflight blocks a refuted fix. A Stop hook is roadmap |
+| Evidence gate W1 / W3 | "Done" and approvals land with an executed run on that sha. | W1 and W3 built and tested |
+| Retry block R2 | Preflight through a PreToolUse hook. | built and tested (`sheldon/preflight.py`). No `PreToolUse` snippet is in the tree |
+| Cascade W2 | One atomic write refutes the claim and stales approvals and tasks. | built and tested. `refute_claim` does the write. `refute_hypothesis` is still the older sketch |
+| Claim, lease, resume, provenance | Atomic claims, a resume of what was tried, model and session on every write. | built and tested. `claim_task`, heartbeat, complete, and `handoff_task` (stores `to_agent` and `note`). Resume and provenance reads are tested |
+| PR check run | Last gate before merge. | R1, pr-ingest, the check decision, and the webhook are tested on a fixture. Not run against GitHub |
 | Cheaper models, safely | The gate holds whatever model is cooking. | to measure |
 
-### 2.1 Ingest and capsule (to build)
+### 2.1 Ingest (to build) and capsule (built)
 
 Repo mapping is not ours. It builds on FalkorDB code-graph (MIT) and the File / Commit / `CO_CHANGED_WITH` vocabulary of FalkorDB RepoGraph (MIT). We reuse those names and credit them.
 
@@ -49,11 +49,11 @@ Graph written by ingest:
 (:File)-[:BELONGS_TO]->(:Repository)
 ```
 
-The capsule is a short block: do-nots from refuted attempts that touch the current task, plus the command that proves the work. Claude Code hooks: `SessionStart` for startup, resume, clear, and compact, and `SubagentStart` because SessionStart context reaches the parent thread. Hook install is adapted from ponytail (MIT, notice kept). Structural calls/imports from code-graph are roadmap.
+The capsule is a short block: do-nots from refuted attempts that touch the current task, plus the command that proves the work. `hooks/claude-session-start.json` is `SessionStart` for startup, resume, clear, and compact, and it runs `python -m sheldon.hooks.session_start`. `SubagentStart` is not in that snippet. Structural calls/imports from code-graph are roadmap.
 
 ### 2.2 Evidence gate
 
-**W1 ran** on 4.18.3 and v4.22.1. It refuses unexecuted, missing, empty, and duplicate ids, and wrong-sha ids on v4.22.1. Valid ids create 1 `FOR` and 2 `CITES`. `tests/gate/test_approve.py` shows `approve` doing that on v4.22.1.
+**W1 ran** on the pinned `falkordb/falkordb:v4.22.1` image. `tests/test_smoke.py` calls `approve` with a missing evidence id on that image and gets no approval. `approve` refuses unexecuted, missing, empty, and duplicate ids, and wrong-sha ids. Valid ids create 1 `FOR` and 2 `CITES`. `tests/gate/test_approve.py` shows that on v4.22.1.
 
 ```cypher
 MATCH (pr:PR {number:$pr, head_sha:$sha})
@@ -66,15 +66,15 @@ FOREACH (x IN ev | CREATE (a)-[:CITES]->(x))
 RETURN a.id
 ```
 
-**W3 is built.** `tests/gate/test_done.py` shows it. Same shape, on `Claim {kind:'done'}`, needing a `test_run` with `exit_code = 0` on the current tree sha. `$ids` are de-duplicated in the client. Zero rows means refused: missing, unexecuted, or wrong-sha evidence. `sheldon run` is to build. A Stop hook that refuses "done" is roadmap.
+**W3 is built.** `tests/gate/test_done.py` shows it. Same shape, on `Claim {kind:'done'}`, needing a `test_run` with `exit_code = 0` on the current tree sha. `$ids` are de-duplicated in the client. Zero rows means refused: missing, unexecuted, or wrong-sha evidence. `sheldon run` is built (#32). A Stop hook that refuses "done" is roadmap.
 
 Trust rule: `sheldon run -- <cmd>` and CI `check_run.completed` are the Evidence writers. A model saying "all tests pass" without one of those nodes is text, and the gate returns 0 rows.
 
-### 2.3 Retry block (to build)
+### 2.3 Retry block (preflight built)
 
 R2 is read-only, through `GRAPH.RO_QUERY` with a timeout. It asks whether the action fingerprint (normalized command plus touched files) matches an `Action` on a refuted claim, and whether a touched file belongs to an open incident. The answer is `ok`, `warn`, or `block`, plus ids.
 
-Claude Code `PreToolUse` on Edit, Write, and Bash calls `sheldon preflight`. Exit code 2 blocks the tool and puts the reason on stderr:
+The CLI is `python -m sheldon.preflight`. Exit code 2 blocks and puts the reason on stderr. A Claude Code `PreToolUse` snippet is not in the tree:
 
 ```text
 blocked: refuted by E-41
@@ -112,13 +112,13 @@ RETURN c.id AS id, size(deps) AS staled
 
 W2 marks an approval's status stale. A task keeps its status and gets the boolean `stale`. It does not mark a PR stale by itself. A PR whose approval went stale loses that approval at the check run. Nothing is deleted. Claims are refuted, never stale.
 
-### 2.5 Claim, lease, resume, provenance (to build)
+### 2.5 Claim, lease, resume, provenance (built)
 
 Claim is one conditional write: the task is open, or its lease has expired, and it has no unfinished dependencies. Heartbeat, complete, and handoff stay one statement each and affect a task this agent holds. Resume is a read: tried, failed and why, believed, next, with ids. Provenance stores the model, as the host reported it, and the session, on every Event, Claim, Evidence, Approval, and Action.
 
 ### 2.6 PR check
 
-**R1 ran.** It returns incident, claim, and evidence rows. Webhook, pr-ingest, and the check run are to build (Akshat and Amaan).
+**R1 is built and tested.** It returns incident, claim, and evidence rows. pr-ingest, the check decision, and the webhook are tested on a fixture. They are not run against GitHub.
 
 ```cypher
 MATCH (pr:PR {number:$pr})-[:CHANGES]->(f:File)
@@ -141,12 +141,12 @@ Roadmap, not Sunday: a model allowlist on W1, escalate-on-stall, a staged harnes
 
 `sheldon-ai` was free on PyPI and npm on 17 Oct and is not published. The CLI command stays `sheldon`. The engine in Docker is `falkordb/falkordb:v4.22.1`. falkordblite bundles 4.18.3, so we do not claim parity with it.
 
-`sheldon init` creates graph key `sheldon:<owner>/<repo>`, installs host hooks, and runs ingest. `sheldon run -- pytest` writes an executed Evidence node (sha, exit code, model, session). The GitHub App listens for `pull_request`, `check_run`, and review events.
+`sheldon init` is to build. It would create graph key `sheldon:<owner>/<repo>`, install host hooks, and run ingest. `sheldon run -- pytest` is built: it writes an executed Evidence node (sha, exit code, model, session). The webhook is tested with a fake client. A live GitHub App is to build.
 
 Demo, about 3 minutes, five steps. Ids below are seed data, not a result.
 
 1. Pain, then the retry block. Show the malladiphani line. Agent A tries the cache-TTL fix that INC-12's E-41 refuted. The hook exits 2.
-2. The gate. Agent B claims "done, all tests pass" without running anything and cites E-52, which is not an executed test run on this sha. W3 returns 0 rows. The check stays red, citing E-52. W3 is to build, so this step waits on that row.
+2. The gate. Agent B claims "done, all tests pass" without running anything and cites E-52, which is not an executed test run on this sha. W3 returns 0 rows. The check stays red, citing E-52.
 3. The cascade. New CI evidence refutes C-7. One W2 write marks C-7 refuted and approval A-3 and task T-9 stale.
 4. With/without numbers. Pass rate and total tokens, same model, at least 3 runs per arm, with the spread. "Safer at the same quality" unless the margin clears the bar. This step is to measure.
 5. If time: init and ingest in the Browser, the R1 comment on a PR touching `checkout/`, and the provenance query.
@@ -155,14 +155,14 @@ Demo, about 3 minutes, five steps. Ids below are seed data, not a result.
 
 | # | Component | Where | Status |
 |---|---|---|---|
-| C1 | `sheldon` Python library | everywhere | to build, except the W1, W2, and R1 queries which ran |
-| C2 | CLI `init`, `ingest`, `run`, `preflight`, `incident add`, `eval` | dev machine, CI | to build |
-| C3 | Claude Code hooks | Claude Code | to build. Other hosts are roadmap |
-| C4 | `sheldon-mcp` stdio | local | to build. Hosted http is roadmap |
+| C1 | `sheldon` Python library | everywhere | built for W1, W2, W3, R1, R2 preflight, claim, resume, provenance, and the capsule. Ingest and `q_star` are to build |
+| C2 | CLI `init`, `ingest`, `run`, `preflight`, `incident add`, `eval` | dev machine, CI | `run` and `preflight` are built. `init`, `ingest`, `incident add`, and `eval` are to build |
+| C3 | Claude Code hooks | Claude Code | SessionStart snippet is built. `PreToolUse` and `SubagentStart` are not in the tree. Other hosts are roadmap |
+| C4 | `sheldon-mcp` stdio | local | stdio server is built and tested (`sheldon/mcp/server.py`). Hosted http is roadmap |
 | C5 | git pre-commit | dev machine | roadmap |
-| C6 | GitHub App | hosted | to build |
-| C7 | Evidence producers | CLI and CI webhook | to build |
-| C8 | FalkorDB `falkordb/falkordb:v4.22.1` | container | pinned. The Docker smoke test is to build beyond the module and `GRAPH.COPY` check that already runs in CI |
+| C6 | GitHub App | hosted | webhook is tested with a fake client. Not run against GitHub. A live GitHub App is to build |
+| C7 | Evidence producers | CLI and CI webhook | `sheldon run` is built. A live CI webhook posting to GitHub is not |
+| C8 | FalkorDB `falkordb/falkordb:v4.22.1` | container | pinned. Smoke tests the module, `GRAPH.COPY`, and W1, W2, and R1 on the seed. `UNIQUE` is not in that file |
 
 One graph key per repo: `sheldon:<owner>/<repo>`. Reads go through `GRAPH.RO_QUERY` with a timeout. Each gated write is one Cypher statement. No `MULTI`/`EXEC`. Constraints are a backstop. `UNIQUE` on `Claim.id` needs an exact-match index first. It rejects a duplicate `CREATE` and `SET`. `MERGE` on an existing id does not trip it, so write paths use `CREATE`. Nothing is deleted.
 
@@ -175,20 +175,20 @@ Ingest, recall, the gate, the cascade, the check-run decision, and preflight use
 | Node or edge | Properties | Written by |
 |---|---|---|
 | `Developer-AUTHORED→Commit-MODIFIED→File`, `File-CO_CHANGED_WITH→File` | hash, message, timestamp, path, frequency | ingest (RepoGraph names). To build |
-| `PR-CHANGES→File` | number, head_sha, status | pr-ingest. To build |
-| `Incident-TOUCHED→File`, `Incident-HAS_CAUSE→Claim` | id, title, severity, at | seed and `incident add`. To build |
-| `Claim` | id, text, kind (`root_cause` / `fix` / `assumption` / `done`), status (`open` / `confirmed` / `refuted`), confidence, model, session | W3 and claim. To build |
-| `Claim-SUPPORTED_BY→Evidence`, `Claim-REFUTED_BY→Evidence` | Evidence: id, kind, sha, executed, exit_code, model, session | W2 ran as a query. Writers are to build |
-| `Approval-FOR→PR`, `CITES→Evidence`, `RELIES_ON→Claim` | id, by, sha, status (`active` / `stale`), model, session | W1 ran as a query. Writer is to build |
-| `Task-DEPENDS_ON→Claim` | id, status (`open` / `claimed` / `done` / `stale`), owner, lease_expires | claim and lease. To build |
-| `Action-ATTEMPTED_FIX_FOR→Claim` | fingerprint, cmd, files | preflight. To build |
-| `Finding` | fingerprint, dismissed, pr | check run. To build |
+| `PR-CHANGES→File` | number, head_sha, status | pr-ingest is built and tested |
+| `Incident-TOUCHED→File`, `Incident-HAS_CAUSE→Claim` | id, title, severity, at | the demo seed writes these. `incident add` is not a command |
+| `Claim` | id, text, kind (`root_cause` / `fix` / `assumption` / `done`), status (`open` / `confirmed` / `refuted`), confidence, model, session | W3 `claim_done` and `claim_task` are built |
+| `Claim-SUPPORTED_BY→Evidence`, `Claim-REFUTED_BY→Evidence` | Evidence: id, kind, sha, executed, exit_code, model, session | `refute_claim` is the tested writer |
+| `Approval-FOR→PR`, `CITES→Evidence`, `RELIES_ON→Claim` | id, by, sha, status (`active` / `stale`), model, session | `approve` is the tested writer |
+| `Task-DEPENDS_ON→Claim` | id, status (`open` / `claimed` / `done` / `stale`), owner, lease_expires | claim, lease, and handoff are built |
+| `Action-ATTEMPTED_FIX_FOR→Claim` | fingerprint, cmd, files | the seed writes the demo Action. The eval harness records one in the dry run. Preflight reads it |
+| `Finding` | fingerprint, dismissed, pr | to build. A dismissed finding is not suppressed yet |
 
-Claim status is `open`, `confirmed`, or `refuted`. A claim is never stale. Approval status is `active` or `stale`. The strings in `sheldon/schema.py` are the older set still in the file. Confirm them against this table before the demo. Do not invent a second copy in a feature branch.
+Claim status in this table is `open`, `confirmed`, or `refuted`. A claim is never stale. Approval status is `active` or `stale`. `sheldon/schema.py` uses `open`, `supported`, and `refuted` for a claim, and `active` or `stale` for an approval. `confirmed` is not in the enum. Do not invent a second copy in a feature branch.
 
 Memory types, Track 02 vocabulary: incident is episodic, a confirmed cause is semantic, a refuted fix is procedural.
 
-## 6. Eval (to build, then to measure)
+## 6. Eval (definition built, paired runs to measure)
 
 Write the definition of a repeated failed step before any count is quoted. MAST-style (step repetition, FM-1.3, arXiv 2503.13657): write the rule, hand-label a sample, then automate. An optional second number is TIDE's loop ratio (redundant loop actions / total actions, arXiv 2602.02196), used as a definition only, never as a memory result. TIDE's published drop is from model scaling, not from memory.
 
@@ -202,7 +202,7 @@ The gate is as strong as the tests it cites. Sheldon blocks evidence that is not
 
 An agent that deletes a failing test and then runs the suite produces a real executed run. Diff-scope evidence is roadmap. See quote 5.
 
-Hook blocking is to build for Claude Code. A git pre-commit hook can be skipped with `--no-verify`, so the PR check is the backstop. That hook is roadmap.
+A `PreToolUse` hook that blocks is not in the tree. The preflight CLI exits 2. A git pre-commit hook can be skipped with `--no-verify`, so the PR check is the backstop. That hook is roadmap.
 
 Most single features have equivalents in other databases. Here, variable-depth, mixed-edge-type, path-returning checks are one bounded Cypher query inside one atomic write, instead of recursive SQL over several edge tables plus application code. That is the framing. It is not a claim that the design needs FalkorDB and nothing else.
 
