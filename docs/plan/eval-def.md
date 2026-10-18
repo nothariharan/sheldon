@@ -9,7 +9,7 @@ In accordance with [`TASKS.md`](../../TASKS.md), this document establishes defin
 ## 1. Repeated Failed Step Definition
 
 ### 1.1 MAST-Style Step Repetition
-Following the Multi-Agent System Troubleshooting (MAST) taxonomy (FM-1.3, step repetition failure mode, arXiv:2503.13657), an action attempt is defined as a **repeated failed step** when:
+Following the Multi-Agent System Failure Taxonomy (MAST; FM-1.3, step repetition failure mode, arXiv:2503.13657), an action attempt is defined as a **repeated failed step** when:
 
 > An agent initiates an action (tool execution, shell command, or file edit) whose canonical normalized target and intent match a historical action previously attempted for a claim, where that previous attempt was refuted by an executed run (`executed = true`, non-zero exit code or failing CI/test outcome).
 
@@ -19,10 +19,11 @@ Formally, an attempted action $A_{new} = (cmd, paths)$ for investigation or task
 3. $C \xrightarrow{\text{REFUTED\_BY}} E$, where $E$ is an `Evidence` node with `executed = true` and `exit_code != 0` (or `kind = 'ci_run'` with failing status).
 
 ### 1.2 External Reference: TIDE Loop Ratio
-The TIDE benchmark (arXiv:2602.02196) formalizes cyclic step repetition in agent trajectory traces via the loop ratio:
-$$R_{\text{loop}} = \frac{|\text{repetitive state cycles}|}{|\text{total trajectory steps}|}$$
+TIDE (Trajectory-based Diagnostic Evaluation, arXiv:2602.02196) is an evaluation framework, not a benchmark. Its loop ratio is Eq. 4:
+$$LR = \frac{\sum (j - i)}{\text{total actions}}$$
+The sum is over loop segments. It counts redundant actions inside loops, not cycles.
 
-*Boundary Notice:* In TIDE, loop-ratio reductions were published as a consequence of frontier model scaling. In Sheldon, TIDE's loop ratio is referenced solely as an external definition and metric definition, never as a Sheldon memory result or empirical finding.
+*Boundary Notice:* TIDE reports that loop ratio drops when scaling up within one model family (Qwen3-4B to Qwen3-30B-A3B). In Sheldon, TIDE's loop ratio is referenced solely as an external definition, never as a Sheldon memory result or empirical finding.
 
 ---
 
