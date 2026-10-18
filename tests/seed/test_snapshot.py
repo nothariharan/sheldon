@@ -93,3 +93,42 @@ def test_copy_graph_resets_a_destination(seed: str) -> None:
     _q(COPY, "MATCH (c:Claim {id: 'C-7'}) SET c.status = 'refuted'")
     copy_graph(seed, COPY)
     assert _q(COPY, "MATCH (c:Claim {id: 'C-7'}) RETURN c.status") == [["open"]]
+
+
+def test_seed_has_a_done_claim_for_the_gate_step(seed: str) -> None:
+    rows = _q(seed, "MATCH (c:Claim {kind: 'done'}) RETURN c.id, c.status, c.model, c.session")
+    assert rows == [["C-11", "open", "agent-model-b", "S-3"]]
+
+
+def test_s0_works_on_a_copy_without_creating_indexes_again(seed: str) -> None:
+    from sheldon.retrieval import s0
+    from sheldon.retrieval.s0 import DEMO_QUESTION
+
+    copy_graph(seed, COPY)
+    assert {hit["id"] for hit in s0(COPY, DEMO_QUESTION)} >= {"INC-12", "C-5", "C-7"}
+
+
+def test_seed_at_a_real_head_sha_lets_a_real_run_turn_the_gate_green() -> None:
+    from sheldon.evidence import record_run
+    from sheldon.gate import claim_done
+
+    head = "0123456789abcdef0123456789abcdef01234567"
+    _drop(GRAPH)
+    try:
+        load_seed(GRAPH, head_sha=head)
+        shas = _q(
+            GRAPH,
+            "MATCH (n) WHERE n.id IN ['E-31', 'E-52', 'E-60', 'A-3'] "
+            "RETURN n.id, n.sha ORDER BY n.id",
+        )
+        assert shas == [["A-3", head], ["E-31", head], ["E-52", head], ["E-60", head]]
+        assert _q(GRAPH, "MATCH (pr:PR {number: 7})-[c:CHANGES]->() RETURN pr.head_sha, c.sha") == [
+            [head, head]
+        ]
+        assert claim_done(GRAPH, "C-11", head, ["E-52"], "agent-model-b", "S-3") is None
+        record_run(GRAPH, "E-70", "pytest", head, 0, "sheldon-run", "S-5")
+        assert claim_done(GRAPH, "C-11", head, ["E-70"], "agent-model-b", "S-3") == "A-C-11"
+        decision = decide_check(GRAPH, 7, head, cited_evidence_ids=["E-70"])
+        assert decision["conclusion"] == "success"
+    finally:
+        _drop(GRAPH)
