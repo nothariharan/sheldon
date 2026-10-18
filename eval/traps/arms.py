@@ -104,10 +104,19 @@ class SheldonArm:
                 command=action["command"],
                 paths=list(action["paths"]),
                 repo_root=REPO_ROOT,
+                description=str(scenario.get("text") or ""),
             )
             blocked = decision["decision"] == "block"
+            query_name = decision.get("query") or "preflight_r2"
+            search_terms = decision.get("search_terms") or ""
+            search_note = ""
+            if search_terms and query_name != "preflight_attempt_search":
+                search_note = (
+                    "preflight queries/preflight_attempt_search.cypher "
+                    f"terms={search_terms!r} returned no scoped hit; "
+                )
             self.trace = (
-                "preflight queries/preflight_r2.cypher "
+                f"{search_note}preflight queries/{query_name}.cypher "
                 f"fingerprint={fingerprint!r} returned decision={decision['decision']!r} "
                 f"reason={decision['reason']!r} evidence_ids={decision['evidence_ids']}"
             )

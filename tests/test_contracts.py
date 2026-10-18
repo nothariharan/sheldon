@@ -162,7 +162,8 @@ def test_stubs_are_not_described_as_working() -> None:
     honest = (
         "Sheldon blocks an exact repeat of a refuted fix, and blocks calling "
         "work done without a real test run, on one shared FalkorDB graph per repo. "
-        "A reworded retry of that fix is allowed: the dev table blocks 0 of 4."
+        "A reworded retry is blocked when it hits that same failed attempt: "
+        "the dev table blocks 3 of 4."
     )
     readme_line = (ROOT / "README.md").read_text(encoding="utf-8").splitlines()[2]
     agents_line = (ROOT / "AGENTS.md").read_text(encoding="utf-8").splitlines()[2]

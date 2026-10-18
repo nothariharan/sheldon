@@ -39,6 +39,7 @@ RUNNABLE: tuple[str, ...] = (
     "count_nodes",
     "writes_with_provenance",
     "preflight_r2",
+    "preflight_attempt_search",
     "trap_overlay",
     "trap_hit_status",
     "capsule_task",

@@ -143,6 +143,52 @@ def test_preflight_blocks_syntactic_variant_of_ttl_retry(seed_graph: str) -> Non
     assert "E-41" in res["evidence_ids"]
 
 
+def test_reworded_retry_blocks_when_fulltext_hits_the_same_file(seed_graph: str) -> None:
+    """Exact fingerprint misses. Full-text on the description hits the failed attempt."""
+    res = preflight(
+        seed_graph,
+        command="update checkout/cache.py",
+        paths=["checkout/cache.py"],
+        description="Raising the cache TTL again",
+    )
+    assert res["decision"] == "block"
+    assert "E-41" in res["evidence_ids"]
+    assert "C-5" in res["claim_ids"]
+
+
+def test_same_description_on_a_different_file_does_not_block(seed_graph: str) -> None:
+    res = preflight(
+        seed_graph,
+        command="update checkout/api.py",
+        paths=["checkout/api.py"],
+        description="Raising the cache TTL again",
+    )
+    assert res["decision"] != "block"
+
+
+def test_a_different_fix_on_the_refuted_file_stays_a_warn(seed_graph: str) -> None:
+    res = preflight(
+        seed_graph,
+        command="write checkout/cache.py",
+        paths=["checkout/cache.py"],
+        description="Replace the cart cache with a write-through store",
+    )
+    assert res["decision"] == "warn"
+
+
+def test_the_same_refuted_claim_scopes_a_hit_on_another_file(seed_graph: str) -> None:
+    res = preflight(
+        seed_graph,
+        command="update checkout/api.py",
+        paths=["checkout/api.py"],
+        description="Raising the cache TTL again",
+        claim_id="C-5",
+    )
+    assert res["decision"] == "block"
+    assert "C-5" in res["claim_ids"]
+    assert "E-41" in res["evidence_ids"]
+
+
 def test_preflight_warns_legitimate_alternative_on_same_file(seed_graph: str) -> None:
     """False-positive avoidance: Different fix on the same file is permitted (warn)."""
     res = preflight(

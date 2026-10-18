@@ -1,6 +1,6 @@
 # Sheldon
 
-Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo. A reworded retry of that fix is allowed: the dev table blocks 0 of 4.
+Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo. A reworded retry is blocked when it hits that same failed attempt: the dev table blocks 3 of 4.
 
 Built and tested on main: W1, W2, W3, R1, R2 preflight, claim and lease (handoff is built), provenance, the capsule text, the session-start hook, resume, compose, the check on the seed path, the demo seed, `sheldon run`, and fail-closed for commit, push, and done. Cut or not built: ingest, the S0 vector half, and paired eval runs.
 
@@ -79,15 +79,15 @@ Dev N = 21 (14 actions that should be blocked, 7 that should be allowed). Held-o
 
 - **no-memory** always allows.
 - **search-only baseline** runs the S0 keyword path (`queries/s0_keyword.cypher`) on the action text and blocks when a hit is a refuted claim, or an incident whose cause claim is refuted.
-- **sheldon** runs preflight R2, W3 `claim_done`, and W1 `approve`. Preflight counts as a block only when the decision is `block`. `warn` counts as allow. `approve` checks cited evidence. When the action names a claim, the same write refuses if that claim is refuted or reaches a refuted claim in 1..3 `RELIES_ON` or `DEPENDS_ON` hops, the window W2 uses. The refusal reason is that path: the claim ids, the edge type on each hop, and the refuting evidence id. `python -m sheldon.gate.approve` prints it, and `--json` includes it. `claim_done` uses the same hop check on the done claim.
+- **sheldon** runs preflight R2, W3 `claim_done`, and W1 `approve`. Preflight counts as a block only when the decision is `block`. `warn` counts as allow. The exact fingerprint is checked first. When it misses, full-text (`db.idx.fulltext.queryNodes` in `queries/preflight_attempt_search.cypher`) runs over failed attempts. A hit counts only when that attempt touched the same file, or the hit is the same refuted claim. Path tokens are left out of the query. `approve` checks cited evidence. When the action names a claim, the same write refuses if that claim is refuted or reaches a refuted claim in 1..3 `RELIES_ON` or `DEPENDS_ON` hops, the window W2 uses. The refusal reason is that path: the claim ids, the edge type on each hop, and the refuting evidence id. `python -m sheldon.gate.approve` prints it, and `--json` includes it. `claim_done` uses the same hop check on the done claim.
 
 ### Dev
 
 | Arm | Bad blocked | Good wrongly blocked | Median ms |
 | --- | --- | --- | --- |
 | no-memory | 0/14 | 0/7 | 0.00 |
-| search-only baseline | 8/14 | 1/7 | 5.68 |
-| sheldon | 10/14 | 0/7 | 4.76 |
+| search-only baseline | 8/14 | 1/7 | 4.35 |
+| sheldon | 13/14 | 0/7 | 5.40 |
 
 Sheldon wrongly blocked good actions: none.
 
@@ -96,14 +96,14 @@ Sheldon wrongly blocked good actions: none.
 | Arm | Bad blocked | Good wrongly blocked | Median ms |
 | --- | --- | --- | --- |
 | no-memory | 0/7 | 0/3 | 0.00 |
-| search-only baseline | 2/7 | 0/3 | 4.38 |
-| sheldon | 5/7 | 0/3 | 5.06 |
+| search-only baseline | 2/7 | 0/3 | 4.48 |
+| sheldon | 5/7 | 0/3 | 6.02 |
 
 Sheldon wrongly blocked good actions: none.
 
-Sheldon still misses four bad actions on the dev set, all reworded retries of the refuted fix (`b1`–`b4`). The command is not the recorded fingerprint `edit checkout/cache.py`, so `queries/preflight_r2.cypher` returns no block and preflight returns decision `warn` (`Files touched in prior incident(s) INC-12; alternative fix attempt allowed`). That is a limit of exact-fingerprint preflight. A different command on that same file is a warn in `tests/test_preflight.py` (`refactor checkout/cache.py`), so this gate does not block every edit of the file.
+Sheldon misses one bad action on the dev set, `b4`. The fingerprint is not `edit checkout/cache.py`. `queries/preflight_attempt_search.cypher` with terms `adjust|session|file|sits|next|cart|store` returned no scoped hit, so preflight stays `warn`. Those terms do not occur in the refuted claim. The held-out reworded retries `h-reword-1` and `h-reword-2` miss the same way: their terms do not occur in that claim, so the held-out count does not move. `refactor checkout/cache.py` with no description stays `warn` in `tests/test_preflight.py`.
 
-On the dev set, search-only blocked three bad actions sheldon allowed: `b1`, `b2`, and `b3`. Search-only wrongly blocked one good action, `e7` (the S0 hit was refuted claim C-5). Sheldon wrongly blocked good actions: none.
+Search-only wrongly blocked one good action, `e7` (the S0 hit was refuted claim C-5). Sheldon wrongly blocked good actions: none. On this run, search-only did not block a bad action that sheldon allowed.
 
 How another arm is added is in [`eval/traps/README.md`](eval/traps/README.md). The check interface is `name` and `blocks(graph, scenario) -> bool`.
 
