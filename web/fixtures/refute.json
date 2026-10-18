@@ -1,0 +1,19 @@
+{
+  "call": "refute_claim(graph, \"C-7\", [\"E-60\"], agent=\"ci\", model=\"ci\", session=\"CI-60\")",
+  "returned": true,
+  "check": {
+    "argv": [
+      "-m",
+      "sheldon.check",
+      "--graph",
+      "sheldon_site_after",
+      "7",
+      "b2",
+      "--evidence",
+      "E-31"
+    ],
+    "exit_code": 1,
+    "stdout": "sheldon: blocked (failure) PR 7 at b2\nstale: A-3 marked stale\nrefuted: C-5 by E-41 (INC-12, via checkout/session.py)\nrefuted: C-7 by E-60 (INC-12, via checkout/session.py)\n",
+    "stderr": ""
+  }
+}
