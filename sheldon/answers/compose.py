@@ -70,9 +70,13 @@ def compose(graph: str, question: str, evidence: list[dict[str, Any]]) -> dict[s
             status = (row.get("status") or "").lower()
             rel = (row.get("relation") or "").upper()
             pair = (claim_id, ev_id)
-            if status == HypothesisStatus.REFUTED.value or rel == REFUTED_BY:
+            # A refuted claim cites the REFUTED_BY evidence. An older
+            # SUPPORTED_BY row is not the refutation.
+            if rel == REFUTED_BY:
                 if pair not in incidents[inc_id]["refuted"]:
                     incidents[inc_id]["refuted"].append(pair)
+            elif status == HypothesisStatus.REFUTED.value:
+                continue
             elif status == HypothesisStatus.OPEN.value:
                 if pair not in incidents[inc_id]["open"]:
                     incidents[inc_id]["open"].append(pair)

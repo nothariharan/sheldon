@@ -12,6 +12,7 @@ from typing import Generator
 import pytest
 
 from sheldon.answers.compose import compose
+from sheldon.belief.refute import refute_claim
 from sheldon.db import connect
 from sheldon.retrieval.recall import recall
 from sheldon.seed import load_seed
@@ -208,5 +209,15 @@ def test_compose_supported_claim_reported_as_supported() -> None:
     result = compose("graph", "Check supported claim", supported_bundle)
     assert result["abstained"] is False
     assert "claim C-7 is supported by evidence E-30" in result["answer"]
+
+
+def test_a_refuted_claim_cites_the_refuting_evidence(seed_graph: str) -> None:
+    assert refute_claim(seed_graph, "C-7", ["E-60"], "ci", "ci", "CI-60") is True
+    bundle = recall(seed_graph, 7)
+    result = compose(seed_graph, "after the cascade", bundle)
+    answer = result["answer"]
+    assert "fix C-7 was refuted by evidence E-60" in answer
+    assert "refuted by evidence E-30" not in answer
+    assert "supported by evidence E-30" not in answer
 
 
