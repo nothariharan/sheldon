@@ -2,7 +2,7 @@
 
 Sheldon blocks coding agents from retrying fixes that already failed, and from calling work done without a real test run, from the first edit to the merge, on one shared FalkorDB graph per repo.
 
-W1, W2, and R1 queries have run. Every other station in this tree is to build or roadmap. Stubs raise `NotImplementedError`. They are not working features.
+Built and tested on main: W1, W2, W3, R1, R2 preflight, claim and lease (handoff is partly built), provenance, the capsule text, resume, compose, the check on the seed path, and the demo seed. `sheldon run` is in review. Cut or not built: ingest, the S0 vector half, paired eval runs, session-start hooks, and fail-closed.
 
 A claim or approval only lands if every evidence id it cites is a real executed run. Refuting evidence marks the claim refuted, and every approval and task that relied on it goes stale, in one atomic write. Nothing marks a claim stale. None we found blocks a coding agent from retrying a code fix refuted in the shared graph.
 
