@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from sheldon.db import read
+from sheldon.gate.closed import is_closed_action, outage_decision
 from sheldon.output import CommandResult, emit
 
 
@@ -211,15 +212,8 @@ def preflight(
     try:
         query_res = query_r2(graph, fingerprint, c_paths, db=db)
     except Exception as exc:  # noqa: BLE001
-        # Fail-open policy on database outage or timeout to prevent agent lockup
-        sys.stderr.write(f"sheldon: [WARN] graph preflight check unavailable: {exc}\n")
-        return {
-            "decision": "warn",
-            "reason": f"Database unavailable; preflight safety check bypassed: {exc}",
-            "evidence_ids": [],
-            "claim_ids": [],
-            "incident_ids": [],
-        }
+        action = normalize_command(command) or "preflight"
+        return outage_decision(action, exc, closed=is_closed_action(command))
 
     return decide_preflight(
         query_res["blocks"],

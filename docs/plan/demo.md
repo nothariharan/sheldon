@@ -41,7 +41,7 @@ Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval fre
 - [ ] FalkorDB is `falkordb/falkordb:v4.22.1`. The Browser is on `localhost:3000`.
 - [ ] The step 4 numbers match the eval table exactly, or the slide says "to be measured".
 - [ ] `SHELDON_PREFLIGHT_OVERRIDE` is unset in the shell you record from (`env | grep SHELDON_PREFLIGHT_OVERRIDE` prints nothing). When it is set, preflight lets every action through and step 1 shows no block.
-- [ ] FalkorDB is up before step 1. Preflight fails open: if the database is unreachable it returns `warn`, not `block`.
+- [ ] FalkorDB is up before step 1. Preflight fails closed for commit, push, and done: if the database is unreachable those return `block` and exit 2, unless `SHELDON_FAIL_OPEN=1` is set. Reads (recall, resume, and the check summary) fail open and return `warn`.
 - [ ] Read the narration against the wording rules in [README.md](README.md). No speed or cost number. No "revolutionary". No "production-ready".
 
 ## 0. Title (0:00–0:10)

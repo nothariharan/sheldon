@@ -9,6 +9,7 @@ import time
 from typing import Any
 
 from sheldon.db import read
+from sheldon.gate.closed import read_warning
 from sheldon.output import CommandResult, emit
 from sheldon.schema import EventType, HypothesisStatus, TaskStatus
 
@@ -102,7 +103,24 @@ def resume(graph: str, agent_id: str, now_ms: int | None = None) -> dict[str, An
 
 def resume_result(graph: str, agent_id: str, now_ms: int | None = None) -> CommandResult:
     """Return the resume dict as a ``CommandResult``."""
-    data = resume(graph, agent_id, now_ms=now_ms)
+    try:
+        data = resume(graph, agent_id, now_ms=now_ms)
+    except (ConnectionError, OSError) as exc:
+        reason = read_warning(exc)
+        return CommandResult(
+            command="resume",
+            exit_code=0,
+            data={
+                "tried": [],
+                "failed": [],
+                "believed": [],
+                "next": [],
+                "decision": "warn",
+                "reason": reason,
+            },
+            text=reason,
+            stream="stderr",
+        )
     text = "\n".join(
         f"{key} {len(data[key])}" for key in ("tried", "failed", "believed", "next")
     )

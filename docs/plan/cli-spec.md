@@ -8,7 +8,7 @@ Akshat: the banner, the interactive mode, help, and the non-TTY / `NO_COLOR` fal
 
 Satyansh: spinners, the colored status lines, and the per-command output for preflight, `sheldon run`, check, and the MCP server. Those four call one shared module, `sheldon/output.py`, so color, spinners, and the plain-text switch live in one place. Akshat's banner, help, and fallback call that same module.
 
-Satyansh's order: the compose fix comes before this CLI work. On the seed, E-30 supported C-7 and E-60 is the refuting run. The session-start hook is built (`python -m sheldon.hooks.session_start`). If time runs short, fail-closed is the cut. This CLI work stays.
+Satyansh's order: the compose fix comes before this CLI work. On the seed, E-30 supported C-7 and E-60 is the refuting run. The session-start hook is built (`python -m sheldon.hooks.session_start`). Commit, push, and done fail closed on a database error. Reads (recall, resume, and the check summary) fail open with a warning. This CLI work stays.
 
 This file does not add a dependency. The implementation pull request pins `rich` in `requirements.txt` and `requirements-dev.txt`. `textual` is a later choice for a full-screen app, not part of the 9 PM cut. Do not add either library in the docs pull request.
 
@@ -87,7 +87,7 @@ Also:
 
 `python -m sheldon.preflight --command "edit checkout/cache.py" --paths checkout/cache.py`
 
-Today the block path writes the reason to stderr and returns 2. The reason starts `blocked: refuted by E-41` and names INC-12. A warn writes the reason and returns 0. An ok returns 0 and prints nothing. A database error is a warn and exit 0 (fail open), until that behavior changes.
+Today the block path writes the reason to stderr and returns 2. The reason starts `blocked: refuted by E-41` and names INC-12. A warn writes the reason and returns 0. An ok returns 0 and prints nothing. A database error on commit, push, or done is a block and exit 2. `SHELDON_FAIL_OPEN=1` makes that a warn and exit 0. A read (recall, resume, or the check summary) is a warn and exit 0.
 
 Target frame on a TTY, block:
 

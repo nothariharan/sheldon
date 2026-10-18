@@ -75,3 +75,27 @@ def test_a_passing_run_on_the_head_writes_an_approval(graph: str) -> None:
         "RETURN a.id, e.id"
     ).result_set
     assert rows == [[approval, "E-pass"]]
+
+
+def test_done_blocks_when_the_database_is_down(monkeypatch: pytest.MonkeyPatch) -> None:
+    from sheldon.gate.closed import DatabaseBlocked
+
+    monkeypatch.delenv("SHELDON_FAIL_OPEN", raising=False)
+
+    def boom() -> None:
+        raise ConnectionError("Connection refused")
+
+    monkeypatch.setattr("sheldon.gate.done.connect", boom)
+    with pytest.raises(DatabaseBlocked, match="done blocked"):
+        claim_done("g", "C-1", "sha", ["E-1"], "m", "s")
+
+
+def test_done_escape_hatch_lets_the_driver_error_through(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SHELDON_FAIL_OPEN", "1")
+
+    def boom() -> None:
+        raise ConnectionError("Connection refused")
+
+    monkeypatch.setattr("sheldon.gate.done.connect", boom)
+    with pytest.raises(ConnectionError, match="Connection refused"):
+        claim_done("g", "C-1", "sha", ["E-1"], "m", "s")

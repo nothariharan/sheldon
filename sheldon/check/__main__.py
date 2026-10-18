@@ -14,6 +14,7 @@ import sys
 
 from sheldon.check.app import check_run_payload, decide_check
 from sheldon.check.webhook import repo_graph
+from sheldon.gate.closed import read_warning
 from sheldon.output import CommandResult, emit
 
 
@@ -24,7 +25,17 @@ def check_result(
     evidence: list[str],
 ) -> CommandResult:
     """Return the check decision. ``data`` is the check-run payload."""
-    decision = decide_check(graph, pr, head_sha, evidence)
+    try:
+        decision = decide_check(graph, pr, head_sha, evidence)
+    except (ConnectionError, OSError) as exc:
+        reason = read_warning(exc)
+        return CommandResult(
+            command="check",
+            exit_code=0,
+            data={"decision": "warn", "reason": reason, "output": {"summary": reason}},
+            text=reason,
+            stream="stderr",
+        )
     payload = check_run_payload(decision)
     title, conclusion = payload["output"]["title"], payload["conclusion"]
     text = f"{title} ({conclusion}) PR {pr} at {head_sha}\n{payload['output']['summary']}"

@@ -81,7 +81,7 @@ blocked: refuted by E-41
 this edit repeats the cache-TTL fix tried for INC-12; E-41 (CI run) refuted it
 ```
 
-`sheldon-mcp` exposes `preflight` for hosts that call tools. Fingerprint match is exact. The `sameAction` JS UDF was tested as our own library on 4.22.1 and 6.0.1. Wiring it is roadmap. Do not change the image pin to load it. FLEX is not preloaded and is not needed. Commit, push, and done fail open today: on a database error, preflight returns warn and the CLI exits 0. Reads fail open as well, so an outage does not freeze the agent. Other hosts are roadmap.
+`sheldon-mcp` exposes `preflight` for hosts that call tools. Fingerprint match is exact. The `sameAction` JS UDF was tested as our own library on 4.22.1 and 6.0.1. Wiring it is roadmap. Do not change the image pin to load it. FLEX is not preloaded and is not needed. Commit, push, and done fail closed: on a database error, preflight returns block and the CLI exits 2. `SHELDON_FAIL_OPEN=1` restores the warn and exit 0. Reads (recall, resume, and the check summary) fail open: on a database error they return a warning and exit 0. Other hosts are roadmap.
 
 ### 2.4 Cascade
 

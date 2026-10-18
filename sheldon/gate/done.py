@@ -7,6 +7,7 @@ approval unless it cites a passing executed test run on that sha.
 from sheldon.cypher import load_query
 from sheldon.db import connect
 from sheldon.evidence.run import TEST_RUN
+from sheldon.gate.closed import raise_if_closed
 from sheldon.schema import ApprovalStatus
 
 # Claim kind from the plan. The test_run kind lives on the producer.
@@ -31,21 +32,24 @@ def claim_done(
     session: str,
 ) -> str | None:
     """Return the approval id, or None when no passing executed run is cited."""
-    rows = _write(
-        graph,
-        "claim_done",
-        {
-            "cid": claim_id,
-            "done_kind": DONE,
-            "ids": list(dict.fromkeys(evidence_ids)),
-            "sha": head_sha,
-            "test_run": TEST_RUN,
-            "aid": f"A-{claim_id}",
-            "status": ApprovalStatus.ACTIVE.value,
-            "model": model,
-            "session": session,
-        },
-    )
+    try:
+        rows = _write(
+            graph,
+            "claim_done",
+            {
+                "cid": claim_id,
+                "done_kind": DONE,
+                "ids": list(dict.fromkeys(evidence_ids)),
+                "sha": head_sha,
+                "test_run": TEST_RUN,
+                "aid": f"A-{claim_id}",
+                "status": ApprovalStatus.ACTIVE.value,
+                "model": model,
+                "session": session,
+            },
+        )
+    except (ConnectionError, OSError) as exc:
+        raise_if_closed("done", exc)
     if not rows:
         return None
     return str(rows[0]["id"])

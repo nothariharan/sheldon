@@ -5,6 +5,7 @@ Status: wired. ``recall`` runs ``queries/recall_pr.cypher`` through
 """
 
 from sheldon.db import read
+from sheldon.gate.closed import read_warning
 from sheldon.output import CommandResult, emit
 
 RECALL_ROW_LIMIT = 50
@@ -23,7 +24,17 @@ def recall(graph: str, pr_number: int) -> list[dict]:
 
 def recall_result(graph: str, pr_number: int) -> CommandResult:
     """Return the recall rows as a ``CommandResult``."""
-    rows = recall(graph, pr_number)
+    try:
+        rows = recall(graph, pr_number)
+    except (ConnectionError, OSError) as exc:
+        reason = read_warning(exc)
+        return CommandResult(
+            command="recall",
+            exit_code=0,
+            data={"pr": pr_number, "rows": [], "decision": "warn", "reason": reason},
+            text=reason,
+            stream="stderr",
+        )
     lines = [
         " ".join(
             str(row.get(key) or "")
