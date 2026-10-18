@@ -1,6 +1,6 @@
 # Sheldon
 
-Sheldon blocks coding agents from retrying fixes that already failed, and from calling work done without a real test run, from the first edit to the merge, on one shared FalkorDB graph per repo.
+Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo. A reworded retry of that fix is allowed: the dev table blocks 0 of 4.
 
 Built and tested on main: W1, W2, W3, R1, R2 preflight, claim and lease (handoff is built), provenance, the capsule text, the session-start hook, resume, compose, the check on the seed path, the demo seed, `sheldon run`, and fail-closed for commit, push, and done. Cut or not built: ingest, the S0 vector half, and paired eval runs.
 
@@ -84,7 +84,6 @@ Dev N = 21 (14 actions that should be blocked, 7 that should be allowed). Held-o
 | no-memory | 0/14 | 0/7 | 0.00 |
 | search-only baseline | 8/14 | 1/7 | 5.33 |
 | sheldon | 7/14 | 0/7 | 4.30 |
-| sheldon | 7/14 | 0/7 | 4.21 |
 
 Sheldon wrongly blocked good actions: none.
 
@@ -95,7 +94,6 @@ Sheldon wrongly blocked good actions: none.
 | no-memory | 0/7 | 0/3 | 0.00 |
 | search-only baseline | 2/7 | 0/3 | 4.87 |
 | sheldon | 3/7 | 0/3 | 3.71 |
-| sheldon | 3/7 | 0/3 | 4.21 |
 
 Sheldon wrongly blocked good actions: none.
 

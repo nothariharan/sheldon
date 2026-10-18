@@ -17,6 +17,31 @@ ROOT = Path(__file__).resolve().parents[2]
 FROZEN = ROOT / "eval" / "traps" / "FROZEN"
 
 
+def _benchmark_rows(readme: str, heading: str) -> list[str]:
+    body = readme.split(heading, 1)[1]
+    stop = "### Held-out" if heading == "### Dev" else "\n## "
+    body = body.split(stop, 1)[0]
+    rows = []
+    for line in body.splitlines():
+        if not line.startswith("| "):
+            continue
+        if line.startswith("| ---") or line.startswith("| Arm"):
+            continue
+        rows.append(line)
+    return rows
+
+
+def test_readme_benchmark_rows_match_the_committed_run() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    results = (ROOT / "eval" / "traps" / "results.md").read_text(encoding="utf-8")
+    for heading in ("### Dev", "### Held-out"):
+        rows = _benchmark_rows(readme, heading)
+        arms = [row.split("|")[1].strip() for row in rows]
+        assert arms.count("sheldon") == 1
+        for row in rows:
+            assert row in results
+
+
 def test_scenario_file_has_the_required_mix() -> None:
     scenarios = load_scenarios()
     by: dict[str, list[dict]] = {}
