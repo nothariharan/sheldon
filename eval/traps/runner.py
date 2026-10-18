@@ -12,6 +12,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
+from eval.traps import mem0_arm
 from eval.traps.arms import Arm, NoMemory, SearchOnlyBaseline, SheldonArm
 from sheldon.cypher import load_query
 from sheldon.db import connect
@@ -32,6 +33,10 @@ HEAD_SHA = "b2"
 
 # Append an arm here. It must implement Arm.name and Arm.blocks.
 ARMS: tuple[Arm, ...] = (NoMemory(), SearchOnlyBaseline(), SheldonArm())
+# Optional real-tool arms join only when their package is installed
+# (requirements-eval.txt), so CI and the base suite run without them.
+if mem0_arm.available():
+    ARMS += (mem0_arm.Mem0Arm(),)
 
 
 def load_scenarios(path: Path = SCENARIOS) -> list[dict[str, Any]]:
@@ -92,19 +97,34 @@ def format_table(rows: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def _false_block_subject(name: str) -> str:
+    if name == "sheldon":
+        return "Sheldon"
+    if name == "no-memory":
+        return "No-memory"
+    if name == "search-only baseline":
+        return "Search-only baseline"
+    return name
+
+
 def _false_block_line(
     scenarios: list[dict[str, Any]],
     decisions: dict[str, dict[str, bool]],
 ) -> str:
-    wrong = [
-        scenario
-        for scenario in scenarios
-        if scenario["expected"] == "allow" and decisions["sheldon"][scenario["id"]]
-    ]
-    if not wrong:
-        return "Sheldon wrongly blocked good actions: none."
-    parts = [f"{scenario['id']} ({scenario['text']})" for scenario in wrong]
-    return "Sheldon wrongly blocked good actions: " + "; ".join(parts) + "."
+    lines = []
+    for arm in ARMS:
+        wrong = [
+            scenario
+            for scenario in scenarios
+            if scenario["expected"] == "allow" and decisions[arm.name][scenario["id"]]
+        ]
+        subject = _false_block_subject(arm.name)
+        if not wrong:
+            lines.append(f"{subject} wrongly blocked good actions: none.")
+            continue
+        parts = [f"{scenario['id']} ({scenario['text']})" for scenario in wrong]
+        lines.append(f"{subject} wrongly blocked good actions: " + "; ".join(parts) + ".")
+    return "\n".join(lines)
 
 
 def _counts(rows: list[dict[str, Any]]) -> tuple:
@@ -122,8 +142,8 @@ def _scenario_table(
     scenarios: list[dict[str, Any]],
     decisions: dict[str, dict[str, bool]],
 ) -> str:
-    header = "| id | category | expected | no-memory | search-only baseline | sheldon |"
-    rule = "| --- | --- | --- | --- | --- | --- |"
+    header = "| id | category | expected | " + " | ".join(arm.name for arm in ARMS) + " |"
+    rule = "| --- | --- | --- | " + " | ".join("---" for _ in ARMS) + " |"
     lines = [header, rule]
     for scenario in scenarios:
         sid = scenario["id"]

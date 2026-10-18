@@ -1,0 +1,13 @@
+# Optional trap-suite arms (eval/traps). Not part of CI or requirements-dev.txt.
+#   .venv/bin/pip install -r requirements-eval.txt
+# These are the versions that install resolved. The mem0 arm downloads
+# sentence-transformers/all-MiniLM-L6-v2 from huggingface.co on first run.
+-r requirements-dev.txt
+mem0ai==2.2.1
+sentence-transformers==6.1.0
+torch==2.14.1
+transformers==5.20.1
+huggingface_hub==1.33.0
+qdrant-client==1.19.1
+ollama==0.6.3
+numpy==2.5.4

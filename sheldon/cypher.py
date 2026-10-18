@@ -42,6 +42,7 @@ RUNNABLE: tuple[str, ...] = (
     "preflight_attempt_search",
     "trap_overlay",
     "trap_hit_status",
+    "trap_memory_rows",
     "capsule_task",
     "record_eval_action",
     "export_graph",
