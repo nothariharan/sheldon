@@ -10,14 +10,34 @@ Exit code is 1 when the check fails, else 0.
 """
 
 import argparse
-import json
 import sys
 
 from sheldon.check.app import check_run_payload, decide_check
 from sheldon.check.webhook import repo_graph
+from sheldon.output import CommandResult, emit
 
 
-def main(argv: list[str] | None = None) -> int:
+def check_result(
+    graph: str,
+    pr: int,
+    head_sha: str,
+    evidence: list[str],
+) -> CommandResult:
+    """Return the check decision. ``data`` is the check-run payload."""
+    decision = decide_check(graph, pr, head_sha, evidence)
+    payload = check_run_payload(decision)
+    title, conclusion = payload["output"]["title"], payload["conclusion"]
+    text = f"{title} ({conclusion}) PR {pr} at {head_sha}\n{payload['output']['summary']}"
+    return CommandResult(
+        command="check",
+        exit_code=1 if decision["conclusion"] == "failure" else 0,
+        data=payload,
+        text=text,
+        json_style="payload",
+    )
+
+
+def main(argv: list[str] | None = None, stdout=None, stderr=None) -> int:
     parser = argparse.ArgumentParser(prog="python -m sheldon.check", description=__doc__)
     target = parser.add_mutually_exclusive_group(required=True)
     target.add_argument("--repo", help="owner/name. Uses the graph key sheldon:<owner>/<name>")
@@ -29,15 +49,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     graph = args.graph or repo_graph(args.repo)
-    decision = decide_check(graph, args.pr, args.head_sha, args.evidence)
-    payload = check_run_payload(decision)
-    if args.json:
-        print(json.dumps(payload, indent=2))
-    else:
-        title, conclusion = payload["output"]["title"], payload["conclusion"]
-        print(f"{title} ({conclusion}) PR {args.pr} at {args.head_sha}")
-        print(payload["output"]["summary"])
-    return 1 if decision["conclusion"] == "failure" else 0
+    result = check_result(graph, args.pr, args.head_sha, args.evidence)
+    return emit(result, as_json=args.json, stdout=stdout, stderr=stderr)
 
 
 if __name__ == "__main__":

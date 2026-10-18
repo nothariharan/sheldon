@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from sheldon.db import read
+from sheldon.output import CommandResult, emit
 
 
 def normalize_command(command: str) -> str:
@@ -227,7 +228,28 @@ def preflight(
     )
 
 
-def main() -> int:
+def preflight_result(
+    graph: str,
+    command: str,
+    paths: list[str],
+    override: bool = False,
+    repo_root: str | Path | None = None,
+    db: Any = None,
+) -> CommandResult:
+    """Return the preflight decision as a ``CommandResult``."""
+    res = preflight(graph, command, paths, override=override, repo_root=repo_root, db=db)
+    decision = res["decision"]
+    text = res["reason"] if decision in {"block", "warn"} else ""
+    return CommandResult(
+        command="preflight",
+        exit_code=2 if decision == "block" else 0,
+        data=res,
+        text=text,
+        stream="stderr" if text else "stdout",
+    )
+
+
+def main(argv: list[str] | None = None, stdout=None, stderr=None, stdin=None) -> int:
     """CLI and Claude Code PreToolUse hook adapter."""
     import argparse
 
@@ -237,17 +259,19 @@ def main() -> int:
     parser.add_argument("--paths", nargs="*", default=[])
     parser.add_argument("--override", action="store_true", default=False)
     parser.add_argument("--stdin", action="store_true", default=False)
+    parser.add_argument("--json", action="store_true", help="print the result as JSON")
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    reader = stdin if stdin is not None else sys.stdin
 
     command = args.command
     paths = list(args.paths)
     graph = args.graph
 
     # Read from stdin if piped or --stdin flag given
-    if args.stdin or not sys.stdin.isatty():
+    if args.stdin or not reader.isatty():
         try:
-            stdin_data = sys.stdin.read().strip()
+            stdin_data = reader.read().strip()
             if stdin_data:
                 payload = json.loads(stdin_data)
                 tool_name = payload.get("tool_name", "")
@@ -268,17 +292,8 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001
             sys.stderr.write(f"sheldon: [WARN] could not parse hook stdin JSON: {exc}\n")
 
-    res = preflight(graph, command, paths, override=args.override)
-
-    if res["decision"] == "block":
-        sys.stderr.write(res["reason"] + "\n")
-        return 2
-
-    if res["decision"] == "warn":
-        sys.stderr.write(res["reason"] + "\n")
-        return 0
-
-    return 0
+    result = preflight_result(graph, command, paths, override=args.override)
+    return emit(result, as_json=args.json, stdout=stdout, stderr=stderr)
 
 
 if __name__ == "__main__":
