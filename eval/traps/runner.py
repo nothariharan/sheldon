@@ -97,19 +97,34 @@ def format_table(rows: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def _false_block_subject(name: str) -> str:
+    if name == "sheldon":
+        return "Sheldon"
+    if name == "no-memory":
+        return "No-memory"
+    if name == "search-only baseline":
+        return "Search-only baseline"
+    return name
+
+
 def _false_block_line(
     scenarios: list[dict[str, Any]],
     decisions: dict[str, dict[str, bool]],
 ) -> str:
-    wrong = [
-        scenario
-        for scenario in scenarios
-        if scenario["expected"] == "allow" and decisions["sheldon"][scenario["id"]]
-    ]
-    if not wrong:
-        return "Sheldon wrongly blocked good actions: none."
-    parts = [f"{scenario['id']} ({scenario['text']})" for scenario in wrong]
-    return "Sheldon wrongly blocked good actions: " + "; ".join(parts) + "."
+    lines = []
+    for arm in ARMS:
+        wrong = [
+            scenario
+            for scenario in scenarios
+            if scenario["expected"] == "allow" and decisions[arm.name][scenario["id"]]
+        ]
+        subject = _false_block_subject(arm.name)
+        if not wrong:
+            lines.append(f"{subject} wrongly blocked good actions: none.")
+            continue
+        parts = [f"{scenario['id']} ({scenario['text']})" for scenario in wrong]
+        lines.append(f"{subject} wrongly blocked good actions: " + "; ".join(parts) + ".")
+    return "\n".join(lines)
 
 
 def _counts(rows: list[dict[str, Any]]) -> tuple:
