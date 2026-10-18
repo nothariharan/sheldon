@@ -1,7 +1,7 @@
 """Claim and lease.
 
-Status: claim, heartbeat, and complete are built. `handoff_task` is
-partly built: it releases a claimed lease and drops `to_agent` and `note`.
+Status: claim, heartbeat, complete, and handoff are built. `handoff_task`
+stores `to_agent` and `note` on the task and releases the lease.
 `tests/coordination/test_claim.py` and the claim race show one winner, and a
 non-owner cannot heartbeat or complete.
 ``resume`` lives in ``resume.py`` so another owner can edit it.
@@ -74,14 +74,15 @@ def complete_task(graph: str, task_id: str, agent_id: str) -> bool:
 
 
 def handoff_task(graph: str, task_id: str, agent_id: str, to_agent: str, note: str) -> bool:
-    """Pass the task when this agent holds it. The note is not stored yet."""
-    del to_agent, note
+    """Pass the task when this agent holds it, and store who it goes to."""
     rows = _write(
         graph,
         "handoff_task",
         {
             "task_id": task_id,
             "agent_id": agent_id,
+            "to_agent": to_agent,
+            "note": note,
             "open": TaskStatus.OPEN.value,
             "claimed": TaskStatus.CLAIMED.value,
         },
