@@ -82,8 +82,8 @@ def run_result(
     )
 
 
-def main(argv: list[str] | None = None, stdout=None, stderr=None) -> int:
-    """Run `sheldon run` and return the child process exit code."""
+def build_parser() -> argparse.ArgumentParser:
+    """The `sheldon` parser. `--help` prints the banner on a terminal."""
     parser = _Parser(
         prog="sheldon",
         usage="sheldon run -- <cmd>",
@@ -98,6 +98,18 @@ def main(argv: list[str] | None = None, stdout=None, stderr=None) -> int:
     run.add_argument("--session", default=os.environ.get("SHELDON_SESSION", ""))
     run.add_argument("--json", action="store_true", help="print the result as JSON")
     run.add_argument("cmd", nargs=argparse.REMAINDER)
+    return parser
+
+
+def main(argv: list[str] | None = None, stdout=None, stderr=None) -> int:
+    """Run `sheldon run` and return the child process exit code."""
+    if argv is None:
+        argv = sys.argv[1:]
+    if not argv and not plain(sys.stdin) and not plain(sys.stdout):
+        from sheldon.interactive import prompt
+
+        return prompt(sys.stdin, sys.stdout, sys.stderr)
+    parser = build_parser()
     args = parser.parse_args(argv)
     cmd = list(args.cmd)
     if cmd and cmd[0] == "--":
