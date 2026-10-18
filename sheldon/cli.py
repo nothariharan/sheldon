@@ -8,7 +8,25 @@ import subprocess
 import sys
 
 from sheldon.evidence.run import record_run
-from sheldon.output import CommandResult, emit
+from sheldon.output import BANNER, CommandResult, emit, plain
+
+HELP = """\
+  run     run a command and record one executed Evidence node
+
+Also:
+  python -m sheldon.preflight    block a repeated refuted edit (exit 2)
+  python -m sheldon.check        print the PR check
+  python -m sheldon.mcp.server   MCP on stdin/stdout"""
+
+
+class _Parser(argparse.ArgumentParser):
+    """Prints the banner above help on a terminal, never in a pipe."""
+
+    def print_help(self, file=None) -> None:
+        file = file if file is not None else sys.stdout
+        if not plain(file):
+            file.write(BANNER + "\n")
+        super().print_help(file)
 
 
 def head_sha() -> str:
@@ -66,8 +84,13 @@ def run_result(
 
 def main(argv: list[str] | None = None, stdout=None, stderr=None) -> int:
     """Run `sheldon run` and return the child process exit code."""
-    parser = argparse.ArgumentParser(prog="sheldon")
-    sub = parser.add_subparsers(dest="name", required=True)
+    parser = _Parser(
+        prog="sheldon",
+        usage="sheldon run -- <cmd>",
+        description=HELP,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    sub = parser.add_subparsers(dest="name", metavar="run", required=True, help=argparse.SUPPRESS)
     run = sub.add_parser("run", help="run a command and record the exit")
     run.add_argument("--graph", default=os.environ.get("SHELDON_GRAPH", "sheldon"))
     run.add_argument("--id", default="")
