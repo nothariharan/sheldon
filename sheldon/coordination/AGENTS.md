@@ -1,6 +1,6 @@
 # coordination (p4)
 
-Status: claim, heartbeat, and complete are built. `tests/coordination/test_claim.py` and the claim race show one winner, and a non-owner cannot heartbeat or complete. `handoff_task` is partly built: it releases a claimed lease and drops `to_agent` and `note`. Hariharan owns `board.py`. Satyansh owns `resume.py`, which is built. Do not edit each other's file.
+Status: claim, heartbeat, complete, and handoff are built. `tests/coordination/test_claim.py` and the claim race show one winner, and a non-owner cannot heartbeat or complete. `handoff_task` stores `to_agent` and `note` on the task. Hariharan owns `board.py`. Satyansh owns `resume.py`, which is built. Do not edit each other's file.
 
 Owns the task board. The refute gate is not in this folder.
 

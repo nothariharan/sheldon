@@ -62,6 +62,21 @@ def test_the_owner_can_extend_and_complete(graph: str) -> None:
     assert _row(graph)[0] == TaskStatus.DONE.value
 
 
+def test_handoff_stores_to_agent_and_note(graph: str) -> None:
+    _task(graph)
+    assert claim_task(graph, "T-9", "a", now_ms=1_000, ttl_ms=5_000) is True
+    assert handoff_task(graph, "T-9", "b", "c", "not the owner") is False
+    assert handoff_task(graph, "T-9", "a", "c", "shard the lock") is True
+    status, owner, to_agent, note = connect().select_graph(graph).query(
+        "MATCH (t:Task {id: $id}) RETURN t.status, t.owner, t.to_agent, t.note",
+        {"id": "T-9"},
+    ).result_set[0]
+    assert status == TaskStatus.OPEN.value
+    assert owner is None
+    assert to_agent == "c"
+    assert note == "shard the lock"
+
+
 def test_the_owner_of_a_done_task_cannot_reopen_it(graph: str) -> None:
     _task(graph)
     assert claim_task(graph, "T-9", "a", now_ms=1_000, ttl_ms=5_000) is True
