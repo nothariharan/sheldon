@@ -1,8 +1,8 @@
 # Progress
 
-Sun 18 Oct 2026. Main is `434c481`. Submission closes 11:59 PM IST. The last about 3 hours are for the video, the form, the README, and the fresh public push.
+Sun 18 Oct 2026. Main is `92a6492`. Submission closes 11:59 PM IST. The last about 3 hours are for the video, the form, the README, and the fresh public push.
 
-A row is built when the code is on main and a test exercises it. Merged since the last note: #44 (smoke runs W1, W2, and R1 on the seed), #42 (session-start hook), #43 (fail-closed for commit, push, and done), and #46 (banner, `sheldon --help`, and plain text off a terminal). Open: #47 (`sheldon` with no args on a terminal opens a prompt).
+A row is built when the code is on main and a test exercises it. Merged since the last note: #44 (smoke runs W1, W2, and R1 on the seed), #42 (session-start hook), #43 (fail-closed for commit, push, and done), #46 (banner, `sheldon --help`, and plain text off a terminal), and #47 (`sheldon` with no args on a terminal opens a prompt). No other open pull request.
 
 ## Suite on main
 
@@ -83,7 +83,7 @@ Commits on main, 29 total: Hariharan 12 (41%), Akshat Bhaskar 10 (34%), Satyansh
 | provenance `writes_with_provenance` | built and tested |
 | retrieval | R1 built. S0 keyword built. Vector and `q_star` not in Sunday's demo. |
 | check | partly built. Seed path tested. Live GitHub not started. |
-| CLI | partly built. #46 added the banner, `sheldon --help`, and plain text when stdout is not a terminal. #47 is open: `sheldon` with no args on a terminal opening a prompt. `sheldon run` is built. `sheldon init` and `sheldon ingest` are not. |
+| CLI | partly built. #46 added the banner, `sheldon --help`, and plain text when stdout is not a terminal. #47 is merged: on a terminal, `sheldon` with no args opens a prompt for preflight, run, check, and help. Off a terminal, no args is still a usage error. `sheldon run` is built. `sheldon init` and `sheldon ingest` are not. |
 | demo seed | built and tested |
 | demo script | partly built. Draft only. |
 | eval | partly built. Definition and dry run are tested. No paired measured runs, so no eval numbers in the pitch. |
@@ -142,7 +142,7 @@ Akshat:
 
 1. Record the demo. No dry-run eval numbers, no eval table in the video.
 2. Submit the form by 11:00 PM IST, including the website link.
-3. `cli-ux` with Satyansh ([cli-spec.md](cli-spec.md)). #46 is merged: the banner, `sheldon --help`, and the non-TTY / `NO_COLOR` fallback. #47 is open: the interactive prompt when `sheldon` has no args on a terminal.
+3. `cli-ux` with Satyansh ([cli-spec.md](cli-spec.md)). #46 is merged: the banner, `sheldon --help`, and the non-TTY / `NO_COLOR` fallback. #47 is merged: the interactive prompt when `sheldon` has no args on a terminal.
 
 Amaan:
 
