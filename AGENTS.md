@@ -1,6 +1,6 @@
 # Sheldon
 
-Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo. A reworded retry is blocked when it hits that same failed attempt: the dev table blocks 3 of 4.
+Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo. On 21 dev and 10 held-out synthetic scenarios we wrote, a narrow test of one job, sheldon blocks 13 of 14 bad dev actions and 5 of 7 bad held-out actions, search-only blocks 8 of 14 and 2 of 7, sheldon false blocks are 0 of 7 and 0 of 3, and search-only false blocks are 1 of 7 and 0 of 3. 1 of 4 reworded retries still passes on dev and 2 of 2 on held-out.
 
 Read [`docs/plan/README.md`](docs/plan/README.md) first. Product scope and wording are that plan. W1 (evidence gate), W2 (refute plus stale cascade), and R1 (PR-time recall) are the only queries that have run. Every other station is **to build** or **roadmap**. A stub that raises `NotImplementedError` is not a working feature.
 
