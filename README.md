@@ -79,15 +79,15 @@ Dev N = 21 (14 actions that should be blocked, 7 that should be allowed). Held-o
 
 - **no-memory** always allows.
 - **search-only baseline** runs the S0 keyword path (`queries/s0_keyword.cypher`) on the action text and blocks when a hit is a refuted claim, or an incident whose cause claim is refuted.
-- **sheldon** runs preflight R2, W3 `claim_done`, and W1 `approve` as they are on main. Preflight counts as a block only when the decision is `block`. `warn` counts as allow. `approve` checks cited evidence. It does not read W2 stale state. W2's `refute_claim` is the refute write; this arm does not call it on a proposed approval.
+- **sheldon** runs preflight R2, W3 `claim_done`, and W1 `approve`. Preflight counts as a block only when the decision is `block`. `warn` counts as allow. `approve` checks cited evidence. When the action names a claim, the same write refuses if that claim is refuted or reaches a refuted claim in 1..3 `RELIES_ON` or `DEPENDS_ON` hops, the window W2 uses. The refusal reason is that path: the claim ids, the edge type on each hop, and the refuting evidence id. `python -m sheldon.gate.approve` prints it, and `--json` includes it. `claim_done` uses the same hop check on the done claim.
 
 ### Dev
 
 | Arm | Bad blocked | Good wrongly blocked | Median ms |
 | --- | --- | --- | --- |
 | no-memory | 0/14 | 0/7 | 0.00 |
-| search-only baseline | 8/14 | 1/7 | 5.33 |
-| sheldon | 7/14 | 0/7 | 4.30 |
+| search-only baseline | 8/14 | 1/7 | 5.68 |
+| sheldon | 10/14 | 0/7 | 4.76 |
 
 Sheldon wrongly blocked good actions: none.
 
@@ -96,14 +96,14 @@ Sheldon wrongly blocked good actions: none.
 | Arm | Bad blocked | Good wrongly blocked | Median ms |
 | --- | --- | --- | --- |
 | no-memory | 0/7 | 0/3 | 0.00 |
-| search-only baseline | 2/7 | 0/3 | 4.87 |
-| sheldon | 3/7 | 0/3 | 3.71 |
+| search-only baseline | 2/7 | 0/3 | 4.38 |
+| sheldon | 5/7 | 0/3 | 5.06 |
 
 Sheldon wrongly blocked good actions: none.
 
-Sheldon missed seven bad actions on the dev set. Four are reworded retries of the refuted fix (`b1`–`b4`): the command is not the recorded fingerprint `edit checkout/cache.py`, so `queries/preflight_r2.cypher` returns no block and preflight returns decision `warn` (`Files touched in prior incident(s) INC-12; alternative fix attempt allowed`). That is a limit of exact-fingerprint preflight. The other three are approvals that cite a claim 1, 2, and 3 `RELIES_ON` hops from a refuted claim (`d1`–`d3`). `queries/approve_pr.cypher` returned an approval id because evidence E-31 executed on sha `b2`. The arm calls that W1 gate only. It does not call W2.
+Sheldon still misses four bad actions on the dev set, all reworded retries of the refuted fix (`b1`–`b4`). The command is not the recorded fingerprint `edit checkout/cache.py`, so `queries/preflight_r2.cypher` returns no block and preflight returns decision `warn` (`Files touched in prior incident(s) INC-12; alternative fix attempt allowed`). That is a limit of exact-fingerprint preflight. A different command on that same file is a warn in `tests/test_preflight.py` (`refactor checkout/cache.py`), so this gate does not block every edit of the file.
 
-On the dev set, search-only blocked five bad actions sheldon allowed: `b1`, `b2`, `b3`, `d1`, and `d2`. Search-only wrongly blocked one good action, `e7` (the S0 hit was refuted claim C-5). Sheldon wrongly blocked good actions: none.
+On the dev set, search-only blocked three bad actions sheldon allowed: `b1`, `b2`, and `b3`. Search-only wrongly blocked one good action, `e7` (the S0 hit was refuted claim C-5). Sheldon wrongly blocked good actions: none.
 
 How another arm is added is in [`eval/traps/README.md`](eval/traps/README.md). The check interface is `name` and `blocks(graph, scenario) -> bool`.
 
@@ -172,7 +172,7 @@ Written by the query files, not declared as constants in `schema.py`:
 Each file under `queries/` is one statement, except `queries/AGENTS.md`, which is the folder rule, and `queries/create_vector_index_event.cypher`, which is comments until `EMBEDDING_DIM` is set.
 
 - `queries/AGENTS.md` — folder rule: one statement per file, parameters, no second query.
-- `queries/approve_pr.cypher` — W1 write. An approval lands when every cited Evidence id executed on that sha. Zero rows means refused.
+- `queries/approve_pr.cypher` — W1 write. An approval lands when every cited Evidence id executed on that sha. If it names a claim, that claim must not be refuted or within 1..3 hops of a refuted claim. Zero rows means refused.
 - `queries/audit_refuted_without_evidence.cypher` — demo audit of refuted hypotheses with no `REFUTED_BY` edge to an Event.
 - `queries/capsule_task.cypher` — read a task and the refuted attempts that touch it, with evidence ids.
 - `queries/check_approvals.cypher` — read approvals `FOR` a PR and cited evidence that is not an executed run on the head sha.

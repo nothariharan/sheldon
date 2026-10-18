@@ -3,7 +3,8 @@
 import pytest
 
 from sheldon.db import connect
-from sheldon.gate.done import claim_done
+from sheldon.gate.done import claim_done, done_decision
+from sheldon.gate.done import main as done_main
 
 GRAPH = "test_w3_done"
 
@@ -64,6 +65,64 @@ def test_a_second_call_does_not_write_another_approval(graph: str) -> None:
         {"id": first},
     ).result_set[0][0]
     assert count == 1
+
+
+def _ancestor_chain(graph: str) -> None:
+    connect().select_graph(graph).query(
+        "CREATE (root:Claim {id: 'C-root', kind: 'done', status: 'refuted'}),"
+        "(near:Claim {id: 'C-near', kind: 'done', status: 'open'}),"
+        "(mid:Claim {id: 'C-mid', kind: 'done', status: 'open'}),"
+        "(far:Claim {id: 'C-far', kind: 'done', status: 'open'}),"
+        "(ev:Evidence {id: 'E-root'}),"
+        "(near)-[:RELIES_ON]->(root),"
+        "(mid)-[:DEPENDS_ON]->(near),"
+        "(far)-[:RELIES_ON]->(mid),"
+        "(root)-[:REFUTED_BY]->(ev)"
+    )
+
+
+def test_refuses_when_the_done_claim_reaches_a_refuted_claim(graph: str) -> None:
+    _ancestor_chain(graph)
+    for claim_id in ("C-root", "C-near", "C-mid", "C-far"):
+        assert claim_done(graph, claim_id, "abc", ["E-pass"], model="opus", session="s1") is None
+    assert _approvals(graph) == 0
+
+
+def test_done_refusal_names_the_path_and_the_refuting_evidence(graph: str) -> None:
+    _ancestor_chain(graph)
+    decision = done_decision(graph, "C-far", "abc", ["E-pass"], model="opus", session="s1")
+    assert decision["id"] is None
+    assert decision["claim_ids"] == ["C-far", "C-mid", "C-near", "C-root"]
+    assert decision["edge_types"] == ["RELIES_ON", "DEPENDS_ON", "RELIES_ON"]
+    assert decision["evidence"] == "E-root"
+    assert "C-far -[:RELIES_ON]-> C-mid" in decision["reason"]
+    assert "refuted by E-root" in decision["reason"]
+    assert _approvals(graph) == 0
+
+
+def test_done_cli_json_includes_the_refusal_path(
+    graph: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _ancestor_chain(graph)
+    code = done_main(
+        [
+            "--graph",
+            graph,
+            "--claim",
+            "C-near",
+            "--sha",
+            "abc",
+            "--evidence",
+            "E-pass",
+            "--json",
+        ]
+    )
+    assert code == 2
+    captured = capsys.readouterr()
+    blob = captured.out + captured.err
+    assert "C-near" in blob
+    assert "E-root" in blob
+    assert "RELIES_ON" in blob
 
 
 def test_a_passing_run_on_the_head_writes_an_approval(graph: str) -> None:
