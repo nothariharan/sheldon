@@ -30,6 +30,8 @@ Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval fre
 - [ ] Reset the demo graph from the frozen seed with `GRAPH.COPY`. Same seed for every take.
 - [ ] FalkorDB is `falkordb/falkordb:v4.22.1`. The Browser is on `localhost:3000`.
 - [ ] The step 4 numbers match the eval table exactly, or the slide says "to be measured".
+- [ ] `SHELDON_PREFLIGHT_OVERRIDE` is unset in the shell you record from (`env | grep SHELDON_PREFLIGHT_OVERRIDE` prints nothing). When it is set, preflight lets every action through and step 1 shows no block.
+- [ ] FalkorDB is up before step 1. Preflight fails open: if the database is unreachable it returns `warn`, not `block`.
 - [ ] Read the narration against the wording rules in [README.md](README.md). No speed or cost number. No "revolutionary". No "production-ready".
 
 ## 0. Title (0:00–0:10)
@@ -79,13 +81,13 @@ Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval fre
 
 ## 3. One-write refute and stale cascade (1:25–2:05)
 
-**Needs:** W2 (`refute_hypothesis`), seed (C-7, A-3, T-9).
+**Needs:** W2 (`refute_claim`), seed (C-7, A-3, T-9).
 
 **On screen:**
 
 1. The Browser: C-7 with approval A-3 and task T-9 relying on it.
 2. New CI evidence arrives. One W2 call.
-3. Its one Cypher statement next to the result: C-7 `refuted`, A-3 `stale`, T-9 `stale`. C-7 is still in the graph.
+3. Its one Cypher statement next to the result: C-7 `status: refuted`, A-3 `status: stale`, and T-9 `stale: true`. T-9 keeps `status: open`: a task's staleness is a flag, not a status (`sheldon/schema.py`). C-7 is still in the graph.
 4. The PR's check now reports `stale: A-3 marked stale`.
 
 **Say:** "New CI evidence refutes C-7. One Cypher statement marks the claim refuted and every approval and task that relied on it stale, in one atomic write. Nothing is deleted. Claims are refuted, never stale. The approval that rested on C-7 no longer counts at the check."
@@ -95,6 +97,8 @@ Each step lists the rows it needs. If a row has not landed by Sun 1 PM (eval fre
 ## 4. With and without (2:05–2:40)
 
 **Needs:** eval-def, eval-count. At least 3 runs per arm, each reset from one frozen `GRAPH.COPY`.
+
+**As of Sun 18 Oct morning:** eval-count is "to build: runs not done". `sheldon/eval/harness.py` has `simulate_retry_block`, a scripted dry run whose pass and token values are not measured. Do not show its table as a result. Unless real paired runs land before the eval freeze, use the fallback below.
 
 **On screen:** one table: pass rate and total tokens, same model, with and without Sheldon, with the spread.
 
