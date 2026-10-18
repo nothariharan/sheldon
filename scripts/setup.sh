@@ -14,5 +14,5 @@ docker compose up -d --wait
 if [[ ! -d .venv ]]; then
   python3 -m venv .venv
 fi
-.venv/bin/python -m pip install -e ".[dev]"
+.venv/bin/python -m pip install -r requirements-dev.txt
 .venv/bin/python -m pytest tests/test_smoke.py

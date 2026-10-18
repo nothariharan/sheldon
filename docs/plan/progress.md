@@ -125,26 +125,26 @@ Left in `TASKS.md`, marked `cut for submission`, not deleted:
 
 Hariharan:
 
-1. Add the `sheldon run` command so it calls `record_run`. The capsule already tells agents to run it.
-2. README: data model, the list of Cypher files, an AI disclosure, a `LICENSE` file, and credit for FalkorDB code-graph and RepoGraph.
-3. Correct `docs/plan/deep.md` line 88 so it does not say the W2 statement ran on 4.18.3.
-4. In the last window, push a fresh public repo after the scan.
+1. `sheldon run` (#32) is done.
+2. README (#33) is done.
+3. Wire the MCP server so a real agent session calls preflight, `sheldon run`, and `claim_done` end to end.
+4. Store `handoff_task` `note` and `to_agent`.
+5. Clean-clone install: `requirements.txt` pins the FalkorDB client, `requirements-dev.txt` pins pytest and ruff, and `./scripts/setup.sh` is the one command.
+6. In the last window, push a fresh public repo.
 
 Satyansh:
 
 1. Change `compose` so a refuted claim cites the `REFUTED_BY` evidence. On the seed, E-30 supported C-7. E-60 is the refuting run.
-2. Add a session-start hook that restores the capsule, or tell the demo out loud that the hook is not built and show `capsule()` by hand.
-3. Make commit, push, and done fail closed when the database is down, or correct `docs/plan/deep.md` line 84. Preflight today fails open.
-4. Do not put dry-run eval numbers in the pitch.
+2. Add a session-start hook that restores the capsule.
+3. Make commit, push, and done fail closed on a database error, or else the `docs/plan/deep.md` line saying they fail open stays.
 
 Akshat:
 
-1. Record the demo from `docs/plan/demo.md`, with the fallbacks above, and with no eval table.
-2. Keep the check on the seed path. Live GitHub is not required for the recording if the CLI fallback is what is on screen.
-3. Submit the form by 11:00 PM IST.
+1. Record the demo.
+2. Submit the form by 11:00 PM IST, including the website link.
 
 Amaan:
 
-1. Schema constraint test only if the three items above are already done. It is not on the demo path.
-2. Clone the fresh public repo and run the install.
-3. Do not start ingest or the package name. Both are cut for submission.
+1. Build the `website` row: a static judge-facing page on Vercel or GitHub Pages. It shows what Sheldon does, the three seed demo moments as recorded CLI output (the retry block on INC-12 citing E-41, the evidence gate, and the refute plus stale cascade), the demo video, the graph data model, and a link to the public repo. The link goes in the README and the form. Nothing else.
+
+The schema constraint test is cut for submission. The row stays in `TASKS.md`.

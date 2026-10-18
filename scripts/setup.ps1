@@ -21,7 +21,7 @@ if (-not (Test-Path ".venv")) {
 }
 
 $python = Join-Path (Get-Location) ".venv\Scripts\python.exe"
-& $python -m pip install -e ".[dev]"
+& $python -m pip install -r requirements-dev.txt
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 & $python -m pytest tests/test_smoke.py
