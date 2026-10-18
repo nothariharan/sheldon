@@ -28,6 +28,7 @@ def record_run(
     exit_code: int,
     model: str,
     session: str,
+    output_digest: str = "",
 ) -> str:
     """Return the evidence id after a real process exit is recorded."""
     rows = _write(
@@ -39,6 +40,7 @@ def record_run(
             "command": command,
             "sha": head_sha,
             "exit_code": exit_code,
+            "output_digest": output_digest,
             "model": model,
             "session": session,
         },

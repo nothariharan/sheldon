@@ -8,6 +8,7 @@ CREATE (e:Evidence {
   sha: $sha,
   executed: true,
   exit_code: $exit_code,
+  output_digest: $output_digest,
   model: $model,
   session: $session
 })
