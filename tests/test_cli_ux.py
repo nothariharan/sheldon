@@ -1,12 +1,26 @@
 """Banner, help, and the plain-text fallback (docs/plan/cli-spec.md, cli-ux row)."""
 
+import contextlib
 import io
 import json
+import sys
 
 import pytest
 
 from sheldon.cli import main as run_main
-from sheldon.output import BANNER, CommandResult, emit, plain
+from sheldon.output import (
+    AMBER,
+    BANNER,
+    GREEN,
+    RED,
+    RESET,
+    CommandResult,
+    colorize,
+    emit,
+    paint,
+    plain,
+    spinner,
+)
 
 
 class Tty(io.StringIO):
@@ -43,7 +57,7 @@ def test_plain_unless_tty_and_no_color_unset(monkeypatch: pytest.MonkeyPatch) ->
 def test_banner_on_a_tty_before_the_status() -> None:
     err = Tty()
     assert emit(BLOCK, stdout=Tty(), stderr=err) == 2
-    assert err.getvalue() == BANNER + "\nblocked: refuted by E-41\n"
+    assert err.getvalue() == BANNER + f"\n{RED}blocked{RESET}: refuted by E-41\n"
 
 
 def test_no_banner_when_not_a_tty() -> None:
@@ -135,3 +149,154 @@ def test_prompt_survives_a_usage_error(monkeypatch: pytest.MonkeyPatch) -> None:
     out = Tty()
     assert interactive.prompt(Tty("check\nhelp\n"), out, out) == 0
     assert "usage: sheldon run -- <cmd>" in out.getvalue()
+
+
+def test_colored_status_words_on_a_tty() -> None:
+    assert paint("alert", RED) == f"{RED}alert{RESET}"
+    text = "blocked: E-52, stale: A-3, passed: test, clear: success, warn: outage"
+    colored = colorize(text)
+    assert f"{RED}blocked{RESET}" in colored
+    assert f"{AMBER}stale{RESET}" in colored
+    assert f"{GREEN}passed{RESET}" in colored
+    assert f"{GREEN}clear{RESET}" in colored
+    assert f"{AMBER}warn{RESET}" in colored
+
+
+def test_sheldon_run_frame_on_a_tty() -> None:
+    ok_res = CommandResult(
+        command="run",
+        exit_code=0,
+        data={"command": "pytest", "id": "E-ok123", "executed": True},
+        text="recorded evidence E-ok123 exit 0",
+    )
+    out = Tty()
+    assert emit(ok_res, stdout=out, stderr=Tty()) == 0
+    val = out.getvalue()
+    assert val.startswith(BANNER)
+    assert " running  pytest\n" in val
+    assert f" {GREEN}passed{RESET}   evidence E-ok123  exit 0\n" in val
+
+    # Nonzero exit line
+    fail_res = CommandResult(
+        command="run",
+        exit_code=3,
+        data={"command": "pytest", "id": "E-fail123", "executed": True},
+        text="recorded evidence E-fail123 exit 3",
+    )
+    out_fail = Tty()
+    assert emit(fail_res, stdout=out_fail, stderr=Tty()) == 3
+    val_fail = out_fail.getvalue()
+    assert " running  pytest\n" in val_fail
+    assert " recorded evidence E-fail123  exit 3\n" in val_fail
+
+
+def test_sheldon_run_frame_off_a_tty() -> None:
+    ok_res = CommandResult(
+        command="run",
+        exit_code=0,
+        data={"command": "pytest", "id": "E-ok123", "executed": True},
+        text="recorded evidence E-ok123 exit 0",
+    )
+    out = io.StringIO()
+    assert emit(ok_res, stdout=out, stderr=io.StringIO()) == 0
+    assert out.getvalue() == "recorded evidence E-ok123 exit 0\n"
+
+
+def test_preflight_frame_with_incident_on_a_tty() -> None:
+    res = CommandResult(
+        command="preflight",
+        exit_code=2,
+        data={"decision": "block", "incident_ids": ["INC-12"]},
+        text="blocked: refuted by E-41",
+        stream="stderr",
+    )
+    err = Tty()
+    assert emit(res, stdout=Tty(), stderr=err) == 2
+    val = err.getvalue()
+    assert val.startswith(BANNER)
+    assert f"\n {RED}blocked{RESET}  INC-12\n" in val
+    assert f"{RED}blocked{RESET}: refuted by E-41\n" in val
+
+
+def test_preflight_ok_leaves_streams_empty_on_a_tty() -> None:
+    res = CommandResult(command="preflight", exit_code=0, data={"decision": "ok"}, text="")
+    out = Tty()
+    err = Tty()
+    assert emit(res, stdout=out, stderr=err) == 0
+    assert out.getvalue() == ""
+    assert err.getvalue() == ""
+
+
+def test_spinner_context_manager(monkeypatch: pytest.MonkeyPatch) -> None:
+    err_plain = io.StringIO()
+    with spinner("running test", stream=err_plain):
+        pass
+    assert err_plain.getvalue() == ""
+
+    err_tty = Tty()
+    monkeypatch.setenv("NO_COLOR", "1")
+    with spinner("running test", stream=err_tty):
+        pass
+    assert err_tty.getvalue() == ""
+
+    # Exception thrown inside with block propagates cleanly without RuntimeError
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    with pytest.raises(FileNotFoundError), spinner("running test", stream=Tty()):
+        raise FileNotFoundError("not found")
+
+
+def test_sheldon_run_json_does_not_enter_spinner(monkeypatch: pytest.MonkeyPatch) -> None:
+    from sheldon import cli, output
+
+    spinner_calls: list[str] = []
+    monkeypatch.setattr(cli, "record_run", lambda *a, **kw: None)
+
+    @contextlib.contextmanager
+    def record_spinner(status: str, stream=None):
+        spinner_calls.append(status)
+        yield
+
+    monkeypatch.setattr(output, "spinner", record_spinner)
+
+    out = Tty()
+    err = Tty()
+    code = run_main(
+        ["run", "--json", "--", sys.executable, "-c", "pass"],
+        stdout=out,
+        stderr=err,
+    )
+    assert code == 0
+    assert spinner_calls == []
+    assert err.getvalue() == ""
+    out_val = out.getvalue()
+    assert "\x1b" not in out_val
+    payload = json.loads(out_val)
+    assert payload["command"] == "run"
+    assert payload["exit_code"] == 0
+
+
+def test_sheldon_run_piped_stdout_does_not_enter_spinner(monkeypatch: pytest.MonkeyPatch) -> None:
+    from sheldon import cli, output
+
+    spinner_calls: list[str] = []
+    monkeypatch.setattr(cli, "record_run", lambda *a, **kw: None)
+
+    @contextlib.contextmanager
+    def record_spinner(status: str, stream=None):
+        spinner_calls.append(status)
+        yield
+
+    monkeypatch.setattr(output, "spinner", record_spinner)
+
+    out = io.StringIO()
+    err = Tty()
+    code = run_main(
+        ["run", "--", sys.executable, "-c", "pass"],
+        stdout=out,
+        stderr=err,
+    )
+    assert code == 0
+    assert spinner_calls == []
+    val = out.getvalue()
+    assert val.startswith("recorded evidence E-")
+    assert val.endswith(" exit 0\n")
