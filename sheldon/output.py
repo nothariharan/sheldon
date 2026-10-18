@@ -1,13 +1,23 @@
 """Plain-text and JSON output.
 
-Banner, color, and spinners stay out of this module. Command functions return
-a ``CommandResult``. ``emit`` is the one place that writes it.
+Command functions return a ``CommandResult``. ``emit`` is the one place that
+writes it. On a terminal with ``NO_COLOR`` unset it prints the banner first.
+Otherwise the output is plain text (docs/plan/cli-spec.md).
 """
 
 import json
+import os
 import sys
 from dataclasses import dataclass
 from typing import Any, TextIO
+
+BANNER = " sheldon\n one graph per repo\n"
+
+
+def plain(stream: TextIO) -> bool:
+    """True when ``stream`` gets plain text: not a TTY, or ``NO_COLOR`` set and not empty."""
+    isatty = getattr(stream, "isatty", None)
+    return not (isatty and isatty()) or bool(os.environ.get("NO_COLOR"))
 
 
 @dataclass(frozen=True)
@@ -54,5 +64,7 @@ def emit(
         return result.exit_code
     if result.text:
         target = err if result.stream == "stderr" else out
+        if not plain(target):
+            target.write(BANNER + "\n")
         target.write(result.text if result.text.endswith("\n") else result.text + "\n")
     return result.exit_code
