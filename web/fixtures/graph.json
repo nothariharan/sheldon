@@ -35,6 +35,20 @@
       }
     },
     {
+      "key": "C-11",
+      "labels": [
+        "Claim"
+      ],
+      "properties": {
+        "id": "C-11",
+        "kind": "done",
+        "status": "open",
+        "text": "Done, all tests pass on PR 7",
+        "model": "agent-model-b",
+        "session": "S-3"
+      }
+    },
+    {
       "key": "C-5",
       "labels": [
         "Claim"

@@ -1,0 +1,56 @@
+{
+  "head_sha": "a8e19cbd14ebf10e9c5872e08c831b894c4e6272",
+  "evidence_id": "E-9d5a2646cfea",
+  "frames": [
+    {
+      "argv": [
+        "-m",
+        "sheldon.check",
+        "--graph",
+        "sheldon_site_gate",
+        "7",
+        "a8e19cbd14ebf10e9c5872e08c831b894c4e6272",
+        "--evidence",
+        "E-52"
+      ],
+      "exit_code": 1,
+      "stdout": "sheldon: blocked (failure) PR 7 at a8e19cbd14ebf10e9c5872e08c831b894c4e6272\nblocked: E-52 not executed\nrefuted: C-5 by E-41 (INC-12, via checkout/session.py)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "run",
+        "--graph",
+        "sheldon_site_gate",
+        "--model",
+        "agent-model-b",
+        "--session",
+        "S-3",
+        "--",
+        "python",
+        "-m",
+        "pytest",
+        "tests/test_output.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "stdout": "recorded evidence E-9d5a2646cfea exit 0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "-m",
+        "sheldon.check",
+        "--graph",
+        "sheldon_site_gate",
+        "7",
+        "a8e19cbd14ebf10e9c5872e08c831b894c4e6272",
+        "--evidence",
+        "E-9d5a2646cfea"
+      ],
+      "exit_code": 0,
+      "stdout": "sheldon: clear (success) PR 7 at a8e19cbd14ebf10e9c5872e08c831b894c4e6272\nrefuted: C-5 by E-41 (INC-12, via checkout/session.py)\n",
+      "stderr": ""
+    }
+  ]
+}
