@@ -26,7 +26,7 @@ Memory is how, not what. The three mechanisms need the graph to remember what fa
 
 | Station | Mechanism | Status |
 |---|---|---|
-| Ingest and capsule | `sheldon ingest` writes the code and history graph. The capsule is re-injected at session start, after compaction, and at subagent start. | to build (ingest, capsule). code-graph structural import is roadmap |
+| Ingest and capsule | `sheldon ingest` writes the code and history graph. The capsule is re-injected at session start, after compaction, and at subagent start. | ingest is to build. The capsule text is built and tested. Session start is built: `python -m sheldon.hooks.session_start` prints it, and `hooks/claude-session-start.json` covers startup, resume, clear, and compact. SubagentStart is not in that snippet. code-graph structural import is roadmap |
 | House standards | Gates enforce refuted-fix, done-needs-a-run, and approval-cites-evidence. | W1 query ran. The rest is to build or roadmap |
 | Evidence gate W1 / W3 | "Done" and approvals land with an executed run on that sha. | W1 query ran. W3 is to build |
 | Retry block R2 | Preflight through a PreToolUse hook. | to build |
@@ -53,7 +53,7 @@ The capsule is a short block: do-nots from refuted attempts that touch the curre
 
 ### 2.2 Evidence gate
 
-**W1 ran** on 4.18.3 and v4.22.1. It refuses unexecuted, missing, empty, and duplicate ids, and wrong-sha ids on v4.22.1. Valid ids create 1 `FOR` and 2 `CITES`. `tests/gate/test_approve.py` shows `approve` doing that on v4.22.1.
+**W1 ran** on the pinned `falkordb/falkordb:v4.22.1` image. `tests/test_smoke.py` calls `approve` with a missing evidence id on that image and gets no approval. `approve` refuses unexecuted, missing, empty, and duplicate ids, and wrong-sha ids. Valid ids create 1 `FOR` and 2 `CITES`. `tests/gate/test_approve.py` shows that on v4.22.1.
 
 ```cypher
 MATCH (pr:PR {number:$pr, head_sha:$sha})

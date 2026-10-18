@@ -1,8 +1,8 @@
 # Progress
 
-Sun 18 Oct 2026, about 10:00 AM IST. Main is `5e06e17`. Submission closes 11:59 PM IST, about 14 hours from this note. The last about 3 hours are for the video, the form, the README, and the fresh public push.
+Sun 18 Oct 2026. Main is `434c481`. Submission closes 11:59 PM IST. The last about 3 hours are for the video, the form, the README, and the fresh public push.
 
-A row is built when the code is on main and a test exercises it. Open pull requests: none.
+A row is built when the code is on main and a test exercises it. Merged since the last note: #44 (smoke runs W1, W2, and R1 on the seed), #42 (session-start hook), #43 (fail-closed for commit, push, and done), and #46 (banner, `sheldon --help`, and plain text off a terminal). Open: #47 (`sheldon` with no args on a terminal opens a prompt).
 
 ## Suite on main
 
@@ -38,7 +38,7 @@ Commits on main, 29 total: Hariharan 12 (41%), Akshat Bhaskar 10 (34%), Satyansh
 
 | Row | State |
 |---|---|
-| smoke-docker | partly built. Module version and `GRAPH.COPY` are tested. The W1, W2, R1, and `UNIQUE` cases are not in the smoke file. |
+| smoke-docker | partly built. Module version, `GRAPH.COPY`, and W1, W2, and R1 on the seed are tested (#44). `UNIQUE` is not in the smoke file. |
 | schema | partly built. Enums and the image pin are on main. No test applies the constraints. |
 | eval-def | built and tested |
 | ingest | not started (`record_event` raises). Cut for submission. |
@@ -53,9 +53,9 @@ Commits on main, 29 total: Hariharan 12 (41%), Akshat Bhaskar 10 (34%), Satyansh
 | claim-lease | built and tested. `handoff_task` is partly built: it drops `to_agent` and `note`. |
 | provenance | built and tested |
 | preflight | built and tested. On a database error, commit, push, and done return `block` and exit 2 (`SHELDON_FAIL_OPEN=1` keeps warn). A read returns `warn` and exit 0. |
-| capsule | partly built. The text is tested, including `sheldon run -- pytest`. No session-start hook restores it. |
+| capsule | built and tested. The text includes `sheldon run -- pytest`. Session start restores it: `python -m sheldon.hooks.session_start` and `hooks/claude-session-start.json` (#42). |
 | resume | built and tested |
-| compose | partly built. The comment is tested. After a refute it can name the old supporting evidence as the refutation. |
+| compose | built and tested. After a refute the comment cites the `REFUTED_BY` evidence. On the seed that is E-60, not E-30 (#41). |
 | check-run | partly built. Decision, webhook, and seed path are tested. Not run against GitHub. This run's seed copy failed with `GRAPH.COPY could not fork`. |
 | eval-count | partly built as a scripted dry run. Paired measured runs are cut for submission. |
 | race-tests | built and tested. Both races pass. The old "xfail until the write lands" line was stale. |
@@ -83,7 +83,7 @@ Commits on main, 29 total: Hariharan 12 (41%), Akshat Bhaskar 10 (34%), Satyansh
 | provenance `writes_with_provenance` | built and tested |
 | retrieval | R1 built. S0 keyword built. Vector and `q_star` not in Sunday's demo. |
 | check | partly built. Seed path tested. Live GitHub not started. |
-| CLI | partly built. `sheldon.preflight` and `python -m sheldon.check` exist. `sheldon run`, `sheldon init`, and `sheldon ingest` do not. |
+| CLI | partly built. #46 added the banner, `sheldon --help`, and plain text when stdout is not a terminal. #47 is open: `sheldon` with no args on a terminal opening a prompt. `sheldon run` is built. `sheldon init` and `sheldon ingest` are not. |
 | demo seed | built and tested |
 | demo script | partly built. Draft only. |
 | eval | partly built. Definition and dry run are tested. No paired measured runs, so no eval numbers in the pitch. |
@@ -96,11 +96,11 @@ Checked against main on this date.
 | Claim | Result |
 |---|---|
 | The `sheldon run` command does not exist. The capsule tells agents to run it. Only `record_run` exists. | Holds. No console script and no `sheldon run` module. `sheldon/capsule.py` sets the proving command to `sheldon run -- pytest`. |
-| No session-start hook restores the capsule. | Holds. `capsule()` returns text. Nothing in the tree installs a `SessionStart` hook. |
-| Commit, push, and done do not fail closed when the database is down. | Fixed by this pull request for commit, push, and done. `preflight` returns `block` and exit 2 (`test_preflight_blocks_on_db_outage`). `SHELDON_FAIL_OPEN=1` keeps warn. Reads (recall, resume, and the check summary) still warn (`test_a_read_warns_on_an_outage`). |
+| No session-start hook restores the capsule. | Fixed by #42. `python -m sheldon.hooks.session_start` prints `capsule()` for `SHELDON_TASK`. `hooks/claude-session-start.json` is the `SessionStart` snippet (startup, resume, clear, compact). |
+| Commit, push, and done do not fail closed when the database is down. | Fixed by #43 for commit, push, and done. `preflight` returns `block` and exit 2 (`test_preflight_blocks_on_db_outage`). `SHELDON_FAIL_OPEN=1` keeps warn. Reads (recall, resume, and the check summary) still warn (`test_a_read_warns_on_an_outage`). |
 | The eval is a scripted dry run with no paired runs, so no eval numbers go in the pitch. | Holds. `run_paired_eval` is `simulate_retry_block`. Pass rate and token totals are not measured. |
-| After the cascade, the PR comment cites E-30 as refuting C-7, but E-30 supported it. | Holds for `compose`. After `refute_claim` on the seed, recall still returns `SUPPORTED_BY` E-30 with status `refuted`, and `compose` prints "fix C-7 was refuted by evidence E-30". The check summary is a different path: it keeps `REFUTED_BY` rows, and the test on main expects "refuted: C-7 by E-60". |
-| `deep.md` line 84 claims fail-closed, and line 88 overstates the W2 run. | Fixed for the fail-closed claim. Line 84 now says commit, push, and done fail closed, and reads (recall, resume, and the check summary) fail open with a warning. Line 88 was corrected earlier: the W2 statement is tested on the pinned v4.22.1 image. |
+| After the cascade, the PR comment cites E-30 as refuting C-7, but E-30 supported it. | Fixed by #41. `compose` cites the `REFUTED_BY` evidence. On the seed the comment says C-7 was refuted by E-60, not E-30 (`tests/answers/test_compose.py`). The check summary still keeps `REFUTED_BY` rows. |
+| `deep.md` line 84 claims fail-closed, and line 88 overstates the W2 run. | Fixed by #43 for the fail-closed claim. Line 84 now says commit, push, and done fail closed, and reads (recall, resume, and the check summary) fail open with a warning. Line 88 was corrected earlier: the W2 statement is tested on the pinned v4.22.1 image. |
 | The README is missing the data model, the Cypher list, the AI disclosure, a LICENSE file, and credit for code-graph and RepoGraph. | Holds. `README.md` has none of those. There is no `LICENSE` file. `docs/plan/deep.md` section 2.1 does credit code-graph and RepoGraph. The README does not. |
 
 Nothing in that list is false.
@@ -142,7 +142,7 @@ Akshat:
 
 1. Record the demo. No dry-run eval numbers, no eval table in the video.
 2. Submit the form by 11:00 PM IST, including the website link.
-3. `cli-ux` with Satyansh ([cli-spec.md](cli-spec.md)): the banner, the interactive mode, help, and the non-TTY / `NO_COLOR` fallback.
+3. `cli-ux` with Satyansh ([cli-spec.md](cli-spec.md)). #46 is merged: the banner, `sheldon --help`, and the non-TTY / `NO_COLOR` fallback. #47 is open: the interactive prompt when `sheldon` has no args on a terminal.
 
 Amaan:
 
