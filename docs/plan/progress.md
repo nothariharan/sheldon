@@ -21,14 +21,14 @@ Run on `92a6492` plus this docs change, against `falkordb/falkordb:v4.22.1`.
 
 ## Overall
 
-19 of 32 `TASKS.md` rows are built and tested. That is 59%. Counted on `92a6492`. A row counts as built only when this note says built, not partly built.
+20 of 32 `TASKS.md` rows are built and tested. That is 63%. Counted on `92a6492`. A row counts as built only when this note says built, not partly built.
 
 | Person | Rows | Built and tested | Left | % built |
 |---|---|---|---|---|
-| Akshat (aksbhaskar) | 7 | 3 | 4 | 43% |
+| Akshat (aksbhaskar) | 7 | 4 | 3 | 57% |
 | Hariharan (nothariharan) | 9 | 8 | 1 | 89% |
 | Amaan | 9 | 3 | 6 | 33% |
-| Satyansh | 8 | 5 | 3 | 63% |
+| Satyansh | 8 | 6 | 2 | 75% |
 
 `cli-ux` is shared, so it is counted under Akshat and under Satyansh.
 
@@ -69,7 +69,7 @@ Commits on main, 47 total, counted on `92a6492`: Hariharan 26 (55%), Akshat Bhas
 | public-repo | not started |
 | website | not started |
 | web-ui | not started |
-| cli-ux | partly built. Akshat's half is built (#46, #47). Satyansh's half is to build. |
+| cli-ux | built and tested. Banner, help, prompt, plain fallback (#46, #47), ANSI colors, frames, spinner with rich. |
 
 ## Deep-plan components
 

@@ -1,14 +1,16 @@
 """Command line. `sheldon run -- <cmd>` records one executed Evidence node."""
 
 import argparse
+import contextlib
 import hashlib
 import os
 import shlex
 import subprocess
 import sys
+from typing import Any
 
 from sheldon.evidence.run import record_run
-from sheldon.output import BANNER, CommandResult, emit, plain
+from sheldon.output import BANNER, CommandResult, emit, plain, spinner
 
 HELP = """\
   run     run a command and record one executed Evidence node
@@ -53,9 +55,17 @@ def run_result(
     evidence_id: str = "",
     model: str = "",
     session: str = "",
+    show_spinner: bool = False,
+    stream: Any = None,
 ) -> CommandResult:
     """Run ``cmd``, record one executed Evidence node, and return the result."""
-    completed = subprocess.run(cmd, capture_output=True)
+    err = stream if stream is not None else sys.stderr
+    with (
+        spinner(f"running {shlex.join(cmd)}", stream=err)
+        if show_spinner
+        else contextlib.nullcontext()
+    ):
+        completed = subprocess.run(cmd, capture_output=True)
     digest = digest_output(completed.stdout, completed.stderr)
     evidence_id = evidence_id or f"E-{digest[:12]}"
     record_run(
@@ -117,14 +127,19 @@ def main(argv: list[str] | None = None, stdout=None, stderr=None) -> int:
     if args.name != "run" or not cmd:
         parser.error("usage: sheldon run -- <cmd>")
 
+    out = stdout if stdout is not None else sys.stdout
+    err = stderr if stderr is not None else sys.stderr
+    show_spinner = not args.json and not plain(out) and not plain(err)
     result = run_result(
         args.graph,
         cmd,
         evidence_id=args.id,
         model=args.model,
         session=args.session,
+        show_spinner=show_spinner,
+        stream=err,
     )
-    return emit(result, as_json=args.json, stdout=stdout, stderr=stderr)
+    return emit(result, as_json=args.json, stdout=out, stderr=err)
 
 
 def console_main() -> None:

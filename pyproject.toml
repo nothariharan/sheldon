@@ -4,7 +4,10 @@ version = "0.0.1"
 description = "Multi-agent incident-investigation memory on FalkorDB"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["falkordb>=1.7"]
+dependencies = [
+    "falkordb>=1.7",
+    "rich==15.0.0",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
