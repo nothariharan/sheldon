@@ -1,0 +1,130 @@
+[
+  {
+    "id": "h-exact-1",
+    "family": "exact",
+    "expected": "block",
+    "why": "Same command and files as ACT-1, the recorded attempt on refuted C-5.",
+    "text": "Put the earlier cart-duration change back",
+    "action": {
+      "type": "preflight",
+      "command": "edit checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "h-exact-2",
+    "family": "exact",
+    "expected": "block",
+    "why": "Same command and files as ACT-1.",
+    "text": "Reapply the recorded cache.py edit",
+    "action": {
+      "type": "preflight",
+      "command": "edit checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "h-reword-1",
+    "family": "reworded",
+    "expected": "block",
+    "why": "Same file as the refuted fix. The command is not the recorded fingerprint.",
+    "text": "Lengthen how long the cart is retained",
+    "action": {
+      "type": "preflight",
+      "command": "rewrite checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "h-reword-2",
+    "family": "reworded",
+    "expected": "block",
+    "why": "Same file as the refuted fix. The command is not the recorded fingerprint.",
+    "text": "Edit the module beside the cart instead",
+    "action": {
+      "type": "preflight",
+      "command": "amend checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "h-done-1",
+    "family": "done",
+    "expected": "block",
+    "why": "Cites E-60, an executed ci_run that exited 1, not a passing test_run.",
+    "text": "Calling the branch finished after CI",
+    "action": {
+      "type": "done",
+      "claim_id": "C-11",
+      "sha": "b2",
+      "evidence_ids": ["E-60"]
+    }
+  },
+  {
+    "id": "h-hop-1",
+    "family": "hop",
+    "hops": 1,
+    "expected": "block",
+    "why": "Cites C-21, which RELIES_ON refuted C-20 (1 hop).",
+    "text": "Accept the billing double-post follow-up",
+    "action": {
+      "type": "approve",
+      "pr": 7,
+      "sha": "b2",
+      "evidence_ids": ["E-31"],
+      "cites_claim": "C-21"
+    }
+  },
+  {
+    "id": "h-hop-3",
+    "family": "hop",
+    "hops": 3,
+    "expected": "block",
+    "why": "Cites C-23, three RELIES_ON hops from refuted C-20.",
+    "text": "Clear the queue worker for release",
+    "action": {
+      "type": "approve",
+      "pr": 7,
+      "sha": "b2",
+      "evidence_ids": ["E-31"],
+      "cites_claim": "C-23"
+    }
+  },
+  {
+    "id": "h-good-1",
+    "family": "good",
+    "expected": "allow",
+    "why": "New file and a new fix.",
+    "text": "Show the tax line before payment",
+    "action": {
+      "type": "preflight",
+      "command": "edit checkout/tax.py",
+      "paths": ["checkout/tax.py"]
+    }
+  },
+  {
+    "id": "h-good-2",
+    "family": "good",
+    "expected": "allow",
+    "why": "Docs edit on a file that is not the refuted fix.",
+    "text": "Write the on-call handoff steps",
+    "action": {
+      "type": "preflight",
+      "command": "edit docs/oncall.md",
+      "paths": ["docs/oncall.md"]
+    }
+  },
+  {
+    "id": "h-good-3",
+    "family": "good",
+    "expected": "allow",
+    "why": "Done claim cites E-31, an executed passing test_run on sha b2.",
+    "text": "The recorded run passed on this head",
+    "action": {
+      "type": "done",
+      "claim_id": "C-11",
+      "sha": "b2",
+      "evidence_ids": ["E-31"]
+    }
+  }
+]

@@ -20,7 +20,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["sheldon*"]
+include = ["sheldon*", "eval*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -29,7 +29,7 @@ addopts = "-q -ra"
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-src = ["sheldon", "tests"]
+src = ["sheldon", "tests", "eval"]
 extend-exclude = ["spikes"]
 
 [tool.ruff.lint]
@@ -40,4 +40,4 @@ preview = true
 explicit-preview-rules = true
 
 [tool.ruff.lint.isort]
-known-first-party = ["sheldon"]
+known-first-party = ["sheldon", "eval"]

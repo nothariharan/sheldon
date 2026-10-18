@@ -1,6 +1,6 @@
 # eval
 
-Status: reset and repeated-step count built; paired runs to build. Report no number from it. Satyansh owns this folder.
+Status: reset and repeated-step count built; paired runs to build. Report no pass rate or token total from the paired harness. The trap suite in `eval/traps/` reports the table `python -m eval.traps` measured. Satyansh owns this folder.
 
 Owns the repeated-failed-steps count and the frozen-seed reset.
 

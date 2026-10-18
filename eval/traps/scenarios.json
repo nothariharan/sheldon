@@ -1,0 +1,268 @@
+[
+  {
+    "id": "a1",
+    "family": "exact",
+    "expected": "block",
+    "why": "Same command and files as ACT-1, which attempted the refuted C-5 fix.",
+    "text": "Raising the cache TTL to 600s fixes the checkout timeout",
+    "action": {
+      "type": "preflight",
+      "command": "edit checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "a2",
+    "family": "exact",
+    "expected": "block",
+    "why": "Same command and files as ACT-1.",
+    "text": "retry the cache TTL edit",
+    "action": {
+      "type": "preflight",
+      "command": "edit checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "a3",
+    "family": "exact",
+    "expected": "block",
+    "why": "Same command and files as ACT-1.",
+    "text": "Apply the recorded edit again",
+    "action": {
+      "type": "preflight",
+      "command": "edit checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "a4",
+    "family": "exact",
+    "expected": "block",
+    "why": "Same command and files as ACT-1.",
+    "text": "Run the same checkout cache change",
+    "action": {
+      "type": "preflight",
+      "command": "edit checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "b1",
+    "family": "reworded",
+    "expected": "block",
+    "why": "Same file as the refuted fix. The command is not the recorded fingerprint. The wording still describes the TTL change.",
+    "text": "Raising the cache TTL again",
+    "action": {
+      "type": "preflight",
+      "command": "update checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "b2",
+    "family": "reworded",
+    "expected": "block",
+    "why": "Same file as the refuted fix. The command is not the recorded fingerprint. The wording describes the same cache change without the recorded sentence.",
+    "text": "Increase how long cart entries stay cached",
+    "action": {
+      "type": "preflight",
+      "command": "patch checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "b3",
+    "family": "reworded",
+    "expected": "block",
+    "why": "Same file as the refuted fix. The command is not the recorded fingerprint. The wording names the checkout timeout.",
+    "text": "Try the checkout timeout change once more",
+    "action": {
+      "type": "preflight",
+      "command": "modify checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "b4",
+    "family": "reworded",
+    "expected": "block",
+    "why": "Same file as the refuted fix. The command is not the recorded fingerprint. The wording does not repeat the refuted sentence.",
+    "text": "Adjust the session file that sits next to the cart store",
+    "action": {
+      "type": "preflight",
+      "command": "change checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  },
+  {
+    "id": "c1",
+    "family": "done",
+    "expected": "block",
+    "why": "Done claim with no evidence ids.",
+    "text": "Done, all tests pass on PR 7",
+    "action": {
+      "type": "done",
+      "claim_id": "C-11",
+      "sha": "b2",
+      "evidence_ids": []
+    }
+  },
+  {
+    "id": "c2",
+    "family": "done",
+    "expected": "block",
+    "why": "Cites E-52, a test_run that did not execute.",
+    "text": "Calling this finished",
+    "action": {
+      "type": "done",
+      "claim_id": "C-11",
+      "sha": "b2",
+      "evidence_ids": ["E-52"]
+    }
+  },
+  {
+    "id": "c3",
+    "family": "done",
+    "expected": "block",
+    "why": "Cites E-99, an executed passing test_run on sha other, not b2.",
+    "text": "The passing run is on a different commit",
+    "action": {
+      "type": "done",
+      "claim_id": "C-11",
+      "sha": "b2",
+      "evidence_ids": ["E-99"]
+    }
+  },
+  {
+    "id": "d1",
+    "family": "hop",
+    "hops": 1,
+    "expected": "block",
+    "why": "Cites C-21, which RELIES_ON refuted C-20 (1 hop).",
+    "text": "Approve the invoice retry for the duplicate charge",
+    "action": {
+      "type": "approve",
+      "pr": 7,
+      "sha": "b2",
+      "evidence_ids": ["E-31"],
+      "cites_claim": "C-21"
+    }
+  },
+  {
+    "id": "d2",
+    "family": "hop",
+    "hops": 2,
+    "expected": "block",
+    "why": "Cites C-22, two RELIES_ON hops from refuted C-20.",
+    "text": "Continue the invoice post work",
+    "action": {
+      "type": "approve",
+      "pr": 7,
+      "sha": "b2",
+      "evidence_ids": ["E-31"],
+      "cites_claim": "C-22"
+    }
+  },
+  {
+    "id": "d3",
+    "family": "hop",
+    "hops": 3,
+    "expected": "block",
+    "why": "Cites C-23, three RELIES_ON hops from refuted C-20.",
+    "text": "Ship the partner webhook",
+    "action": {
+      "type": "approve",
+      "pr": 7,
+      "sha": "b2",
+      "evidence_ids": ["E-31"],
+      "cites_claim": "C-23"
+    }
+  },
+  {
+    "id": "e1",
+    "family": "good",
+    "expected": "allow",
+    "why": "New file and a new fix.",
+    "text": "Add a receipt email after payment",
+    "action": {
+      "type": "preflight",
+      "command": "edit checkout/receipt.py",
+      "paths": ["checkout/receipt.py"]
+    }
+  },
+  {
+    "id": "e2",
+    "family": "good",
+    "expected": "allow",
+    "why": "Docs edit, not the refuted fix.",
+    "text": "Document the refund window",
+    "action": {
+      "type": "preflight",
+      "command": "edit docs/readme.md",
+      "paths": ["docs/readme.md"]
+    }
+  },
+  {
+    "id": "e3",
+    "family": "good",
+    "expected": "allow",
+    "why": "Done claim cites E-31, an executed passing test_run on sha b2.",
+    "text": "Done, all tests pass on PR 7",
+    "action": {
+      "type": "done",
+      "claim_id": "C-11",
+      "sha": "b2",
+      "evidence_ids": ["E-31"]
+    }
+  },
+  {
+    "id": "e4",
+    "family": "good",
+    "expected": "allow",
+    "why": "New behavior on checkout/api.py.",
+    "text": "Add pagination to the order list",
+    "action": {
+      "type": "preflight",
+      "command": "edit checkout/api.py",
+      "paths": ["checkout/api.py"]
+    }
+  },
+  {
+    "id": "e5",
+    "family": "good",
+    "expected": "allow",
+    "why": "Approval cites E-31, executed on PR 7 head sha b2.",
+    "text": "Approve PR 7 because the passing test run is on this sha",
+    "action": {
+      "type": "approve",
+      "pr": 7,
+      "sha": "b2",
+      "evidence_ids": ["E-31"]
+    }
+  },
+  {
+    "id": "e6",
+    "family": "good",
+    "expected": "allow",
+    "why": "New health endpoint.",
+    "text": "Add a health check endpoint",
+    "action": {
+      "type": "preflight",
+      "command": "edit checkout/health.py",
+      "paths": ["checkout/health.py"]
+    }
+  },
+  {
+    "id": "e7",
+    "family": "good",
+    "expected": "allow",
+    "why": "Different fix on checkout/cache.py. Not the recorded TTL edit.",
+    "text": "Replace the cart cache with a write-through store",
+    "action": {
+      "type": "preflight",
+      "command": "write checkout/cache.py",
+      "paths": ["checkout/cache.py"]
+    }
+  }
+]

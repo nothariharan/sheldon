@@ -9,7 +9,7 @@
 ## Verification
 
 - [ ] I read the `AGENTS.md` in the folder I edited
-- [ ] `ruff check sheldon tests`, `pytest`, and `pytest tests/test_smoke.py` against `falkordb/falkordb:v4.22.1`. Paste the output in this PR (`TESTING.md`)
+- [ ] `ruff check sheldon tests eval`, `pytest`, and `pytest tests/test_smoke.py` against `falkordb/falkordb:v4.22.1`. Paste the output in this PR (`TESTING.md`)
 - [ ] `pytest` (FalkorDB up). If a race is still an expected failure, say so
 - [ ] New Cypher is a new file under `queries/`, one statement, no second query
 - [ ] Status strings and edge names still come from `sheldon/schema.py`
