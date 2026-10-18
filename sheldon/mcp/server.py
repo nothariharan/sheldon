@@ -4,16 +4,29 @@ Status: built.
 Hosted http is roadmap. Stdio server provides standard JSON-RPC 2.0 MCP protocol.
 """
 
+import hashlib
 import json
+import shlex
+import subprocess
 import sys
 from typing import Any
 
 from sheldon.belief.refute import refute_claim
 from sheldon.coordination.board import claim_task
+from sheldon.evidence.run import record_run
+from sheldon.gate.done import claim_done
 from sheldon.preflight import preflight
 from sheldon.retrieval.recall import recall
 
-TOOLS: tuple[str, ...] = ("preflight", "recall", "claim", "refute", "resume")
+TOOLS: tuple[str, ...] = (
+    "preflight",
+    "recall",
+    "claim",
+    "refute",
+    "resume",
+    "sheldon_run",
+    "claim_done",
+)
 
 MCP_TOOL_DEFINITIONS = [
     {
@@ -93,6 +106,40 @@ MCP_TOOL_DEFINITIONS = [
             "required": ["graph", "agent_id"],
         },
     },
+    {
+        "name": "sheldon_run",
+        "description": "sheldon run -- <cmd>. Run it and record one executed Evidence node.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "graph": {"type": "string", "description": "FalkorDB graph key"},
+                "cmd": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Command argv, as in sheldon run -- <cmd>",
+                },
+                "model": {"type": "string"},
+                "session": {"type": "string"},
+            },
+            "required": ["graph", "cmd"],
+        },
+    },
+    {
+        "name": "claim_done",
+        "description": "Approve a done claim that cites a passing executed test run on this sha.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "graph": {"type": "string", "description": "FalkorDB graph key"},
+                "claim_id": {"type": "string"},
+                "head_sha": {"type": "string"},
+                "evidence_ids": {"type": "array", "items": {"type": "string"}},
+                "model": {"type": "string"},
+                "session": {"type": "string"},
+            },
+            "required": ["graph", "claim_id", "head_sha", "evidence_ids"],
+        },
+    },
 ]
 
 
@@ -145,7 +192,72 @@ def call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
 
         return resume(graph, agent_id)
 
+    if name == "sheldon_run":
+        return _sheldon_run(
+            graph,
+            _command(arguments.get("cmd")),
+            str(arguments.get("model", "")),
+            str(arguments.get("session", "")),
+        )
+
+    if name == "claim_done":
+        claim_id = str(arguments.get("claim_id", ""))
+        approval_id = claim_done(
+            graph,
+            claim_id,
+            str(arguments.get("head_sha", "")),
+            [str(item) for item in (arguments.get("evidence_ids") or [])],
+            str(arguments.get("model", "")),
+            str(arguments.get("session", "")),
+        )
+        return {"approval_id": approval_id, "claim_id": claim_id}
+
     raise ValueError(f"unhandled tool {name!r}")
+
+
+def _command(raw: object) -> list[str]:
+    if isinstance(raw, str):
+        cmd = shlex.split(raw)
+    else:
+        cmd = [str(part) for part in (raw or [])]
+    if not cmd:
+        raise ValueError("sheldon_run needs a command")
+    return cmd
+
+
+def _head_sha() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+        return ""
+
+
+def _sheldon_run(graph: str, cmd: list[str], model: str, session: str) -> dict[str, Any]:
+    """Run `sheldon run -- <cmd>` and record the real exit."""
+    completed = subprocess.run(cmd, capture_output=True)
+    command = shlex.join(cmd)
+    digest = hashlib.sha256(completed.stdout + completed.stderr).hexdigest()
+    evidence_id = f"E-{digest[:12]}"
+    sha = _head_sha()
+    record_run(
+        graph,
+        evidence_id=evidence_id,
+        command=command,
+        head_sha=sha,
+        exit_code=completed.returncode,
+        model=model,
+        session=session,
+    )
+    return {
+        "id": evidence_id,
+        "exit_code": completed.returncode,
+        "sha": sha,
+        "command": command,
+    }
 
 
 def handle_jsonrpc(request: dict[str, Any]) -> dict[str, Any] | None:
