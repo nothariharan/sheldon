@@ -1,13 +1,13 @@
 # Sheldon
 
+Sheldon blocks an exact repeat of a refuted fix, and blocks calling work done without a real test run, on one shared FalkorDB graph per repo. On 21 dev and 10 held-out synthetic scenarios we wrote, a narrow test of one job, sheldon blocks 13 of 14 bad dev actions and 5 of 7 bad held-out actions, search-only blocks 8 of 14 and 2 of 7, sheldon false blocks are 0 of 7 and 0 of 3, and search-only false blocks are 1 of 7 and 0 of 3. 1 of 4 reworded retries still passes on dev and 2 of 2 on held-out.
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![FalkorDB](https://img.shields.io/badge/FalkorDB-v4.22.1-ff3b30.svg)](https://github.com/FalkorDB/FalkorDB)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
 Sheldon runs your codebase like a Michelin kitchen: every agent, frontier or small, gets its ticket, its prep note and its tools, and no change leaves the kitchen until real evidence says it's ready.
-
-![Sheldon CLI refusing an unverified approval](docs/demo/refusal.gif)
 
 <p align="center">
   <img src="assets/sheldon-banner.svg" alt="Sheldon Banner" width="100%" />
@@ -93,7 +93,7 @@ sequenceDiagram
     FalkorDB-->>CI: Return C-7 refuted, 2 dependents staled
 
     Note over Agent,FalkorDB: Step 2: W1 Evidence Gate & Refusal
-    Agent->>Gate: sheldon approve PR 7 (citing C-7)
+    Agent->>Gate: python -m sheldon.gate.approve PR 7 (citing C-7)
     Gate->>FalkorDB: Run W1 approve_pr.cypher & refuted_ancestor.cypher
     FalkorDB->>FalkorDB: Walk (cited)-[:RELIES_ON|DEPENDS_ON*1..3]->(ancestor)
     FalkorDB-->>Gate: Hit refuted ancestor C-7 (path: A-3 -> C-7, refuted by E-60)
@@ -279,7 +279,7 @@ python -m sheldon.hooks.session_start
 
 - **Conditional writes (`WHERE` in write clauses):** Used in W1 (`approve_pr.cypher`), W2 (`refute_claim.cypher`), and W3 (`claim_done.cypher`) so approvals and refute cascades land in a single atomic transaction without multi-step race conditions.
 - **Full-text index (`db.idx.fulltext.queryNodes`):** Used in preflight retry search (`queries/preflight_attempt_search.cypher`) and S0 keyword lookup (`queries/s0_keyword.cypher`) across failed attempts, claims, and incident titles.
-- **GRAPH.COPY:** Used in `eval/traps/` and `sheldon.seed.copy_graph` to reset an evaluation graph from a frozen baseline in milliseconds without re-running seed scripts.
+- **GRAPH.COPY:** Used in `eval/traps/` and `sheldon.seed.copy_graph` to reset an evaluation graph from a frozen baseline without re-running seed scripts.
 - **FalkorDB Browser:** Used on port 3000 for visual inspection of repo nodes, trace paths, and the stale cascade.
 
 ## AI disclosure
