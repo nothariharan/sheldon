@@ -24,7 +24,7 @@ os.environ.setdefault("MEM0_TELEMETRY", "False")
 
 EMBEDDER = "sentence-transformers/all-MiniLM-L6-v2"
 DIMS = 384
-LIMIT = 5
+LIMIT = 5  # top_k
 THRESHOLD = 0.5
 USER = "trap-suite"
 
@@ -80,7 +80,7 @@ class Mem0Arm:
     def blocks(self, graph: str, scenario: dict[str, Any]) -> bool:
         memory = self._load(graph)
         found = memory.search(
-            scenario["text"], filters={"user_id": USER}, limit=LIMIT, threshold=THRESHOLD
+            scenario["text"], filters={"user_id": USER}, top_k=LIMIT, threshold=THRESHOLD
         )
         hits = found.get("results", []) if isinstance(found, dict) else found
         ids = [hit["metadata"]["node_id"] for hit in hits]
@@ -91,7 +91,7 @@ class Mem0Arm:
         )
         scores = [round(hit.get("score", 0.0), 3) for hit in hits]
         self.trace = (
-            f"mem0 search limit={LIMIT} threshold={THRESHOLD} hits={ids} scores={scores} "
+            f"mem0 search top_k={LIMIT} threshold={THRESHOLD} hits={ids} scores={scores} "
             f"trap_hit_status={_compact_status(rows)} blocked={blocked}"
         )
         return blocked
