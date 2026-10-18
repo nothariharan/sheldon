@@ -13,6 +13,9 @@ A claim or approval only lands if every evidence id it cites is a real executed 
 | [quotes.md](quotes.md) | The five quotes this plan uses. No others. |
 | [demo.md](demo.md) | Draft 3-minute demo script, step by step, with the rows each step needs and its fallback. |
 | [eval-def.md](eval-def.md) | Operational definition of repeated failed steps, 7-case taxonomy, and paired eval protocol. |
+| [ui-reference.md](ui-reference.md) | Layout notes from two product sites, and what the Sheldon page borrows. |
+| [ui-spec.md](ui-spec.md) | Landing page and the read-only seed view. Must-ship cut is 9 PM IST. |
+| [cli-spec.md](cli-spec.md) | CLI banner, status colors, help, and the plain-text fallback. |
 
 ## Status words
 
