@@ -162,8 +162,11 @@ def test_stubs_are_not_described_as_working() -> None:
     honest = (
         "Sheldon blocks an exact repeat of a refuted fix, and blocks calling "
         "work done without a real test run, on one shared FalkorDB graph per repo. "
-        "A reworded retry is blocked when it hits that same failed attempt: "
-        "the dev table blocks 3 of 4."
+        "On 21 dev and 10 held-out synthetic scenarios we wrote, a narrow test of "
+        "one job, sheldon blocks 13 of 14 bad dev actions and 5 of 7 bad held-out "
+        "actions, search-only blocks 8 of 14 and 2 of 7, sheldon false blocks are "
+        "0 of 7 and 0 of 3, and search-only false blocks are 1 of 7 and 0 of 3. "
+        "1 of 4 reworded retries still passes on dev and 2 on held-out."
     )
     readme_line = (ROOT / "README.md").read_text(encoding="utf-8").splitlines()[2]
     agents_line = (ROOT / "AGENTS.md").read_text(encoding="utf-8").splitlines()[2]
