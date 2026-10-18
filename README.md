@@ -87,9 +87,9 @@ Dev N = 21 (14 actions that should be blocked, 7 that should be allowed). Held-o
 | Arm | Bad blocked | Good wrongly blocked | Median ms |
 | --- | --- | --- | --- |
 | no-memory | 0/14 | 0/7 | 0.00 |
-| search-only baseline | 8/14 | 1/7 | 4.35 |
-| sheldon | 13/14 | 0/7 | 5.40 |
-| mem0 (infer=False, local embedder) | 7/14 | 0/7 | 8.74 |
+| search-only baseline | 8/14 | 1/7 | 5.31 |
+| sheldon | 13/14 | 0/7 | 5.43 |
+| mem0 (infer=False, local embedder) | 7/14 | 0/7 | 10.14 |
 
 No-memory wrongly blocked good actions: none.
 Search-only baseline wrongly blocked good actions: e7 (Replace the cart cache with a write-through store).
@@ -101,9 +101,9 @@ mem0 (infer=False, local embedder) wrongly blocked good actions: none.
 | Arm | Bad blocked | Good wrongly blocked | Median ms |
 | --- | --- | --- | --- |
 | no-memory | 0/7 | 0/3 | 0.00 |
-| search-only baseline | 2/7 | 0/3 | 4.48 |
-| sheldon | 5/7 | 0/3 | 6.02 |
-| mem0 (infer=False, local embedder) | 1/7 | 0/3 | 7.75 |
+| search-only baseline | 2/7 | 0/3 | 4.58 |
+| sheldon | 5/7 | 0/3 | 6.13 |
+| mem0 (infer=False, local embedder) | 1/7 | 0/3 | 8.72 |
 
 No-memory wrongly blocked good actions: none.
 Search-only baseline wrongly blocked good actions: none.
