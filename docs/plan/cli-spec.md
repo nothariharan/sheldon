@@ -12,6 +12,39 @@ Satyansh's order: the compose fix comes before this CLI work. On the seed, E-30 
 
 This file does not add a dependency. The implementation pull request pins `rich` in `requirements.txt` and `requirements-dev.txt`. `textual` is a later choice for a full-screen app, not part of the 9 PM cut. Do not add either library in the docs pull request.
 
+## Output interface
+
+`sheldon/output.py` is the one writer. Command code returns a `CommandResult` and does not print. Akshat and Satyansh add a banner, a spinner, or color by wrapping `emit`, not by editing preflight, run, check, resume, or recall.
+
+`CommandResult` fields:
+
+- `command`: `preflight`, `run`, `check`, `resume`, or `recall`
+- `exit_code`: the process exit code
+- `data`: the structured payload
+- `text`: the plain-text line
+- `stream`: `stdout` or `stderr`. Preflight block and warn use `stderr`
+- `json_style`: `envelope` or `payload`
+
+`emit(result, as_json=False)` writes `text` to `stream`. That is the default. `emit(result, as_json=True)` writes JSON to stdout and nothing to stderr.
+
+The envelope is `command`, `exit_code`, `text`, and `data`. Preflight, `sheldon run`, resume, and recall use it. Check uses `json_style="payload"`: `--json` still prints the check-run payload, because that document is what a program already parses. The `CommandResult` for check still carries that payload in `data`.
+
+Flags, all before any `--` separator:
+
+- `python -m sheldon.preflight --json`
+- `sheldon run --json -- <cmd>`
+- `python -m sheldon.check --json`
+- `python -m sheldon.coordination.resume --json`
+- `python -m sheldon.retrieval.recall --json`
+
+Plain text when `--json` is absent:
+
+- preflight: the reason on stderr, exit 2 on block, exit 0 on warn or ok
+- `sheldon run`: `recorded evidence <id> exit <code>`, then the child exit code
+- check: the title line and the summary, unchanged
+- resume: `tried`, `failed`, `believed`, and `next` counts
+- recall: one line of incident, claim, relation, and evidence per row
+
 Today `sheldon` is `sheldon.cli:console_main` and requires a subcommand. `python -m sheldon.preflight`, `python -m sheldon.check`, and `python -m sheldon.mcp.server` are separate entry points. The frames below are the target look. Where today's process prints less, the frame says so.
 
 ## Rules for every command
