@@ -60,6 +60,9 @@ flowchart LR
 | `Commit` | Node | Git commit metadata (`hash`, `message`, `timestamp`) authored by developers. |
 | `Developer` | Node | Author of commits in the repository history. |
 | `Repository` | Node | Code repository anchor (`BELONGS_TO`) for files and history. |
+| `Event` | Node | One step in an investigation (`type`, `text`, `ts`), linked by `NEXT` and `IN_INVESTIGATION`. |
+| `Investigation` | Node | Groups the events of one investigation. |
+| `Hypothesis` | Node | Older sketch label used by refute_hypothesis.cypher and q_star.cypher. |
 | `REFUTED_BY` | Edge | Links a refuted `Claim` to the executed `Evidence` that refuted it, recording agent, model, and timestamp. |
 | `SUPPORTED_BY` | Edge | Links a `Claim` to passing `Evidence` that verifies it. |
 | `ATTEMPTED_FIX_FOR` | Edge | Connects an attempted `Action` to the `Claim` it sought to resolve. |
@@ -232,7 +235,7 @@ Execute commands and record verified evidence in the graph:
 sheldon run -- pytest
 ```
 
-When tests pass, an executed `Evidence` node `E-<digest>` is recorded on the active commit sha.
+Each run records one executed `Evidence` node `E-<digest>` on the current commit sha, with its exit code. Only a run that exited 0 can back a done claim.
 
 ### 4. MCP Server Setup
 
@@ -242,7 +245,7 @@ Sheldon runs as a standard Model Context Protocol (MCP) server over stdin/stdout
 python -m sheldon.mcp.server
 ```
 
-Add Sheldon to your Claude Code or MCP client configuration (`~/.claude/settings.json`):
+Add Sheldon to `.mcp.json` at your project root (or run `claude mcp add sheldon --env SHELDON_GRAPH=sheldon:demo -- python -m sheldon.mcp.server`):
 
 ```json
 {
@@ -281,6 +284,51 @@ python -m sheldon.hooks.session_start
 - **Full-text index (`db.idx.fulltext.queryNodes`):** Used in preflight retry search (`queries/preflight_attempt_search.cypher`) and S0 keyword lookup (`queries/s0_keyword.cypher`) across failed attempts, claims, and incident titles.
 - **GRAPH.COPY:** Used in `eval/traps/` and `sheldon.seed.copy_graph` to reset an evaluation graph from a frozen baseline without re-running seed scripts.
 - **FalkorDB Browser:** Used on port 3000 for visual inspection of repo nodes, trace paths, and the stale cascade.
+
+## Cypher files
+
+Each file under `queries/` is one statement, except `queries/AGENTS.md`, which is the folder rule, and `queries/create_vector_index_event.cypher`, which is comments until `EMBEDDING_DIM` is set.
+
+- `queries/AGENTS.md` — folder rule: one statement per file, parameters, no second query.
+- `queries/approve_pr.cypher` — W1 write. An approval lands when every cited Evidence id executed on that sha. If it names a claim, that claim must not be refuted or within 1..3 hops of a refuted claim. Zero rows means refused.
+- `queries/audit_refuted_without_evidence.cypher` — demo audit of refuted hypotheses with no `REFUTED_BY` edge to an Event.
+- `queries/capsule_task.cypher` — read a task and the refuted attempts that touch it, with evidence ids.
+- `queries/check_approvals.cypher` — read approvals `FOR` a PR and cited evidence that is not an executed run on the head sha.
+- `queries/check_cited_evidence.cypher` — look up each cited evidence id. A missing id still returns a row, with `found` false.
+- `queries/claim_done.cypher` — W3 write. A done claim needs an executed `test_run` that exited 0 on this sha. `MERGE` on the approval id.
+- `queries/claim_task.cypher` — one conditional write so concurrent callers produce one winner.
+- `queries/complete_task.cypher` — set a claimed task to done for the agent that holds it.
+- `queries/count_nodes.cypher` — count the nodes in the graph.
+- `queries/create_fulltext_claim_text.cypher` — full-text index on `Claim.text`.
+- `queries/create_fulltext_event_text.cypher` — full-text index on `Event.text`.
+- `queries/create_fulltext_incident_title.cypher` — full-text index on `Incident.title`.
+- `queries/create_index_event_id.cypher` — index on `Event.id`.
+- `queries/create_index_event_ts.cypher` — index on `Event.ts`.
+- `queries/create_index_hypothesis_id.cypher` — index on `Hypothesis.id`.
+- `queries/create_index_task_id.cypher` — index on `Task.id`.
+- `queries/create_vector_index_event.cypher` — commented sketch of a vector index on `Event.embedding`. Not runnable until `EMBEDDING_DIM` is set.
+- `queries/handoff_task.cypher` — release a claimed lease: status back to open, `owner` and `lease_expires` cleared.
+- `queries/heartbeat.cypher` — extend the lease when this agent still holds the task.
+- `queries/hypothesis_confidence.cypher` — read `Hypothesis.confidence` so the locked refute sketch can write that value back.
+- `queries/ingest_pull_request.cypher` — one statement for the files a PR changes at one head sha. A new push replaces the `CHANGES` set.
+- `queries/preflight_attempt_search.cypher` — full-text over failed attempts when the exact fingerprint misses. A hit counts only for the same file or the same refuted claim.
+- `queries/preflight_r2.cypher` — retry check sent as a read, for an exact action fingerprint and file incident warnings.
+- `queries/q_star.cypher` — read open tasks still tied to a hypothesis whose support traces back to an action that was later refuted.
+- `queries/recall_pr.cypher` — R1 read. For each file a PR changes, incidents, claims, and the evidence that supports or refutes them, bounded at one co-change hop.
+- `queries/record_eval_action.cypher` — write an `Action` during an evaluation run.
+- `queries/record_event.cypher` — append one `Event` to an investigation and link `NEXT` from the previous event.
+- `queries/record_run.cypher` — write one `Evidence` node. `executed: true` is a literal, so a caller cannot pass it in.
+- `queries/refute_claim.cypher` — W2 write. Refute a claim and stale dependents at up to 3 hops. A task keeps its status and gets boolean `stale`.
+- `queries/refute_hypothesis.cypher` — older sketch: one write on a `Hypothesis` and cited `Event` ids. A contract test locks this file.
+- `queries/refuted_ancestor.cypher` — read the shortest path from a claim to a refuted claim in 1..3 `RELIES_ON` or `DEPENDS_ON` hops, with the refuting evidence id. Used for the refusal reason.
+- `queries/repeated_failed_steps.cypher` — count actions that match a prior attempt on a refuted claim backed by executed non-zero evidence.
+- `queries/resume_state.cypher` — read tried, failed, believed, and next, each citing ids.
+- `queries/s0_keyword.cypher` — keyword hits over stored text, with no traversal. The vector half waits on `EMBEDDING_DIM`.
+- `queries/seed_demo.cypher` — demo seed in one `CREATE`. The ids are seed data, not a result.
+- `queries/trap_hit_status.cypher` — read claim status, or the cause-claim status of an incident, for S0 hit ids. Used by the trap suite.
+- `queries/trap_memory_rows.cypher` — read incident titles and claim text for the optional mem0 trap arm. Read-only.
+- `queries/trap_overlay.cypher` — one `CREATE` of the trap-suite hop chain and the wrong-sha test run, applied after the demo seed.
+- `queries/writes_with_provenance.cypher` — read `id`, label, `model`, and `session` for `Claim`, `Evidence`, `Approval`, and `Action`.
 
 ## AI disclosure
 
