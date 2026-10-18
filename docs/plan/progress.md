@@ -1,8 +1,8 @@
 # Progress
 
-Sun 18 Oct 2026. Main is `92a6492`. Submission closes 11:59 PM IST. The last about 3 hours are for the video, the form, the README, and the fresh public push.
+Sun 18 Oct 2026. Main is `e3efdf0`. Submission closes 11:59 PM IST. The last about 3 hours are for the video, the form, the README, and the fresh public push.
 
-A row is built when the code is on main and a test exercises it. Merged since the last note: #44 (smoke runs W1, W2, and R1 on the seed), #42 (session-start hook), #43 (fail-closed for commit, push, and done), #46 (banner, `sheldon --help`, and plain text off a terminal), and #47 (`sheldon` with no args on a terminal opens a prompt). No other open pull request.
+A row is built when the code is on main and a test exercises it. Merged since the last note: #44 (smoke runs W1, W2, and R1 on the seed), #42 (session-start hook), #43 (fail-closed for commit, push, and done), #46 (banner, `sheldon --help`, and plain text off a terminal), #47 (`sheldon` with no args on a terminal opens a prompt), #48 (status lines), and #49 (cli-ux colors, frames, and the spinner). No other open pull request.
 
 ## Suite on main
 
@@ -11,17 +11,17 @@ ruff check sheldon tests
 All checks passed!
 
 pytest
-188 passed in 12.02s
+196 passed in 12.07s
 
 pytest tests/test_smoke.py
 3 passed in 0.12s
 ```
 
-Run on `92a6492` plus this docs change, against `falkordb/falkordb:v4.22.1`.
+Run on `e3efdf0` plus this change, against `falkordb/falkordb:v4.22.1`.
 
 ## Overall
 
-20 of 32 `TASKS.md` rows are built and tested. That is 63%. Counted on `92a6492`. A row counts as built only when this note says built, not partly built.
+20 of 32 `TASKS.md` rows are built and tested. That is 63%. Counted on `e3efdf0`, including #49 (`cli-ux` is built). A row counts as built only when this note says built, not partly built.
 
 | Person | Rows | Built and tested | Left | % built |
 |---|---|---|---|---|
@@ -32,7 +32,7 @@ Run on `92a6492` plus this docs change, against `falkordb/falkordb:v4.22.1`.
 
 `cli-ux` is shared, so it is counted under Akshat and under Satyansh.
 
-Commits on main, 47 total, counted on `92a6492`: Hariharan 26 (55%), Akshat Bhaskar 14 (30%), Satyansh Gaur 6 (13%), Cursor Agent 1 (2%). Amaan has 0.
+Commits on main, 49 total, counted on `e3efdf0`: Hariharan 27 (55%), Akshat Bhaskar 14 (29%), Satyansh Gaur 7 (14%), Cursor Agent 1 (2%). Amaan has 0.
 
 ## Rows
 
@@ -138,7 +138,7 @@ Hariharan:
 Satyansh:
 
 1. `compose` cites the `REFUTED_BY` evidence (E-60 on the seed). Done (#41).
-2. `cli-ux` with Akshat ([cli-spec.md](cli-spec.md)). Satyansh: spinners, colored blocked / passed / stale lines, and the preflight, `sheldon run`, check, and MCP frames through one shared output module.
+2. `cli-ux` colors, frames, and the spinner are built (#49). The spinner stays off for `--json`, and when stdout or stderr is not a terminal.
 3. The session-start hook is built (`python -m sheldon.hooks.session_start`). Commit, push, and done fail closed on a database error. Reads (recall, resume, and the check summary) fail open with a warning.
 
 Akshat:

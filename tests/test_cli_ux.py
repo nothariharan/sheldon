@@ -246,7 +246,7 @@ def test_spinner_context_manager(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_sheldon_run_json_does_not_enter_spinner(monkeypatch: pytest.MonkeyPatch) -> None:
-    from sheldon import cli, output
+    from sheldon import cli
 
     spinner_calls: list[str] = []
     monkeypatch.setattr(cli, "record_run", lambda *a, **kw: None)
@@ -256,7 +256,7 @@ def test_sheldon_run_json_does_not_enter_spinner(monkeypatch: pytest.MonkeyPatch
         spinner_calls.append(status)
         yield
 
-    monkeypatch.setattr(output, "spinner", record_spinner)
+    monkeypatch.setattr(cli, "spinner", record_spinner)
 
     out = Tty()
     err = Tty()
@@ -276,7 +276,7 @@ def test_sheldon_run_json_does_not_enter_spinner(monkeypatch: pytest.MonkeyPatch
 
 
 def test_sheldon_run_piped_stdout_does_not_enter_spinner(monkeypatch: pytest.MonkeyPatch) -> None:
-    from sheldon import cli, output
+    from sheldon import cli
 
     spinner_calls: list[str] = []
     monkeypatch.setattr(cli, "record_run", lambda *a, **kw: None)
@@ -286,7 +286,7 @@ def test_sheldon_run_piped_stdout_does_not_enter_spinner(monkeypatch: pytest.Mon
         spinner_calls.append(status)
         yield
 
-    monkeypatch.setattr(output, "spinner", record_spinner)
+    monkeypatch.setattr(cli, "spinner", record_spinner)
 
     out = io.StringIO()
     err = Tty()
