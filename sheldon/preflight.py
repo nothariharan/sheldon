@@ -3,10 +3,13 @@
 Status: built.
 Preflight checks proposed actions against the shared FalkorDB graph before tool execution.
 Blocks exact retries of refuted fixes and emits warnings on touched incident files.
+When the fingerprint misses, full-text over failed attempts can block. The graph
+scope is the same file or the same refuted claim.
 """
 
 import json
 import os
+import re
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -15,6 +18,8 @@ from typing import Any
 from sheldon.db import read
 from sheldon.gate.closed import is_closed_action, outage_decision
 from sheldon.output import CommandResult, emit
+from sheldon.retrieval.s0 import keyword_terms
+from sheldon.schema import HypothesisStatus
 
 
 def normalize_command(command: str) -> str:
@@ -83,6 +88,51 @@ def compute_action_fingerprint(
         return norm_cmd
 
     return f"{norm_cmd}|{','.join(c_paths)}"
+
+
+def path_tokens(paths: Sequence[str]) -> list[str]:
+    """Tokens of a path. They are the graph scope, not full-text terms."""
+    tokens: list[str] = []
+    for path in paths:
+        tokens.extend(re.findall(r"[a-z0-9]+", path.lower()))
+    return tokens
+
+
+def query_attempt_search(
+    graph: str,
+    terms: str,
+    paths: Sequence[str],
+    claim_id: str = "",
+    db: Any = None,
+) -> list[dict]:
+    """Full-text over failed attempts, scoped to the same file or the same claim."""
+    if not terms:
+        return []
+    rows = read(
+        graph,
+        "preflight_attempt_search",
+        {
+            "terms": terms,
+            "paths": list(paths),
+            "claim": claim_id,
+            "refuted": HypothesisStatus.REFUTED.value,
+        },
+        db=db,
+    )
+    blocks = []
+    for row in rows:
+        if not row.get("claim") or not row.get("evidence"):
+            continue
+        blocks.append(
+            {
+                "action": row.get("action"),
+                "claim": row.get("claim"),
+                "evidence": row.get("evidence"),
+                "incident": row.get("incident"),
+                "reason": row.get("reason") or "Refuted fix",
+            }
+        )
+    return blocks
 
 
 def query_r2(
@@ -192,8 +242,16 @@ def preflight(
     override: bool = False,
     repo_root: str | Path | None = None,
     db: Any = None,
+    description: str = "",
+    claim_id: str = "",
 ) -> dict[str, Any]:
-    """Execute preflight check on proposed command and touched file paths."""
+    """Execute preflight check on proposed command and touched file paths.
+
+    ``description`` is optional prose. When the exact fingerprint misses, a
+    full-text query over failed attempts can still block. A hit counts only
+    when the attempt touched one of these files, or the hit is ``claim_id``.
+    Path tokens are excluded from the query. They are the scope, not terms.
+    """
     effective_override = override or os.environ.get("SHELDON_PREFLIGHT_OVERRIDE") == "1"
 
     try:
@@ -211,15 +269,28 @@ def preflight(
 
     try:
         query_res = query_r2(graph, fingerprint, c_paths, db=db)
+        query_name = "preflight_r2"
+        search_terms = ""
+        if not query_res["blocks"] and description:
+            search_terms = keyword_terms(description, exclude=path_tokens(c_paths))
+            found = query_attempt_search(
+                graph, search_terms, c_paths, claim_id=claim_id, db=db
+            )
+            if found:
+                query_res["blocks"] = found
+                query_name = "preflight_attempt_search"
     except Exception as exc:  # noqa: BLE001
         action = normalize_command(command) or "preflight"
         return outage_decision(action, exc, closed=is_closed_action(command))
 
-    return decide_preflight(
+    decision = decide_preflight(
         query_res["blocks"],
         query_res["warnings"],
         override=effective_override,
     )
+    decision["query"] = query_name
+    decision["search_terms"] = search_terms
+    return decision
 
 
 def preflight_result(
@@ -229,9 +300,20 @@ def preflight_result(
     override: bool = False,
     repo_root: str | Path | None = None,
     db: Any = None,
+    description: str = "",
+    claim_id: str = "",
 ) -> CommandResult:
     """Return the preflight decision as a ``CommandResult``."""
-    res = preflight(graph, command, paths, override=override, repo_root=repo_root, db=db)
+    res = preflight(
+        graph,
+        command,
+        paths,
+        override=override,
+        repo_root=repo_root,
+        db=db,
+        description=description,
+        claim_id=claim_id,
+    )
     decision = res["decision"]
     text = res["reason"] if decision in {"block", "warn"} else ""
     return CommandResult(
@@ -252,6 +334,8 @@ def main(argv: list[str] | None = None, stdout=None, stderr=None, stdin=None) ->
     parser.add_argument("--command", default="")
     parser.add_argument("--paths", nargs="*", default=[])
     parser.add_argument("--override", action="store_true", default=False)
+    parser.add_argument("--description", default="")
+    parser.add_argument("--claim", default="")
     parser.add_argument("--stdin", action="store_true", default=False)
     parser.add_argument("--json", action="store_true", help="print the result as JSON")
 
@@ -286,7 +370,14 @@ def main(argv: list[str] | None = None, stdout=None, stderr=None, stdin=None) ->
         except Exception as exc:  # noqa: BLE001
             sys.stderr.write(f"sheldon: [WARN] could not parse hook stdin JSON: {exc}\n")
 
-    result = preflight_result(graph, command, paths, override=args.override)
+    result = preflight_result(
+        graph,
+        command,
+        paths,
+        override=args.override,
+        description=args.description,
+        claim_id=args.claim,
+    )
     return emit(result, as_json=args.json, stdout=stdout, stderr=stderr)
 
 

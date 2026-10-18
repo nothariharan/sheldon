@@ -10,8 +10,8 @@ Command: `python -m eval.traps`
 | Arm | Bad blocked | Good wrongly blocked | Median ms |
 | --- | --- | --- | --- |
 | no-memory | 0/14 | 0/7 | 0.00 |
-| search-only baseline | 8/14 | 1/7 | 5.68 |
-| sheldon | 10/14 | 0/7 | 4.76 |
+| search-only baseline | 8/14 | 1/7 | 4.35 |
+| sheldon | 13/14 | 0/7 | 5.40 |
 
 Sheldon wrongly blocked good actions: none.
 
@@ -23,9 +23,9 @@ Sheldon wrongly blocked good actions: none.
 | a2 | exact | block | allow | block | block |
 | a3 | exact | block | allow | allow | block |
 | a4 | exact | block | allow | block | block |
-| b1 | reworded | block | allow | block | allow |
-| b2 | reworded | block | allow | block | allow |
-| b3 | reworded | block | allow | block | allow |
+| b1 | reworded | block | allow | block | block |
+| b2 | reworded | block | allow | block | block |
+| b3 | reworded | block | allow | block | block |
 | b4 | reworded | block | allow | allow | allow |
 | c1 | done | block | allow | allow | block |
 | c2 | done | block | allow | allow | block |
@@ -49,14 +49,11 @@ Sheldon wrongly blocked good actions: none.
 - a3 search-only baseline: expected block, got allow. s0_keyword terms='apply|recorded|edit|again' hits=[] trap_hit_status=[] blocked=False
 - a4 no-memory: expected block, got allow. no-memory has no gate and returns allow
 - b1 no-memory: expected block, got allow. no-memory has no gate and returns allow
-- b1 sheldon: expected block, got allow. preflight queries/preflight_r2.cypher fingerprint='update checkout/cache.py|checkout/cache.py' returned decision='warn' reason='Files touched in prior incident(s) INC-12; alternative fix attempt allowed' evidence_ids=['E-41']
 - b2 no-memory: expected block, got allow. no-memory has no gate and returns allow
-- b2 sheldon: expected block, got allow. preflight queries/preflight_r2.cypher fingerprint='patch checkout/cache.py|checkout/cache.py' returned decision='warn' reason='Files touched in prior incident(s) INC-12; alternative fix attempt allowed' evidence_ids=['E-41']
 - b3 no-memory: expected block, got allow. no-memory has no gate and returns allow
-- b3 sheldon: expected block, got allow. preflight queries/preflight_r2.cypher fingerprint='modify checkout/cache.py|checkout/cache.py' returned decision='warn' reason='Files touched in prior incident(s) INC-12; alternative fix attempt allowed' evidence_ids=['E-41']
 - b4 no-memory: expected block, got allow. no-memory has no gate and returns allow
 - b4 search-only baseline: expected block, got allow. s0_keyword terms='adjust|session|file|sits|next|cart|store' hits=['C-7'] trap_hit_status=[{'id': 'C-7', 'claim_status': 'open', 'incident_cause_status': None}] blocked=False
-- b4 sheldon: expected block, got allow. preflight queries/preflight_r2.cypher fingerprint='change checkout/cache.py|checkout/cache.py' returned decision='warn' reason='Files touched in prior incident(s) INC-12; alternative fix attempt allowed' evidence_ids=['E-41']
+- b4 sheldon: expected block, got allow. preflight queries/preflight_attempt_search.cypher terms='adjust|session|file|sits|next|cart|store' returned no scoped hit; preflight queries/preflight_r2.cypher fingerprint='change checkout/cache.py|checkout/cache.py' returned decision='warn' reason='Files touched in prior incident(s) INC-12; alternative fix attempt allowed' evidence_ids=['E-41']
 - c1 no-memory: expected block, got allow. no-memory has no gate and returns allow
 - c1 search-only baseline: expected block, got allow. s0_keyword terms='done|all|tests|pass' hits=['C-11'] trap_hit_status=[{'id': 'C-11', 'claim_status': 'open', 'incident_cause_status': None}] blocked=False
 - c2 no-memory: expected block, got allow. no-memory has no gate and returns allow
@@ -74,8 +71,8 @@ Sheldon wrongly blocked good actions: none.
 | Arm | Bad blocked | Good wrongly blocked | Median ms |
 | --- | --- | --- | --- |
 | no-memory | 0/7 | 0/3 | 0.00 |
-| search-only baseline | 2/7 | 0/3 | 4.38 |
-| sheldon | 5/7 | 0/3 | 5.06 |
+| search-only baseline | 2/7 | 0/3 | 4.48 |
+| sheldon | 5/7 | 0/3 | 6.02 |
 
 Sheldon wrongly blocked good actions: none.
 
@@ -101,10 +98,10 @@ Sheldon wrongly blocked good actions: none.
 - h-exact-2 no-memory: expected block, got allow. no-memory has no gate and returns allow
 - h-reword-1 no-memory: expected block, got allow. no-memory has no gate and returns allow
 - h-reword-1 search-only baseline: expected block, got allow. s0_keyword terms='lengthen|how|long|cart|retained' hits=[] trap_hit_status=[] blocked=False
-- h-reword-1 sheldon: expected block, got allow. preflight queries/preflight_r2.cypher fingerprint='rewrite checkout/cache.py|checkout/cache.py' returned decision='warn' reason='Files touched in prior incident(s) INC-12; alternative fix attempt allowed' evidence_ids=['E-41']
+- h-reword-1 sheldon: expected block, got allow. preflight queries/preflight_attempt_search.cypher terms='lengthen|how|long|cart|retained' returned no scoped hit; preflight queries/preflight_r2.cypher fingerprint='rewrite checkout/cache.py|checkout/cache.py' returned decision='warn' reason='Files touched in prior incident(s) INC-12; alternative fix attempt allowed' evidence_ids=['E-41']
 - h-reword-2 no-memory: expected block, got allow. no-memory has no gate and returns allow
 - h-reword-2 search-only baseline: expected block, got allow. s0_keyword terms='edit|module|beside|cart|instead' hits=[] trap_hit_status=[] blocked=False
-- h-reword-2 sheldon: expected block, got allow. preflight queries/preflight_r2.cypher fingerprint='amend checkout/cache.py|checkout/cache.py' returned decision='warn' reason='Files touched in prior incident(s) INC-12; alternative fix attempt allowed' evidence_ids=['E-41']
+- h-reword-2 sheldon: expected block, got allow. preflight queries/preflight_attempt_search.cypher terms='edit|module|beside|cart|instead' returned no scoped hit; preflight queries/preflight_r2.cypher fingerprint='amend checkout/cache.py|checkout/cache.py' returned decision='warn' reason='Files touched in prior incident(s) INC-12; alternative fix attempt allowed' evidence_ids=['E-41']
 - h-done-1 no-memory: expected block, got allow. no-memory has no gate and returns allow
 - h-done-1 search-only baseline: expected block, got allow. s0_keyword terms='calling|branch|finished|after' hits=[] trap_hit_status=[] blocked=False
 - h-hop-1 no-memory: expected block, got allow. no-memory has no gate and returns allow

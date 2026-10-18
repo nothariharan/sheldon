@@ -6,6 +6,7 @@ It is the baseline the demo compares R1 against, not a feature to ship.
 """
 
 import re
+from collections.abc import Sequence
 
 from sheldon.cypher import load_query
 from sheldon.db import connect, read
@@ -23,14 +24,16 @@ _STOPWORDS = frozenset(
 )
 
 
-def keyword_terms(question: str) -> str:
+def keyword_terms(question: str, exclude: Sequence[str] = ()) -> str:
     """Turn a question into a RediSearch OR query. Empty when nothing is searchable.
 
     A raw question returns no rows: terms are ANDed and punctuation breaks the
     parser. Words shorter than 3 characters and common stopwords are dropped.
+    ``exclude`` drops tokens that are a graph scope (a file path), not a search term.
     """
+    skipped = _STOPWORDS | {word.lower() for word in exclude}
     words = re.findall(r"[a-z0-9]+", question.lower())
-    terms = dict.fromkeys(w for w in words if len(w) >= 3 and w not in _STOPWORDS)
+    terms = dict.fromkeys(word for word in words if len(word) >= 3 and word not in skipped)
     return "|".join(terms)
 
 
